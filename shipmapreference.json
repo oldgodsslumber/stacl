@@ -1,0 +1,656 @@
+{
+  "version": 1,
+  "active": 0,
+  "slots": {
+    "0": {
+      "char": {
+        "name": "James",
+        "rank": "Ensign",
+        "species": "Human",
+        "era": "",
+        "assignment": "",
+        "role": "",
+        "control": 11,
+        "daring": 11,
+        "fitness": 12,
+        "insight": 11,
+        "presence": 8,
+        "reason": 9,
+        "command": 5,
+        "conn": 3,
+        "security": 4,
+        "engineering": 4,
+        "science": 4,
+        "medicine": 2,
+        "stress": 0,
+        "determination": 3,
+        "values": [
+          "I am always right",
+          "",
+          ""
+        ],
+        "valuesUsed": [
+          false,
+          false,
+          false
+        ],
+        "valuesChallenged": [
+          false,
+          false,
+          false
+        ],
+        "focuses": [
+          "Unarmed Combat",
+          "Laser Beams"
+        ],
+        "traits": [],
+        "gear": [],
+        "talents": [],
+        "directive": "Explore an uncharted region and make contact with whatever you find.",
+        "directiveNotes": "",
+        "missionProgress": 0,
+        "background": "",
+        "homeworld": "",
+        "upbringing": "Agriculture",
+        "careerEvent": "Battle Survivor",
+        "crewNotes": "",
+        "momentum": 1,
+        "threat": 1,
+        "creationComplete": true,
+        "creationStep": 6,
+        "_selectedSpecies": "Human",
+        "_selectedEra": "",
+        "_selectedEnv": "Cosmopolitan City",
+        "_selectedUpbringing": "Agriculture",
+        "_selectedTrack": "Security",
+        "_lp": {
+          "speciesAttrFree": [
+            "control"
+          ],
+          "speciesDiscChoice": "",
+          "speciesDiscFree": [
+            "security"
+          ],
+          "envAttr": "insight",
+          "upbrAttr": "fitness",
+          "upbrDisc": "science",
+          "trackDiscFree2": [],
+          "trackDiscFree1": "",
+          "trackDiscFree": []
+        }
+      },
+      "ship": {
+        "name": "",
+        "registry": "",
+        "className": "Miranda",
+        "era": "Original Series",
+        "scale": 4,
+        "missionProfile": "",
+        "trait": "Federation Starship; a dual-purpose patrol and combat vessel that became a beloved multipurpose cruiser.",
+        "notes": "",
+        "comms": 7,
+        "computers": 8,
+        "engines": 8,
+        "sensors": 9,
+        "structure": 8,
+        "weapons": 8,
+        "command": 3,
+        "conn": 3,
+        "security": 2,
+        "engineering": 2,
+        "science": 3,
+        "medicine": 2,
+        "shipStress": 0,
+        "talents": [],
+        "traits": [],
+        "interiorCells": [
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "Bridge",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": true
+          },
+          {
+            "name": "",
+            "icon": "",
+            "notes": "",
+            "isVoid": false
+          }
+        ]
+      },
+      "sectors": [
+        {
+          "name": "Sector 001",
+          "cells": [
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": true,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            },
+            {
+              "type": "unknown",
+              "isVoid": false,
+              "isCurrent": false,
+              "name": "",
+              "icon": "",
+              "notes": "",
+              "feature": ""
+            }
+          ],
+          "currentCell": 12
+        }
+      ],
+      "activeSector": 0,
+      "npcs": [],
+      "combatEnemies": [],
+      "playerStress": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "log": []
+    }
+  }
+}
