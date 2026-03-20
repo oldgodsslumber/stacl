@@ -3938,13 +3938,32 @@ async function startCamera(hd){
 
 function applyBgCss(vidEl,wrapEl){
   if(!vidEl||!wrapEl)return;
-  vidEl.style.filter='';vidEl.style.mixBlendMode='';
+  // Reset all effects
+  vidEl.style.filter='';vidEl.style.transform='';vidEl.style.mixBlendMode='';
+  vidEl.style.position='';vidEl.style.bottom='';vidEl.style.left='';
+  vidEl.style.width='';vidEl.style.height='';vidEl.style.maxWidth='';vidEl.style.maxHeight='';
+  vidEl.style.borderRadius='';vidEl.style.border='';vidEl.style.objectFit='';
   wrapEl.style.backgroundImage='';wrapEl.style.backgroundSize='';wrapEl.style.backgroundPosition='';
-  if(_bgType==='blur'){vidEl.style.filter='blur(20px)';}
-  else if(_bgType==='image'&&_bgSrc){
+  if(_bgType==='blur'){
+    // Full-video blur — scales slightly to hide blurred edges
+    vidEl.style.filter='blur(16px)';
+    vidEl.style.transform='scale(1.08)';
+  }else if(_bgType==='image'&&_bgSrc){
+    // Bridge image fills background; camera becomes a PiP inset at bottom centre
     wrapEl.style.backgroundImage='url('+_bgSrc+')';
-    wrapEl.style.backgroundSize='cover';wrapEl.style.backgroundPosition='center';
-    vidEl.style.mixBlendMode='screen';
+    wrapEl.style.backgroundSize='cover';
+    wrapEl.style.backgroundPosition='center';
+    vidEl.style.position='absolute';
+    vidEl.style.bottom='20px';
+    vidEl.style.left='50%';
+    vidEl.style.transform='translateX(-50%)';
+    vidEl.style.width='30%';
+    vidEl.style.maxWidth='100%';
+    vidEl.style.height='auto';
+    vidEl.style.maxHeight='60%';
+    vidEl.style.borderRadius='8px';
+    vidEl.style.border='2px solid #FF9900';
+    vidEl.style.objectFit='cover';
   }
 }
 async function applyCameraStream(stream){
