@@ -3750,7 +3750,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 
 <script>
 var _rec=null,_chunks=[],_timer=null,_secs=0;
-var _stream=null,_hdStream=null,_bgDisplayStream=null;
+var _stream=null,_hdStream=null,_bgEffect=null,_bgDisplayStream=null;
 var _bgType='none',_bgSrc='';var BG_BASE='${bgBase}';
 var _ch=new BroadcastChannel('stcl-hud');
 _ch.onmessage=function(e){if(e.data&&e.data.type==='state')applyState(e.data);};
@@ -3936,42 +3936,38 @@ async function startCamera(hd){
   for(var i=0;i<tries.length;i++){try{return await navigator.mediaDevices.getUserMedia(tries[i]);}catch(e){if(i===tries.length-1)throw e;}}
 }
 
+// Setup-screen preview only — simple CSS hint so the user can see their choice
 function applyBgCss(vidEl,wrapEl){
   if(!vidEl||!wrapEl)return;
-  // Reset all effects
-  vidEl.style.filter='';vidEl.style.transform='';vidEl.style.mixBlendMode='';
-  vidEl.style.position='';vidEl.style.bottom='';vidEl.style.left='';
-  vidEl.style.width='';vidEl.style.height='';vidEl.style.maxWidth='';vidEl.style.maxHeight='';
-  vidEl.style.borderRadius='';vidEl.style.border='';vidEl.style.objectFit='';
+  vidEl.style.filter='';
   wrapEl.style.backgroundImage='';wrapEl.style.backgroundSize='';wrapEl.style.backgroundPosition='';
   if(_bgType==='blur'){
-    // Full-video blur — scales slightly to hide blurred edges
-    vidEl.style.filter='blur(16px)';
-    vidEl.style.transform='scale(1.08)';
+    vidEl.style.filter='blur(10px)';
   }else if(_bgType==='image'&&_bgSrc){
-    // Bridge image fills background; camera becomes a PiP inset at bottom centre
     wrapEl.style.backgroundImage='url('+_bgSrc+')';
-    wrapEl.style.backgroundSize='cover';
-    wrapEl.style.backgroundPosition='center';
-    vidEl.style.position='absolute';
-    vidEl.style.bottom='20px';
-    vidEl.style.left='50%';
-    vidEl.style.transform='translateX(-50%)';
-    vidEl.style.width='30%';
-    vidEl.style.maxWidth='100%';
-    vidEl.style.height='auto';
-    vidEl.style.maxHeight='60%';
-    vidEl.style.borderRadius='8px';
-    vidEl.style.border='2px solid #FF9900';
-    vidEl.style.objectFit='cover';
+    wrapEl.style.backgroundSize='cover';wrapEl.style.backgroundPosition='center';
   }
 }
+
 async function applyCameraStream(stream){
+  if(_bgEffect){_bgEffect.stopEffect();_bgEffect=null;}
   _bgDisplayStream=stream;
   var vid=document.getElementById('webcam-video');
-  var wrap=document.getElementById('webcam-wrap');
+  var noSig=document.getElementById('no-signal');
   if(vid)vid.srcObject=stream;
-  applyBgCss(vid,wrap);
+  if(_bgType!=='none'){
+    if(noSig)noSig.textContent='Loading segmentation\u2026';
+    try{
+      _bgEffect=new VirtualBgEffect(_bgType,_bgSrc||null,20);
+      var out=await _bgEffect.startEffect(stream);
+      stream.getAudioTracks().forEach(function(t){out.addTrack(t);});
+      _bgDisplayStream=out;
+      if(vid)vid.srcObject=out;
+      if(noSig)noSig.textContent='';
+    }catch(e){
+      if(noSig){noSig.textContent='Segmentation failed — showing raw feed';setTimeout(function(){noSig.textContent='';},4000);}
+    }
+  }
 }
 
 // === Recording ===
@@ -4012,7 +4008,7 @@ function stopRec(){
   var btn=document.getElementById('rec-btn');if(btn){btn.textContent='\u25CF REC SCREEN';btn.classList.remove('rec-on');}
   var t=document.getElementById('rec-timer');if(t)t.textContent='';
   if(_hdStream){
-    // Only stop the HD stream if we own it (not the opener's shared stream)
+    if(_bgEffect){_bgEffect.stopEffect();_bgEffect=null;}
     if(_hdStream!==getOpenerStream())_hdStream.getTracks().forEach(function(t){t.stop();});
     _hdStream=null;
     if(_stream)applyCameraStream(_stream);
@@ -4090,6 +4086,101 @@ async function startHUD(cam){
 }
 enumDevs();
 
+// === VirtualBgEffect (MediaPipe SelfieSegmentation) ===
+var MEDIAPIPE_CDN='https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1/';
+function loadScript(src){
+  return new Promise(function(resolve,reject){
+    var s=document.createElement('script');s.src=src;
+    s.onload=resolve;s.onerror=function(){reject(new Error('Failed to load: '+src));};
+    document.head.appendChild(s);
+  });
+}
+var VirtualBgEffect=(function(){
+  var _segPromise=null;
+  function VirtualBgEffect(type,imageSrc,blurRadius){
+    this.type=type;this.imageSrc=imageSrc;this.blurRadius=blurRadius||20;
+    this._running=false;this._seg=null;this._video=null;this._canvas=null;
+    this._ctx=null;this._bgImg=null;this._outStream=null;this._rafId=null;
+  }
+  VirtualBgEffect._getSegmenter=function(){if(!_segPromise)_segPromise=VirtualBgEffect._load();return _segPromise;};
+  VirtualBgEffect._load=function(){
+    return loadScript(MEDIAPIPE_CDN+'selfie_segmentation.js').then(function(){
+      if(!window.SelfieSegmentation)throw new Error('SelfieSegmentation not available');
+      var seg=new window.SelfieSegmentation({locateFile:function(f){return MEDIAPIPE_CDN+f;}});
+      seg.setOptions({modelSelection:1});
+      seg.onResults(function(){});
+      return seg.initialize().then(function(){return seg;});
+    });
+  };
+  VirtualBgEffect.prototype.startEffect=function(stream){
+    var self=this;
+    return VirtualBgEffect._getSegmenter().then(function(seg){
+      self._seg=seg;
+      var imgLoad=Promise.resolve();
+      if(self.type==='image'&&self.imageSrc){
+        imgLoad=new Promise(function(resolve,reject){
+          var img=new Image();
+          img.crossOrigin='anonymous';
+          img.onload=function(){self._bgImg=img;resolve();};
+          img.onerror=reject;img.src=self.imageSrc;
+        });
+      }
+      return imgLoad.then(function(){
+        var video=document.createElement('video');
+        video.srcObject=stream;video.muted=true;video.autoplay=true;video.playsInline=true;
+        return new Promise(function(resolve){video.onloadedmetadata=resolve;setTimeout(resolve,2000);})
+        .then(function(){return video.play().catch(function(){});})
+        .then(function(){
+          var W=video.videoWidth||1280,H=video.videoHeight||720;
+          var canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+          self._video=video;self._canvas=canvas;self._ctx=canvas.getContext('2d');
+          self._running=true;
+          seg.onResults(function(r){self._onResults(r);});
+          self._scheduleFrame();
+          self._outStream=canvas.captureStream(30);
+          return self._outStream;
+        });
+      });
+    });
+  };
+  VirtualBgEffect.prototype._onResults=function(results){
+    if(!this._running||!this._ctx)return;
+    var ctx=this._ctx,W=this._canvas.width,H=this._canvas.height;
+    ctx.clearRect(0,0,W,H);
+    // Draw background layer
+    if(this.type==='blur'){
+      ctx.filter='blur('+this.blurRadius+'px)';
+      ctx.drawImage(results.image,-this.blurRadius*1.5,-this.blurRadius*1.5,W+this.blurRadius*3,H+this.blurRadius*3);
+      ctx.filter='none';
+    }else if(this.type==='image'&&this._bgImg){
+      var s=Math.max(W/this._bgImg.naturalWidth,H/this._bgImg.naturalHeight);
+      var sw=this._bgImg.naturalWidth*s,sh=this._bgImg.naturalHeight*s;
+      ctx.drawImage(this._bgImg,(W-sw)/2,(H-sh)/2,sw,sh);
+    }else{
+      ctx.drawImage(results.image,0,0,W,H);
+    }
+    // Mask: cut person shape out of background and composite real video pixels
+    var tmp=document.createElement('canvas');tmp.width=W;tmp.height=H;
+    var tCtx=tmp.getContext('2d');
+    tCtx.drawImage(results.segmentationMask,0,0,W,H);
+    tCtx.globalCompositeOperation='source-in';
+    tCtx.drawImage(results.image,0,0,W,H);
+    ctx.drawImage(tmp,0,0);
+  };
+  VirtualBgEffect.prototype._scheduleFrame=function(){
+    var self=this;if(!self._running||!self._seg||!self._video)return;
+    self._rafId=requestAnimationFrame(function(){
+      self._seg.send({image:self._video}).catch(function(){}).finally(function(){self._scheduleFrame();});
+    });
+  };
+  VirtualBgEffect.prototype.stopEffect=function(){
+    this._running=false;
+    if(this._rafId)cancelAnimationFrame(this._rafId);
+    if(this._video){this._video.srcObject=null;this._video=null;}
+    if(this._outStream){this._outStream.getTracks().forEach(function(t){t.stop();});this._outStream=null;}
+  };
+  return VirtualBgEffect;
+})();
 
 <\/script></body></html>`;
 }
