@@ -4101,6 +4101,7 @@ var VirtualBgEffect=(function(){
     this.type=type;this.imageSrc=imageSrc;this.blurRadius=blurRadius||20;
     this._running=false;this._seg=null;this._video=null;this._canvas=null;
     this._ctx=null;this._bgImg=null;this._outStream=null;this._rafId=null;
+    this._tmpCanvas=null;this._tmpCtx=null;
   }
   VirtualBgEffect._getSegmenter=function(){if(!_segPromise)_segPromise=VirtualBgEffect._load();return _segPromise;};
   VirtualBgEffect._load=function(){
@@ -4150,7 +4151,7 @@ var VirtualBgEffect=(function(){
     // Draw background layer
     if(this.type==='blur'){
       ctx.filter='blur('+this.blurRadius+'px)';
-      ctx.drawImage(results.image,-this.blurRadius*1.5,-this.blurRadius*1.5,W+this.blurRadius*3,H+this.blurRadius*3);
+      ctx.drawImage(results.image,-this.blurRadius*2,-this.blurRadius*2,W+this.blurRadius*4,H+this.blurRadius*4);
       ctx.filter='none';
     }else if(this.type==='image'&&this._bgImg){
       var s=Math.max(W/this._bgImg.naturalWidth,H/this._bgImg.naturalHeight);
@@ -4159,13 +4160,23 @@ var VirtualBgEffect=(function(){
     }else{
       ctx.drawImage(results.image,0,0,W,H);
     }
-    // Mask: cut person shape out of background and composite real video pixels
-    var tmp=document.createElement('canvas');tmp.width=W;tmp.height=H;
-    var tCtx=tmp.getContext('2d');
-    tCtx.drawImage(results.segmentationMask,0,0,W,H);
-    tCtx.globalCompositeOperation='source-in';
-    tCtx.drawImage(results.image,0,0,W,H);
-    ctx.drawImage(tmp,0,0);
+    // Build masked foreground:
+    // The mask has opaque white (person) and opaque black (background) — both alpha=1.
+    // source-in only tests alpha so it can't distinguish them. Instead, copy mask
+    // brightness into the video frame's alpha channel via pixel manipulation.
+    if(!this._tmpCanvas){
+      this._tmpCanvas=document.createElement('canvas');
+      this._tmpCanvas.width=W;this._tmpCanvas.height=H;
+      this._tmpCtx=this._tmpCanvas.getContext('2d',{willReadFrequently:true});
+    }
+    this._tmpCtx.drawImage(results.segmentationMask,0,0,W,H);
+    var maskPx=this._tmpCtx.getImageData(0,0,W,H).data;
+    this._tmpCtx.drawImage(results.image,0,0,W,H);
+    var imgD=this._tmpCtx.getImageData(0,0,W,H);
+    var d=imgD.data;
+    for(var i=0;i<d.length;i+=4){d[i+3]=maskPx[i];}  // alpha = mask brightness
+    this._tmpCtx.putImageData(imgD,0,0);
+    ctx.drawImage(this._tmpCanvas,0,0);
   };
   VirtualBgEffect.prototype._scheduleFrame=function(){
     var self=this;if(!self._running||!self._seg||!self._video)return;
