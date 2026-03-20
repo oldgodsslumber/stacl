@@ -3414,7 +3414,7 @@ function buildHudCtrlHTML() {
   </div>`;
 }
 
-const HUD_LEFT_KEYS = ['stats','sectorMap','interiorMap'];
+const HUD_LEFT_KEYS = ['stats','sectorMap'];
 function toggleHudVis(key) {
   _hudVis[key] = !_hudVis[key];
   // Left-side panels are mutually exclusive — turning one on turns others off
@@ -3565,12 +3565,12 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 .scell.cur{border:2px solid #FF9900;background:rgba(255,153,0,.1)}
 .scell.void{opacity:.18}
 .scell-name{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:7px;color:#7a4a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 1px}
-/* Ship interior mini-map — left side */
-#p-interior{top:20px;left:20px;width:200px;bottom:20px}
-.imap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px}
-.icell{display:flex;flex-direction:column;align-items:center;justify-content:center;height:20px;border:1px solid #1a0800;font-size:9px;position:relative;background:rgba(5,3,0,.6)}
+/* Ship interior mini-map — popup right of camera, left of journal */
+#p-interior{top:20px;right:285px;width:240px;border-left:2px solid #FF9900;border-right:6px solid #FF9900;border-radius:10px 0 0 10px}
+.imap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.icell{display:flex;flex-direction:column;align-items:center;justify-content:center;height:32px;border:1px solid #1a0800;font-size:12px;position:relative;background:rgba(5,3,0,.6)}
 .icell.void{opacity:.12;background:#000}
-.icell-name{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:6px;color:#7a4a1a;overflow:hidden;white-space:nowrap}
+.icell-name{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:7px;color:#7a4a1a;overflow:hidden;white-space:nowrap}
 /* NPC Spotlight — floating center card */
 #p-spotlight{bottom:20px;right:285px;width:255px}
 /* Center bottom — dice */
@@ -3659,16 +3659,18 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 
 <!-- LEFT: Officer stats + vitals -->
 <div id="p-left" class="panel" style="display:none">
-  <div class="ph">Officer</div>
-  <div class="h-name" id="h-name">—</div>
-  <div class="h-rank" id="h-rank"></div>
-  <div class="h-era" id="h-era"></div>
-  <div class="sec-div"></div>
-  <div class="sec-lbl">Attributes</div>
-  <div id="h-attrs"></div>
-  <div class="sec-div"></div>
-  <div class="sec-lbl">Disciplines</div>
-  <div id="h-discs"></div>
+  <div class="ph" id="p-left-header">Officer</div>
+  <div id="h-officer-section">
+    <div class="h-name" id="h-name">—</div>
+    <div class="h-rank" id="h-rank"></div>
+    <div class="h-era" id="h-era"></div>
+    <div class="sec-div"></div>
+    <div class="sec-lbl">Attributes</div>
+    <div id="h-attrs"></div>
+    <div class="sec-div"></div>
+    <div class="sec-lbl">Disciplines</div>
+    <div id="h-discs"></div>
+  </div>
   <div id="h-shipstats-section" style="display:none">
     <div class="sec-div"></div>
     <div class="sec-lbl" style="color:#99CCFF">Ship Systems</div>
@@ -3751,6 +3753,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 <script>
 var _rec=null,_chunks=[],_timer=null,_secs=0;
 var _stream=null,_hdStream=null,_bgEffect=null,_bgDisplayStream=null;
+var _previewStream=null,_previewEffect=null;
 var _bgType='none',_bgSrc='';var BG_BASE='${bgBase}';
 var _ch=new BroadcastChannel('stcl-hud');
 _ch.onmessage=function(e){if(e.data&&e.data.type==='state')applyState(e.data);};
@@ -3791,8 +3794,11 @@ function applyState(d){
   }
 
   show('p-creation',false);
+  var showShip=vis.shipStats===true;
   show('p-left',vis.stats===true||vis.stats===undefined);
-  show('h-shipstats-section',vis.shipStats===true);
+  show('h-officer-section',!showShip);
+  show('h-shipstats-section',showShip);
+  setText('p-left-header',showShip?'Ship':'Officer');
   show('p-sector',vis.sectorMap===true);
   show('p-interior',vis.interiorMap===true);
   show('p-right',vis.log!==false||vis.encounter!==false);
@@ -3918,8 +3924,7 @@ function selectBg(el){
   el.classList.add('selected');
   _bgType=el.dataset.type||'none';
   _bgSrc=el.dataset.src?BG_BASE+el.dataset.src:'';
-  applyBgCss(document.getElementById('setup-preview'),document.getElementById('setup-preview-wrap'));
-  applyBgCss(document.getElementById('webcam-video'),document.getElementById('webcam-wrap'));
+  applyPreviewEffect();
 }
 
 // === Camera helpers ===
@@ -4035,16 +4040,33 @@ async function startSetupPreview(){
   var vid=document.getElementById('setup-preview');
   var opStream=getOpenerStream();
   if(opStream){
-    // Use the stream the main app already has permission for
-    if(vid){vid.srcObject=opStream;if(noSig)noSig.style.display='none';}
-    return;
+    _previewStream=opStream;
+  }else{
+    var cid=document.getElementById('cam-sel')?document.getElementById('cam-sel').value:'';
+    try{
+      _previewStream=await navigator.mediaDevices.getUserMedia({video:cid?{deviceId:{ideal:cid}}:true,audio:false});
+    }catch(e){if(noSig)noSig.style.display='';return;}
   }
-  // Fallback: try local getUserMedia (may prompt for permission)
-  var cid=document.getElementById('cam-sel')?document.getElementById('cam-sel').value:'';
+  if(vid&&_previewStream){vid.srcObject=_previewStream;if(noSig)noSig.style.display='none';}
+  await applyPreviewEffect();
+}
+
+async function applyPreviewEffect(){
+  if(_previewEffect){_previewEffect.stopEffect();_previewEffect=null;}
+  var vid=document.getElementById('setup-preview');
+  var noSig=document.getElementById('setup-no-cam');
+  if(!_previewStream||!vid)return;
+  vid.srcObject=_previewStream; // show raw while loading
+  if(_bgType==='none')return;
+  if(noSig){noSig.style.display='';noSig.textContent='Loading\u2026';}
   try{
-    var s=await navigator.mediaDevices.getUserMedia({video:cid?{deviceId:{ideal:cid}}:true,audio:false});
-    if(vid){vid.srcObject=s;if(noSig)noSig.style.display='none';}
-  }catch(e){if(noSig)noSig.style.display='';}
+    _previewEffect=new VirtualBgEffect(_bgType,_bgSrc||null,20);
+    var out=await _previewEffect.startEffect(_previewStream);
+    if(vid)vid.srcObject=out;
+    if(noSig)noSig.style.display='none';
+  }catch(e){
+    if(noSig){noSig.style.display='';noSig.textContent='Effect unavailable';}
+  }
 }
 
 async function enumDevs(){
@@ -4075,11 +4097,17 @@ async function startHUD(cam){
   document.getElementById('setup').style.display='none';
   if(cam){
     try{
-      // Use the main window's pre-acquired stream if available
       var opStream=getOpenerStream();
-      if(opStream){_stream=opStream;}
-      else{_stream=await startCamera(false);}
-      await applyCameraStream(_stream);
+      _stream=opStream||await startCamera(false);
+      if(_previewEffect){
+        // Promote the already-running preview effect to the main HUD — no restart needed
+        _bgEffect=_previewEffect;_previewEffect=null;
+        _bgDisplayStream=_bgEffect._outStream||_stream;
+        var vid=document.getElementById('webcam-video');
+        if(vid)vid.srcObject=_bgDisplayStream;
+      }else{
+        await applyCameraStream(_stream);
+      }
     }catch(e){document.getElementById('no-signal').textContent='Camera unavailable';}
   }
   document.getElementById('rec-btn').style.display='';
