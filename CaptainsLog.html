@@ -1821,7 +1821,7 @@ function renderCS6() {
     </div>
   </div>
   <div class="field"><label>Rank</label><select onchange="saveCharField('rank',this.value)"><option>— Select Rank —</option>${rankOpts}</select></div>
-  <div class="field"><label>Assignment / Ship</label><input value="${escH(c.assignment)}" placeholder="e.g. USS Enterprise NCC-1701" onchange="saveCharField('assignment',this.value)"></div>
+  <div class="field"><label>Assignment / Ship</label><input value="${escH(c.assignment)}" placeholder="e.g. USS Enterprise NCC-1701" onchange="saveCharField('assignment',this.value);if(!S.ship.name){saveShipField('name',this.value.replace(/\\s+NCC-\\S+/i,'').trim());}"></div>
   <div class="field"><label>Role / Department Head</label><input value="${escH(c.role)}" placeholder="e.g. Chief Science Officer" onchange="saveCharField('role',this.value)"></div>
   <div class="field"><label>Homeworld</label><input value="${escH(c.homeworld)}" placeholder="e.g. Vulcan, Earth, Andoria…" onchange="saveCharField('homeworld',this.value)"></div>
   <button class="btn btn-accent btn-sm" style="margin-bottom:8px" onclick="rollDirective()">Roll Directive (d20)</button>
