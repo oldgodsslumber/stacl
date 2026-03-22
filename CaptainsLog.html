@@ -567,6 +567,224 @@ const YES_NO_MATRIX = {
   'Highly Improbable':{yes:2, yestwist:3,  notwist:16, no:20},
 };
 
+const ACTION_WORDS = [
+  {d:1,  word:'Investigate', prompt:'Uncover hidden truth through inquiry'},
+  {d:2,  word:'Rescue',      prompt:'Extract someone from danger or captivity'},
+  {d:3,  word:'Negotiate',   prompt:'Broker agreement between hostile parties'},
+  {d:4,  word:'Escort',      prompt:'Safely convey a person or object'},
+  {d:5,  word:'Infiltrate',  prompt:'Gain covert access to a secured area'},
+  {d:6,  word:'Defend',      prompt:'Hold a position against attack or pressure'},
+  {d:7,  word:'Retrieve',    prompt:'Recover something lost, stolen, or taken'},
+  {d:8,  word:'Survey',      prompt:'Map, scan, or assess an unknown region'},
+  {d:9,  word:'Establish',   prompt:'Found a new presence — base, colony, accord'},
+  {d:10, word:'Expose',      prompt:'Bring a secret or conspiracy into the light'},
+  {d:11, word:'Evacuate',    prompt:'Remove civilians from a dangerous location'},
+  {d:12, word:'Pursue',      prompt:'Chase a fleeing vessel, person, or signal'},
+  {d:13, word:'Sabotage',    prompt:'Disable or destroy a critical enemy asset'},
+  {d:14, word:'Mediate',     prompt:'Stand between two factions on the brink'},
+  {d:15, word:'Decode',      prompt:'Interpret an encrypted message or artifact'},
+  {d:16, word:'Contain',     prompt:'Prevent a threat from spreading or escaping'},
+  {d:17, word:'Observe',     prompt:'Watch without interference and report back'},
+  {d:18, word:'Repair',      prompt:'Restore a damaged system, vessel, or relationship'},
+  {d:19, word:'Prevent',     prompt:'Stop an event before it can occur'},
+  {d:20, word:'Liberate',    prompt:'Free a people, prisoner, or world from control'},
+  {d:21, word:'Locate',      prompt:'Find a person, object, or phenomenon'},
+  {d:22, word:'Disrupt',     prompt:'Break apart an operation or power structure'},
+  {d:23, word:'Protect',     prompt:'Shield the vulnerable from a known threat'},
+  {d:24, word:'Deceive',     prompt:'Mislead an enemy through misdirection'},
+  {d:25, word:'Colonise',    prompt:'Establish a permanent settlement somewhere new'},
+  {d:26, word:'Unmask',      prompt:'Identify a spy, traitor, or hidden actor'},
+  {d:27, word:'Deliver',     prompt:'Transport critical cargo to its destination'},
+  {d:28, word:'Intercept',   prompt:'Block a transmission, vessel, or plan mid-course'},
+  {d:29, word:'Extract',     prompt:'Remove something or someone from hostile territory'},
+  {d:30, word:'Assess',      prompt:'Evaluate a situation, population, or technology'},
+  {d:31, word:'Quarantine',  prompt:'Isolate a biological, technological, or social hazard'},
+  {d:32, word:'Test',        prompt:'Subject a theory, weapon, or person to trial'},
+  {d:33, word:'Awaken',      prompt:'Rouse something dormant — a sleeper, a weapon, a people'},
+  {d:34, word:'Dismantle',   prompt:'Take apart a network, device, or ideology'},
+  {d:35, word:'Harvest',     prompt:'Collect a rare resource or vital intelligence'},
+  {d:36, word:'Suppress',    prompt:'Quell an uprising, signal, or dangerous capability'},
+  {d:37, word:'Challenge',   prompt:'Contest a law, authority, or claim directly'},
+  {d:38, word:'Herald',      prompt:'Announce or prepare the arrival of something momentous'},
+  {d:39, word:'Preserve',    prompt:'Keep alive something in danger of being lost forever'},
+  {d:40, word:'Seize',       prompt:'Take control of a ship, station, or resource'},
+  {d:41, word:'Unify',       prompt:'Bring fractured factions under a single purpose'},
+  {d:42, word:'Monitor',     prompt:'Track an ongoing process from a distance'},
+  {d:43, word:'Construct',   prompt:'Build something new under difficult circumstances'},
+  {d:44, word:'Threaten',    prompt:'Apply pressure to change behaviour through ultimatum'},
+  {d:45, word:'Purge',       prompt:'Eliminate a corruption, infection, or traitor network'},
+  {d:46, word:'Recover',     prompt:'Bring back someone or something believed lost'},
+  {d:47, word:'Endure',      prompt:'Survive a prolonged ordeal with no immediate escape'},
+  {d:48, word:'Overthrow',   prompt:'Remove a government, commander, or system of control'},
+  {d:49, word:'Forge',       prompt:'Create — an alliance, a weapon, a new identity'},
+  {d:50, word:'Map',         prompt:'Chart the unknown for those who follow'},
+  {d:51, word:'Witness',     prompt:'Be present for a historic or irreversible event'},
+  {d:52, word:'Warn',        prompt:'Deliver a critical message before it is too late'},
+  {d:53, word:'Stall',       prompt:'Buy time while another plan unfolds'},
+  {d:54, word:'Reclaim',     prompt:'Take back what was lost or taken away'},
+  {d:55, word:'Broker',      prompt:'Arrange an exchange — goods, prisoners, secrets'},
+  {d:56, word:'Contest',     prompt:'Compete for control of a territory or resource'},
+  {d:57, word:'Steal',       prompt:'Take something that doesn\'t belong to you — for good reasons'},
+  {d:58, word:'Destabilise', prompt:'Undermine a power base from within'},
+  {d:59, word:'Inoculate',   prompt:'Prepare a people or system against a coming threat'},
+  {d:60, word:'Trace',       prompt:'Follow a trail backward to its true origin'},
+  {d:61, word:'Justify',     prompt:'Defend a decision or action before a higher authority'},
+  {d:62, word:'Detain',      prompt:'Hold someone long enough for the mission to succeed'},
+  {d:63, word:'Translate',   prompt:'Bridge an impossible gap in language or culture'},
+  {d:64, word:'Deactivate',  prompt:'Shut down a weapon, AI, or dangerous technology'},
+  {d:65, word:'Exile',       prompt:'Remove a dangerous presence from Federation space'},
+  {d:66, word:'Signal',      prompt:'Transmit a beacon, distress call, or activation code'},
+  {d:67, word:'Sacrifice',   prompt:'Give something up to ensure a larger victory'},
+  {d:68, word:'Reconfigure', prompt:'Adapt existing tools to solve an unexpected problem'},
+  {d:69, word:'Absorb',      prompt:'Integrate a new world, people, or technology'},
+  {d:70, word:'Outwit',      prompt:'Win through cleverness rather than force'},
+  {d:71, word:'Maintain',    prompt:'Keep a fragile peace, system, or life intact'},
+  {d:72, word:'Infiltrate',  prompt:'Become part of the enemy to understand them'},
+  {d:73, word:'Redirect',    prompt:'Turn a threat\'s momentum against itself'},
+  {d:74, word:'Capture',     prompt:'Take a prisoner, vessel, or data intact'},
+  {d:75, word:'Survive',     prompt:'Make it through against overwhelming odds'},
+  {d:76, word:'Declare',     prompt:'Formally announce allegiance, war, or independence'},
+  {d:77, word:'Revive',      prompt:'Bring back something or someone given up for lost'},
+  {d:78, word:'Train',       prompt:'Prepare others for a conflict they cannot yet imagine'},
+  {d:79, word:'Delay',       prompt:'Slow an inevitable process to change its outcome'},
+  {d:80, word:'Transmit',    prompt:'Send something critical across a hostile medium'},
+  {d:81, word:'Discover',    prompt:'Find something no one knew existed'},
+  {d:82, word:'Override',    prompt:'Bypass a system, command, or authority'},
+  {d:83, word:'Resolve',     prompt:'Bring a long-running conflict to a definitive end'},
+  {d:84, word:'Honour',      prompt:'Fulfil a commitment or treaty at great personal cost'},
+  {d:85, word:'Shatter',     prompt:'Break apart something thought to be unbreakable'},
+  {d:86, word:'Guard',       prompt:'Stand watch over something of immense value'},
+  {d:87, word:'Accelerate',  prompt:'Speed up a process — contact, development, collapse'},
+  {d:88, word:'Judge',       prompt:'Render a verdict that will define a people\'s future'},
+  {d:89, word:'Rewrite',     prompt:'Change the historical record — or correct it'},
+  {d:90, word:'Answer',      prompt:'Respond to a summons, distress call, or ultimatum'},
+  {d:91, word:'Balance',     prompt:'Hold two opposing forces in equilibrium long enough to matter'},
+  {d:92, word:'Confront',    prompt:'Face something directly that has long been avoided'},
+  {d:93, word:'Choose',      prompt:'Force a decision between two paths with no good outcome'},
+  {d:94, word:'Pursue',      prompt:'Follow something that does not want to be found'},
+  {d:95, word:'Contain',     prompt:'Keep something dangerous from becoming something catastrophic'},
+  {d:96, word:'Unmask',      prompt:'Tear away the pretence to reveal what\'s underneath'},
+  {d:97, word:'Unite',       prompt:'Bring together what conflict has torn apart'},
+  {d:98, word:'Restore',     prompt:'Return something to the state it should be in'},
+  {d:99, word:'Liberate',    prompt:'Free something that has been constrained against its will'},
+  {d:100,word:'Expose',      prompt:'Force a truth into the open that powerful forces wish hidden'},
+];
+
+const MEANING_WORDS = [
+  {d:1,  word:'Truth',       prompt:'What someone desperately needs to know — or hide'},
+  {d:2,  word:'Sovereignty', prompt:'The right of a people to govern themselves'},
+  {d:3,  word:'Signal',      prompt:'A message whose sender and meaning are both unknown'},
+  {d:4,  word:'Legacy',      prompt:'The weight of what came before on what comes next'},
+  {d:5,  word:'Silence',     prompt:'An absence more dangerous than any noise'},
+  {d:6,  word:'Betrayal',    prompt:'A breach of trust at the worst possible moment'},
+  {d:7,  word:'Relic',       prompt:'A fragment of a lost civilisation with power still intact'},
+  {d:8,  word:'Disease',     prompt:'A biological or social contagion spreading unchecked'},
+  {d:9,  word:'Alliance',    prompt:'A partnership both sides need but neither fully trusts'},
+  {d:10, word:'Weapon',      prompt:'A technology built to end conflict — or start one'},
+  {d:11, word:'Memory',      prompt:'A recorded or living account that changes everything'},
+  {d:12, word:'Survivor',    prompt:'The last of their kind — or so they claim'},
+  {d:13, word:'Border',      prompt:'A line in space that both sides will die to defend'},
+  {d:14, word:'Prophet',     prompt:'A figure whose visions may be madness, divinity, or programming'},
+  {d:15, word:'Prototype',   prompt:'A device that works — but whose consequences are unknown'},
+  {d:16, word:'Exile',       prompt:'A person who knows too much to be allowed home'},
+  {d:17, word:'Treaty',      prompt:'A peace agreement holding together by a single thread'},
+  {d:18, word:'Plague',      prompt:'Something spreading through a population — biological or ideological'},
+  {d:19, word:'Fugitive',    prompt:'Someone running from justice — or from the unjust'},
+  {d:20, word:'Core',        prompt:'The power source at the heart of a world or war'},
+  {d:21, word:'Hostage',     prompt:'A life held to ensure another\'s compliance'},
+  {d:22, word:'Anomaly',     prompt:'A phenomenon that shouldn\'t exist — but does'},
+  {d:23, word:'Secret',      prompt:'Information so dangerous it must never leave this room'},
+  {d:24, word:'Conscience',  prompt:'A moral dilemma with no clean resolution'},
+  {d:25, word:'Beacon',      prompt:'A signal calling something toward it from the dark'},
+  {d:26, word:'Diplomat',    prompt:'An envoy carrying more than just messages'},
+  {d:27, word:'Saboteur',    prompt:'Someone on the inside working against everything'},
+  {d:28, word:'Colony',      prompt:'A settlement facing extinction from within or without'},
+  {d:29, word:'Archive',     prompt:'A library of knowledge someone wants destroyed'},
+  {d:30, word:'Heir',        prompt:'A successor whose right to power is contested'},
+  {d:31, word:'Scar',        prompt:'Old damage still shaping present decisions'},
+  {d:32, word:'Oracle',      prompt:'A system, being, or text that claims to see the future'},
+  {d:33, word:'Insurgency',  prompt:'An uprising that may be rebellion or revolution'},
+  {d:34, word:'Homeworld',   prompt:'A planet whose fate will define a people forever'},
+  {d:35, word:'Prisoner',    prompt:'Someone detained who knows more than their captors realize'},
+  {d:36, word:'Accord',      prompt:'A fragile agreement about to be broken'},
+  {d:37, word:'Contagion',   prompt:'Something spreading that cannot be contained by ordinary means'},
+  {d:38, word:'Ghost',       prompt:'A presence — digital, spectral, or political — from the past'},
+  {d:39, word:'Threshold',   prompt:'A point of no return rapidly approaching'},
+  {d:40, word:'Martyr',      prompt:'Someone willing to die to make the mission mean something'},
+  {d:41, word:'Manifest',    prompt:'A list of people, cargo, or events that cannot all be true'},
+  {d:42, word:'Void',        prompt:'An empty space where something critical used to be'},
+  {d:43, word:'Cargo',       prompt:'A shipment whose true nature is concealed from everyone'},
+  {d:44, word:'Faction',     prompt:'A splinter group whose agenda contradicts their parent power'},
+  {d:45, word:'Identity',    prompt:'A person who is not who — or what — they appear to be'},
+  {d:46, word:'Echo',        prompt:'A pattern from the past repeating in the present'},
+  {d:47, word:'Doctrine',    prompt:'A principle used to justify something unconscionable'},
+  {d:48, word:'Child',       prompt:'An innocent life at the centre of an adult conflict'},
+  {d:49, word:'Vanguard',    prompt:'The advance force of something much larger behind them'},
+  {d:50, word:'Paradox',     prompt:'A situation whose solution creates the problem that started it'},
+  {d:51, word:'Sanctuary',   prompt:'A safe haven that both sides want — for different reasons'},
+  {d:52, word:'Proof',       prompt:'Evidence that would change everything if it could be verified'},
+  {d:53, word:'Bloodline',   prompt:'A lineage carrying political, genetic, or spiritual power'},
+  {d:54, word:'Debt',        prompt:'An obligation that must be paid — or called in'},
+  {d:55, word:'Hunger',      prompt:'A need — for resources, recognition, or revenge'},
+  {d:56, word:'Pact',        prompt:'A secret agreement with consequences only now becoming clear'},
+  {d:57, word:'Ruin',        prompt:'The remains of something that once stood against the dark'},
+  {d:58, word:'Spark',       prompt:'The first sign of something much larger about to ignite'},
+  {d:59, word:'Quarantine',  prompt:'A zone sealed off for reasons no one will explain clearly'},
+  {d:60, word:'Covenant',    prompt:'A sacred promise now being weaponised by one side'},
+  {d:61, word:'Wreckage',    prompt:'The aftermath of a disaster whose cause is disputed'},
+  {d:62, word:'Heresy',      prompt:'A belief that threatens an entire power structure'},
+  {d:63, word:'Vessel',      prompt:'A ship or person carrying something they don\'t understand'},
+  {d:64, word:'Contraband',  prompt:'Something forbidden because of what it might reveal'},
+  {d:65, word:'Omen',        prompt:'A sign that multiple factions interpret differently'},
+  {d:66, word:'Jurisdiction',prompt:'A legal void no authority will claim — or all of them will'},
+  {d:67, word:'Myth',        prompt:'A story that turns out to be more literal than anyone expected'},
+  {d:68, word:'Awakening',   prompt:'A shift in consciousness — individual, collective, or artificial'},
+  {d:69, word:'Frontier',    prompt:'The edge of the known, where old rules don\'t apply'},
+  {d:70, word:'Trial',       prompt:'A legal proceeding whose outcome has already been decided'},
+  {d:71, word:'Equilibrium', prompt:'A balance of power someone is about to destroy'},
+  {d:72, word:'Keystone',    prompt:'The one person or thing holding everything else together'},
+  {d:73, word:'Convergence', prompt:'Multiple independent threats arriving at the same moment'},
+  {d:74, word:'Transmission',prompt:'A message from somewhere it should be impossible to send from'},
+  {d:75, word:'Resurrection',prompt:'A return from death — literal, political, or technological'},
+  {d:76, word:'Burden',      prompt:'A responsibility too heavy for one person — or one crew'},
+  {d:77, word:'Remnant',     prompt:'What survives when everything else is gone'},
+  {d:78, word:'Law',         prompt:'A rule that is technically correct but morally bankrupt'},
+  {d:79, word:'Mirror',      prompt:'A version of the crew — or their mission — they cannot accept'},
+  {d:80, word:'Vow',         prompt:'A promise made in desperation, now coming due'},
+  {d:81, word:'Crossroads',  prompt:'A decision point with no safe option and no going back'},
+  {d:82, word:'Witness',     prompt:'The one person who saw what happened and survived to tell it'},
+  {d:83, word:'Fracture',    prompt:'A crack in something — a ship, a society, a crew — widening fast'},
+  {d:84, word:'Inheritance', prompt:'What one generation leaves the next, wanted or not'},
+  {d:85, word:'Wound',       prompt:'An old injury — historical, political, personal — that never healed'},
+  {d:86, word:'Cost',        prompt:'The price of doing the right thing — higher than anyone expected'},
+  {d:87, word:'Lie',         prompt:'A deception at the foundation of everything the mission depends on'},
+  {d:88, word:'Hope',        prompt:'The most dangerous thing in the quadrant right now'},
+  {d:89, word:'Choice',      prompt:'A decision whose consequences will outlast everyone in the room'},
+  {d:90, word:'Mourning',    prompt:'Grief that has been allowed to become policy'},
+  {d:91, word:'Namesake',    prompt:'A person living in the shadow of a legendary predecessor'},
+  {d:92, word:'Question',    prompt:'A civilisation asking something the Federation cannot answer'},
+  {d:93, word:'Equilibrium', prompt:'A balance held together by the last thread of trust'},
+  {d:94, word:'Spark',       prompt:'The moment that sets an irreversible chain in motion'},
+  {d:95, word:'Remnant',     prompt:'The last survivors of something the galaxy thought was gone'},
+  {d:96, word:'Vigil',       prompt:'A watch kept in the dark for something that may never come'},
+  {d:97, word:'Threshold',   prompt:'A civilisation at the tipping point between two futures'},
+  {d:98, word:'Mirror',      prompt:'An enemy that is a reflection of what the crew could become'},
+  {d:99, word:'Debt',        prompt:'Something owed that the debtor refuses to acknowledge'},
+  {d:100,word:'Silence',     prompt:'A refusal to speak that is more damning than any confession'},
+];
+
+const SPECIES_NAMES = {
+  'Human':      { male:['James','Jonathan','Benjamin','Jean-Luc','William','Montgomery','Leonard','Pavel','Hikaru','Miles','Julian','Chakotay','Tom','Harry','Reginald','Data','Geordi','Worf','Gabriel','Christopher','Michael','Aaron','Diego','Ethan','Kofi','Riku','Tariq','Aleksei','Priya','Soren','Matteo','Osei','Yusuf','Haruki','Emeka','Liam','Zane','Rafael','Tobias','Dmitri','Kwame','Alistair','Naveen','Ibrahim','Cian','Roshan','Desmond','Aurelio','Jovan','Caleb'], female:['Kathryn','Beverly','Nyota','Christine','Jadzia','Kira','Deanna','Lwaxana','Keiko','Ro','Hoshi','T\'Pol','Philippa','Sylvia','Tilly','Joann','Laira','Una','Rafaela','Seven','Amara','Simone','Yuki','Fatima','Ingrid','Nadia','Saoirse','Priya','Linh','Amelia','Zara','Chidinma','Marisol','Astrid','Ayasha','Rhiannon','Soraya','Leila','Caoimhe','Adaeze','Valentina','Roshani','Miriam','Solange','Elara','Kezia','Britta','Devika','Fiona','Nkechi'] },
+  'Vulcan':     { male:['Spock','Sarek','Surak','Stonn','Soval','Sybok','Skon','Solkar','Selek','Salok','Tuvok','Vorik','Taurik','Sopek','Satok','Suvek','Sirok','Sorval','Sekar','Satek','Koss','Lojal','Kuvak','Tonek','Vonek','Valek','Sivok','Sorvak','Talok','Narok','Sovek','Kaval','Tenak','Ruval','Sivak','Norval','Tarev','Solek','Kanek','Tavek','Sevik','Soral','Korev','Sulok','Tanek','Voral','Konak','Sorak','Telek','Sivrak'], female:['T\'Pol','T\'Pau','T\'Pring','T\'Pel','T\'Mir','T\'Pan','T\'Paal','T\'Hen','T\'Shael','T\'Vrea','Valeris','Selar','Sakonna','Saavik','T\'Lara','T\'Vora','T\'Nara','T\'Kela','T\'Rala','T\'Sona','T\'Peva','T\'Lyra','T\'Kara','T\'Mira','T\'Neva','T\'Reia','T\'Kova','T\'Pavi','T\'Salor','T\'Nira','Savin','Veral','T\'Vena','T\'Leva','T\'Pren','Sorel','T\'Vala','T\'Kena','T\'Sira','T\'Pova','Seleya','T\'Vren','T\'Kaya','Velara','T\'Neva','T\'Mala','Soran','T\'Peva','T\'Lira','T\'Vora'] },
+  'Bajoran':    { family:['Kira','Odo','Winn','Jaro','Furel','Shakaar','Bareil','Tahna','Bek','Holza','Jatarn','Kainon','Orta','Surmak','Varis','Prylar','Ranjen','Nalas','Tarsa','Lenaris','Darvin','Cerin','Halar','Moset','Silaran','Timor','Vedek','Opaka','Yaten','Razka','Torin','Darya','Navok','Jeran','Sorel','Kavar','Timak','Danir','Havek','Rolan','Tolvar','Corat','Janir','Horak','Sirak','Bekar','Narov','Dolak','Terak','Mirval'], given:['Nerys','Laren','Neela','Pallra','Roana','Meru','Leeta','Ziyal','Senna','Lenara','Adami','Varis','Kasat','Tora','Naren','Selna','Mevra','Darena','Tamara','Linara','Sovren','Kelara','Tomari','Devra','Mirel','Jasara','Lelara','Navara','Tevin','Riara','Sarith','Molara','Devrin','Lisara','Talara','Renara','Belara','Jevara','Kasira','Narana','Torima','Sylara','Merana','Telara','Venara','Sarela','Dorima','Relara','Kenara','Sivara'] },
+  'Klingon':    { male:['Worf','Martok','Gowron','Kahless','Kor','Kang','Koloth','Kruge','Chang','Gorkon','Mogh','Duras','Toral','K\'mpec','Kurn','Lursa','Nu\'Daq','Noggra','Ja\'rod','L\'Kor','Toq','Torin','Tumek','Rodek','Telok','K\'Ratak','K\'Tal','H\'Ta','Huraga','Maltz','Rektan','Gorath','Durakh','Morak','Kargan','Klaa','Koord','Targhal','Valkoth','Gorvas','Talak','Korrath','Groth','Norghak','Boral','Targon','Drakh','Kurath','Torath','Gorkon'], female:['B\'Elanna','B\'Etor','K\'Ehleyr','Lursa','Grilka','Sirella','Kurak','Kahmar','Huss','Karana','Linkasa','Lukara','Shenara','Valkris','Vixis','L\'Rell','Azetbur','Miral','Seska','Azura','Kloreth','Vrak','Morghul','Dreva','Kerith','Voral','Lureth','Karona','Beleth','Gorath','Talmora','Druvek','Kreveth','Vuldra','Moreth','Tareva','Gritha','Karveth','Lurova','Belrak','Torneth','Vixeth','Gralka','Dureva','Koreva','Talveth','Morketh','Breveth','Kolveth','Luraka'] },
+  'Andorian':   { male:['Shran','Thelev','Thelin','Thon','Thoris','Tholos','Keval','Shras','Gareb','Telev','Thavan','Shreth','Thalev','Koven','Sherath','Thovan','Kavel','Shrivan','Thalvan','Kovath','Shronal','Thalkor','Kevras','Shronak','Thalrim','Kovrel','Shrenath','Thalson','Kevorn','Shronev','Thavorn','Kovash','Shrenov','Thalveth','Kevreth','Shravan','Thalnek','Kovrel','Threnev','Kovash','Shrovel','Thalvorn','Kevorn','Shraneth','Thalvrak','Kovreth','Shrenath','Thalvrak','Kovrak','Threnash'], female:['Jhamel','Talas','Talla','Tarah','Thriss','Shevreth','Zhavey','Thalova','Shreveth','Zareth','Jhaleth','Tariva','Sheriva','Zhaveth','Thalara','Shreva','Jhariva','Thariva','Shreleth','Zareva','Jhaveth','Talisha','Shrevara','Zhavara','Thaliva','Shrevela','Jhareva','Taliveth','Shreliva','Zarela','Jhaliveth','Taleriva','Shrelara','Zhavariva','Thalvara','Shrevriva','Jhareveth','Taliriva','Shrelriva','Zarriva','Jhariva','Taleshra','Shrelveth','Zhavriva','Thalieva','Shrevara','Jhaliva','Talrieva','Shreleva','Zarieva'] },
+  'Cardassian': { male:['Dukat','Garak','Tain','Macet','Evek','Lemec','Jasad','Madred','Ghemor','Ranor','Pirak','Trepar','Hogue','Rugal','Marritza','Damar','Tekeny','Silaran','Kotan','Belor','Tavor','Errak','Mekar','Dalor','Tenek','Sorvin','Hakor','Telak','Beval','Danek','Rukor','Gorak','Talor','Bevek','Donak','Nekar','Talek','Corat','Gorvel','Deval','Terak','Koval','Norel','Barak','Dalek','Sorel','Gornek','Tarek','Corak','Neval'], female:['Ziyal','Natima','Ocett','Tora','Mila','Rekelen','Gilora','Korinas','Tesanya','Palandine','Bavath','Selena','Tariva','Mevara','Noriva','Terana','Devara','Gorela','Taleva','Solara','Bareva','Norisel','Taliva','Morana','Derika','Gorvela','Talova','Soreva','Norela','Meriva','Bavela','Norana','Taleva','Morisa','Devriva','Gorriva','Talriva','Soriva','Norriva','Meriva','Bavriva','Norriva','Talriva','Morriva','Devriva','Gorela','Talela','Sorela','Norela','Meriva'] },
+  'Ferengi':    { male:['Quark','Rom','Nog','Brunt','Garak','Zek','Gint','Hoex','Krax','Gaila','Keldar','Bractor','Goss','Letek','Lokirrim','Arridor','Kol','Fnarg','Gegis','Plegg','Brak','Gorta','Trevak','Dimal','Nozak','Lorm','Frool','Geln','Trak','Daimon','Greln','Preel','Nalok','Torvin','Grel','Drimak','Fneel','Lorkon','Gretal','Prinak','Narot','Grevak','Doral','Fnort','Grevnal','Protal','Narov','Tornak','Grenol','Drimnal'], female:['Ishka','Prinadora','Leeta','Pel','Aluura','Rekelen','Natima','Norva','Lirva','Sheva','Brana','Torela','Drimeva','Preleva','Norela','Greleva','Fnevara','Lorieva','Treleva','Brevara','Nariva','Goriva','Torriva','Drimriva','Prelriva','Norriva','Grelriva','Fneriva','Loririva','Treriva','Breliva','Torela','Drimela','Prelela','Norela','Grelela','Fneela','Loriela','Treela','Brevela','Narela','Gorela','Toriva','Drimara','Prelara','Norara','Grelara','Fneara','Loriara','Trelara'] },
+  'Orion':      { male:['Harrad-Sar','Nausicaan','Devna','Morn','Rishon','Tergin','Maras','Korvin','Delvin','Garth','Kelvan','Toran','Siroc','Vorkon','Nelrak','Doral','Garkon','Torvin','Derak','Kornas','Veldak','Norkon','Selrak','Tornak','Delon','Garvek','Torvak','Delrak','Kornek','Velnok','Norak','Selvak','Tornol','Delovak','Garvak','Torlek','Delvak','Kornak','Velnak','Nornak','Selnak','Tornvak','Delovek','Garvek','Torlek','Delvek','Kornak','Velnak','Nornak','Selnak'], female:['Marta','Navaar','D\'Nesh','Maras','Devna','Vina','Areel','Sheva','Kara','Selana','Velara','Norieva','Toreva','Delara','Gorana','Koreva','Veliva','Noreva','Seleva','Torara','Delieva','Goriva','Koriva','Velieva','Noriva','Selieva','Torriva','Delriva','Goriva','Koriva','Velriva','Norriva','Selriva','Torela','Deleva','Gorela','Korela','Velela','Norela','Selela','Torela','Delala','Gorala','Korala','Velala','Norala','Selala','Torala','Delala','Gorala'] },
+  'Romulan':    { male:['Jarok','Bochra','Chulak','D\'Tan','Hiren','Letant','Mendak','Merrok','Mirok','Neral','Nijil','Pardek','Patahk','Setal','Taibak','Tebok','Thei','Tokath','Tomalek','Vreenak','Velal','Almak','Livara','Ruwon','Tal','Ayel','Xerius','N\'Vek','Telek','Valdore','Morvak','Dekkan','Torvek','Navak','Serrak','Delrak','Torek','Mordek','Narvak','Servek','Dorvak','Terak','Morvek','Nardek','Sertek','Deltek','Torvak','Mordak','Narvek','Servak'], female:['Sela','Liviana','T\'Nae','Charvanek','Vriha','Taev','Sarael','Torael','Nelvael','Devael','Morael','Serael','Torvael','Narvael','Delvael','Gorvael','Kelvael','Norael','Selvael','Torvael','Delaris','Goraris','Kelaris','Noraris','Selaris','Toraris','Moraris','Narvaris','Delvaris','Gorvaris','Kelvaris','Noraris','Selvaris','Torvaris','Delriva','Gorriva','Kelriva','Norriva','Selriva','Torriva','Morriva','Narvriva','Delvriva','Gorvriva','Kelvriva','Norela','Selvela','Torvela','Morela','Narvela'] },
+};
+
 const MISSION_TYPES = [
   'Aid & Relief','Conspiracy','Deep Space Exploration','Defense','Diplomacy',
   'Escort & Evacuation','Espionage','First Contact','Medical','Near Space',
@@ -769,7 +987,7 @@ function defaultShip() {
 function defaultSector(name) {
   const cells = Array.from({length:25}, (_,i) => ({
     type:'unknown', isVoid:false, isCurrent: i===12,
-    name: i===12 ? '' : '', icon:'', notes:'', feature:'',
+    name: i===12 ? '' : '', icon:'', notes:'', feature:'', subZone: null,
   }));
   return {name: name||'Sector 001', cells, currentCell:12};
 }
@@ -789,6 +1007,7 @@ function defaultState() {
 
 let ACTIVE_SLOT = 0;
 let S = defaultState();
+window._mapZoom = null;
 
 function saveSlot() {
   localStorage.setItem(`stcl_slot_${ACTIVE_SLOT}`, JSON.stringify(S));
@@ -1586,6 +1805,7 @@ function renderCS5() {
 
 function renderCS6() {
   const c = S.char;
+  const species = c.species || '';
   const rankOpts = ['Cadet','Ensign','Lieutenant Junior Grade','Lieutenant','Lieutenant Commander','Commander','Captain','Commodore','Admiral'].map(r=>`<option${c.rank===r?' selected':''}>${r}</option>`).join('');
   let dirRows = DIRECTIVE_TABLE.map(d=>{
     const sel = c.directive === d.desc;
@@ -1594,7 +1814,12 @@ function renderCS6() {
     </tr>`;
   }).join('');
   return `
-  <div class="field"><label>Full Name</label><input value="${escH(c.name)}" placeholder="e.g. James T. Kirk…" onchange="saveCharField('name',this.value)"></div>
+  <div class="field"><label>Full Name</label>
+    <div style="display:flex;gap:6px;align-items:center">
+      <input style="flex:1" value="${escH(c.name)}" placeholder="e.g. James T. Kirk…" onchange="saveCharField('name',this.value)">
+      <button class="btn btn-sm btn-accent" onclick="rollRandomName()" title="Random name for ${escH(species||'selected species')}">🎲 Random</button>
+    </div>
+  </div>
   <div class="field"><label>Rank</label><select onchange="saveCharField('rank',this.value)"><option>— Select Rank —</option>${rankOpts}</select></div>
   <div class="field"><label>Assignment / Ship</label><input value="${escH(c.assignment)}" placeholder="e.g. USS Enterprise NCC-1701" onchange="saveCharField('assignment',this.value)"></div>
   <div class="field"><label>Role / Department Head</label><input value="${escH(c.role)}" placeholder="e.g. Chief Science Officer" onchange="saveCharField('role',this.value)"></div>
@@ -1702,6 +1927,84 @@ function setMapSubTab(t) { _mapSubTab=t; renderCurrentTab(); }
 function renderSectorMap() {
   const sector = S.sectors[S.activeSector];
   if (!sector) return '<div class="card"><p>No sector data.</p></div>';
+
+  // ── SUB-ZONE VIEW ──────────────────────────────────────────────────────────
+  if (window._mapZoom) {
+    const sz = window._mapZoom.subZone;
+    const szCellIdx = window._mapZoom.cellIdx;
+
+    // Sub-zone grid
+    let szGridHTML = '<div id="map-grid">';
+    for(let i=0;i<25;i++){
+      const cell = sz.cells[i];
+      const isCurrent = sz.currentCell === i;
+      const isAdj = isAdjacentCell(sz.currentCell, i) && !cell.isVoid;
+      let cls = 'map-cell';
+      if(cell.isVoid) cls += ' void';
+      else if(isCurrent) cls += ' current';
+      else if(isAdj) cls += ' adjacent';
+      else if(cell.type === 'explored') cls += ' explored';
+      else cls += ' unexplored';
+      const icon = cell.icon || (isCurrent ? '🚀' : '·');
+      szGridHTML += `<div class="${cls}" onclick="clickSubZoneCell(${i})" title="${escH(cell.name)||'Zone '+i}">
+        <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
+        <span class="cell-icon">${icon}</span>
+        ${cell.name?`<span class="cell-name">${escH(cell.name)}</span>`:''}
+      </div>`;
+    }
+    szGridHTML += '</div>';
+
+    // Sub-zone cell detail
+    const szSelIdx = window._selectedMapCell ?? sz.currentCell;
+    const szSelCell = sz.cells[szSelIdx];
+    let szDetailHTML = '';
+    if(szSelCell && !szSelCell.isVoid){
+      const isCur = szSelIdx === sz.currentCell;
+      const isAdjSel = isAdjacentCell(sz.currentCell, szSelIdx);
+      szDetailHTML = `<div class="card">
+        <div class="card-title">ZONE ${szSelIdx+1}: ${escH(szSelCell.name)||'Unknown'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpToSubZone(${szSelIdx})">🚀 Warp Here</button>` : ''}
+          <button class="btn btn-sm" onclick="toggleSubZoneVoid(${szSelIdx})">${szSelCell.isVoid?'Clear Void':'Mark Void'}</button>
+        </div>
+        <div class="field"><label>Zone Name</label>
+          <input value="${escH(szSelCell.name)}" placeholder="e.g. Northern Settlement, Mine Alpha…" onchange="setSubZoneCellProp(${szSelIdx},'name',this.value)">
+        </div>
+        <div class="field"><label>Icon (emoji)</label>
+          <input value="${escH(szSelCell.icon)}" placeholder="e.g. 🏔 🌳 🏙 ⚡ 🌊" onchange="setSubZoneCellProp(${szSelIdx},'icon',this.value)">
+        </div>
+        <div class="field"><label>Feature</label>
+          <input value="${escH(szSelCell.feature)}" placeholder="e.g. Ruins, Outpost, Natural Landmark…" onchange="setSubZoneCellProp(${szSelIdx},'feature',this.value)">
+        </div>
+        <div class="field"><label>Notes</label>
+          <textarea rows="2" onchange="setSubZoneCellProp(${szSelIdx},'notes',this.value)">${escH(szSelCell.notes)}</textarea>
+        </div>
+      </div>`;
+    }
+
+    return `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="exitSubZone()">← Back to ${escH(sector.name)}</button>
+        <div class="card-title" style="margin:0">SUB-ZONE MAP</div>
+      </div>
+      <div style="font-size:14px;color:var(--accent);font-weight:bold;margin-bottom:8px">
+        <input value="${escH(sz.name)}" style="background:transparent;border:none;border-bottom:1px solid var(--accent);color:var(--accent);font-weight:bold;font-size:14px;width:100%" onchange="setSubZoneName(this.value)" placeholder="Sub-zone name…">
+      </div>
+      <p style="font-size:10px;color:var(--muted);margin-bottom:8px">Sub-zone grid for <strong>${escH(sector.cells[szCellIdx].name||'Cell '+(szCellIdx+1))}</strong>. Click adjacent zone to warp. Click any cell to edit.</p>
+      ${szGridHTML}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:10px;color:var(--muted)">
+        <span style="color:var(--accent)">▣ Current</span>
+        <span style="color:var(--info)">▣ Adjacent (can warp)</span>
+        <span>■ Explored</span>
+        <span style="opacity:0.5">■ Unexplored</span>
+        <span style="opacity:0.3">■ Void</span>
+      </div>
+    </div>
+    ${szDetailHTML}`;
+  }
+
+  // ── NORMAL SECTOR VIEW ────────────────────────────────────────────────────
   const m = sector;
 
   // Sector switcher
@@ -1745,6 +2048,7 @@ function renderSectorMap() {
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
         ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpTo(${selIdx})">🚀 Warp Here</button>` : ''}
         <button class="btn btn-sm" onclick="toggleVoid(${selIdx})">${selCell.isVoid?'Clear Void':'Mark Void'}</button>
+        <button class="btn btn-sm" onclick="enterSubZone(${selIdx})">🔍 Enter Sub-Zone</button>
       </div>
       <div class="field"><label>System Name</label>
         <input value="${escH(selCell.name)}" placeholder="e.g. Veridian III, Deep Space 9…" onchange="setCellProp(${selIdx},'name',this.value)">
@@ -2373,6 +2677,27 @@ function renderOracleTab() {
         ${rCard('incident','INCIDENT','var(--info)')}
       </div>
 
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">MISSION GENERATOR (d100 × d100)</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+          <button class="btn btn-sm" onclick="genOracle('action_word')">Roll Action Word (d100)</button>
+          <button class="btn btn-sm" onclick="genOracle('meaning_word')">Roll Meaning Word (d100)</button>
+          <button class="btn btn-sm btn-accent" onclick="genOracle('mission_gen')">Roll Both</button>
+        </div>
+        ${(results.actionWord||results.meaningWord) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          ${results.actionWord ? `<div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--accent-dim);border-radius:4px;padding:8px">
+            <div style="font-size:9px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">ACTION WORD</div>
+            <div style="font-size:15px;font-weight:bold;color:var(--accent)">${escH(results.actionWord.word)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">${escH(results.actionWord.prompt)}</div>
+          </div>` : ''}
+          ${results.meaningWord ? `<div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--info);border-radius:4px;padding:8px">
+            <div style="font-size:9px;color:var(--info);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">MEANING WORD</div>
+            <div style="font-size:15px;font-weight:bold;color:var(--info)">${escH(results.meaningWord.word)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">${escH(results.meaningWord.prompt)}</div>
+          </div>` : ''}
+        </div>` : ''}
+      </div>
+
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
         <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ENCOUNTER</div>
         <button class="btn btn-sm" style="margin-bottom:4px;width:100%" onclick="genOracle('enc_space')">Space (d20)</button>
@@ -2671,8 +2996,10 @@ function saveLogEntryEdit() {
 function showAddNPC() {
   const factionOpts = ['Federation','Klingon','Romulan','Cardassian','Borg','Ferengi','Civilian','Other'].map(f=>`<option>${f}</option>`).join('');
   const attOpts = ['Hostile','Suspicious','Neutral','Friendly','Allied'].map(a=>`<option>${a}</option>`).join('');
+  const speciesOpts = Object.keys(SPECIES_NAMES).map(s=>`<option>${s}</option>`).join('');
   openModal(`<h2>CREATE NPC</h2>
-  <div class="field"><label>Name</label><input id="npc-name-in" placeholder="e.g. Commander T'Rel…"></div>
+  <div class="field"><label>Name</label><div style="display:flex;gap:6px"><input id="npc-name-in" placeholder="e.g. Commander T'Rel…" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-name-in').value=rollNPCName(document.getElementById('npc-species-sel').value)" title="Random name">🎲</button></div></div>
+  <div class="field"><label>Species</label><select id="npc-species-sel">${speciesOpts}</select></div>
   <div class="field"><label>Faction / Affiliation</label><select id="npc-faction-sel">${factionOpts}</select></div>
   <div class="field"><label>Role / Archetype</label><input id="npc-role-in" placeholder="e.g. Science Officer, Spy…"></div>
   <div class="field"><label>Attitude</label><select id="npc-att-sel">${attOpts}</select></div>
@@ -2723,11 +3050,26 @@ function deleteNPC(i) {
   showConfirm('Delete this NPC?', ()=>{ S.npcs.splice(i,1); saveSlot(); renderCurrentTab(); });
 }
 
+function rollNPCName(species) {
+  const rp = arr => arr[Math.floor(Math.random()*arr.length)];
+  const keys = Object.keys(SPECIES_NAMES);
+  const speciesKey = species ? (keys.find(k => species.toLowerCase().includes(k.toLowerCase())) || 'Human') : rp(keys);
+  const data = SPECIES_NAMES[speciesKey];
+  if (speciesKey === 'Bajoran') {
+    return rp(data.family) + ' ' + rp(data.given);
+  }
+  return rp(Math.random() < 0.5 ? data.male : data.female);
+}
+
 function generateNPC() {
   const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+  const faction = pick(['Federation','Klingon','Romulan','Cardassian','Ferengi','Civilian','Other']);
+  // Map faction to a likely species for name generation
+  const keys = Object.keys(SPECIES_NAMES);
+  const factionSpecies = {Federation:'Human',Klingon:'Klingon',Romulan:'Romulan',Cardassian:'Cardassian',Ferengi:'Ferengi',Civilian:pick(keys),Other:pick(keys)};
   const npc = {
-    name: pick(NPC_NAMES),
-    faction: pick(['Federation','Klingon','Romulan','Cardassian','Ferengi','Civilian','Other']),
+    name: rollNPCName(factionSpecies[faction]||'Human'),
+    faction,
     role: pick(NPC_ARCHETYPES),
     attitude: pick(['Hostile','Suspicious','Neutral','Neutral','Friendly']),
     trait: pick(NPC_TRAITS),
@@ -2911,7 +3253,10 @@ function genOracle(type) {
     case 'enc_space': { const e=ENCOUNTER_SPACE[r]; window._storyResults['enc_space']={name:e.name,desc:e.desc}; break; }
     case 'enc_planet': { const e=ENCOUNTER_PLANET[r]; window._storyResults['enc_planet']={name:e.name,desc:e.desc}; break; }
     case 'npc': {
-      const name=pick(NPC_NAMES), arch=pick(NPC_ARCHETYPES), trait=pick(NPC_TRAITS), fact=pick(['Federation','Klingon','Romulan','Cardassian','Civilian','Unknown']);
+      const fact=pick(['Federation','Klingon','Romulan','Cardassian','Civilian','Unknown']);
+      const factionSpeciesMap={Federation:'Human',Klingon:'Klingon',Romulan:'Romulan',Cardassian:'Cardassian'};
+      const name=rollNPCName(factionSpeciesMap[fact]||null);
+      const arch=pick(NPC_ARCHETYPES), trait=pick(NPC_TRAITS);
       window._storyResults['npc']={desc:`${name} — ${arch} (${fact}). "${trait}"`};
       break;
     }
@@ -2923,11 +3268,47 @@ function genOracle(type) {
     case 'planet_feature': window._storyResults['planet_feature']={desc:pick(PLANET_FEATURES)}; break;
     case 'momentum_spend': window._storyResults['momentum_spend']={name:MOMENTUM_SPENDS[r%MOMENTUM_SPENDS.length].name,desc:MOMENTUM_SPENDS[r%MOMENTUM_SPENDS.length].desc}; break;
     case 'threat_spend': window._storyResults['threat_spend']={name:THREAT_SPENDS[r%THREAT_SPENDS.length].name,desc:THREAT_SPENDS[r%THREAT_SPENDS.length].desc}; break;
+    case 'action_word': {
+      const ra = Math.floor(Math.random()*100);
+      const entry = ACTION_WORDS[ra] || ACTION_WORDS[0];
+      window._storyResults.actionWord = entry;
+      break;
+    }
+    case 'meaning_word': {
+      const rm = Math.floor(Math.random()*100);
+      const entry = MEANING_WORDS[rm] || MEANING_WORDS[0];
+      window._storyResults.meaningWord = entry;
+      break;
+    }
+    case 'mission_gen': {
+      const ra = Math.floor(Math.random()*100);
+      const rm = Math.floor(Math.random()*100);
+      window._storyResults.actionWord = ACTION_WORDS[ra] || ACTION_WORDS[0];
+      window._storyResults.meaningWord = MEANING_WORDS[rm] || MEANING_WORDS[0];
+      break;
+    }
   }
   renderCurrentTab();
 }
 
 function clearOracleResults() { window._storyResults={}; renderCurrentTab(); }
+
+function rollRandomName() {
+  const species = S.char && S.char.species ? S.char.species : 'Human';
+  let key = Object.keys(SPECIES_NAMES).find(k => species.toLowerCase().includes(k.toLowerCase())) || 'Human';
+  const data = SPECIES_NAMES[key];
+  let name;
+  if (key === 'Bajoran') {
+    const fam = data.family[Math.floor(Math.random() * data.family.length)];
+    const given = data.given[Math.floor(Math.random() * data.given.length)];
+    name = fam + ' ' + given;
+  } else {
+    const pool = Math.random() < 0.5 ? data.male : data.female;
+    name = pool[Math.floor(Math.random() * pool.length)];
+  }
+  saveCharField('name', name);
+  renderCurrentTab();
+}
 
 // ============================================================
 // CHARACTER FUNCTIONS
@@ -3331,6 +3712,75 @@ function deleteSector() {
     S.activeSector=Math.max(0,S.activeSector-1);
     saveSlot(); renderCurrentTab();
   });
+}
+
+// ── Sub-zone functions ──────────────────────────────────────────────────────
+function enterSubZone(cellIdx) {
+  const sector = S.sectors[S.activeSector]; if(!sector) return;
+  const cell = sector.cells[cellIdx];
+  if(!cell.subZone) {
+    cell.subZone = {
+      name: cell.name || ('Zone ' + (cellIdx+1)),
+      currentCell: 12,
+      cells: Array.from({length:25}, () => ({name:'', icon:'', isVoid:false, notes:'', feature:'', type:'unknown'}))
+    };
+    saveSlot();
+  }
+  window._mapZoom = {cellIdx, subZone: cell.subZone};
+  window._selectedMapCell = null;
+  renderCurrentTab();
+}
+
+function exitSubZone() {
+  window._mapZoom = null;
+  window._selectedMapCell = null;
+  renderCurrentTab();
+}
+
+function setSubZoneName(val) {
+  if(!window._mapZoom) return;
+  window._mapZoom.subZone.name = val;
+  const sector = S.sectors[S.activeSector];
+  if(sector) sector.cells[window._mapZoom.cellIdx].subZone = window._mapZoom.subZone;
+  saveSlot();
+}
+
+function setSubZoneCellProp(i, prop, val) {
+  if(!window._mapZoom) return;
+  window._mapZoom.subZone.cells[i][prop] = val;
+  const sector = S.sectors[S.activeSector];
+  if(sector) sector.cells[window._mapZoom.cellIdx].subZone = window._mapZoom.subZone;
+  saveSlot();
+}
+
+function clickSubZoneCell(i) {
+  if(!window._mapZoom) return;
+  window._selectedMapCell = i;
+  window._mapZoom.subZone.cells[i].type = 'explored';
+  const sector = S.sectors[S.activeSector];
+  if(sector) sector.cells[window._mapZoom.cellIdx].subZone = window._mapZoom.subZone;
+  saveSlot(); renderCurrentTab();
+}
+
+function warpToSubZone(i) {
+  if(!window._mapZoom) return;
+  const sz = window._mapZoom.subZone;
+  if(sz.cells[sz.currentCell]) sz.cells[sz.currentCell].isCurrent = false;
+  sz.currentCell = i;
+  sz.cells[i].isCurrent = true;
+  sz.cells[i].type = 'explored';
+  window._selectedMapCell = i;
+  const sector = S.sectors[S.activeSector];
+  if(sector) sector.cells[window._mapZoom.cellIdx].subZone = sz;
+  saveSlot(); renderCurrentTab();
+}
+
+function toggleSubZoneVoid(i) {
+  if(!window._mapZoom) return;
+  window._mapZoom.subZone.cells[i].isVoid = !window._mapZoom.subZone.cells[i].isVoid;
+  const sector = S.sectors[S.activeSector];
+  if(sector) sector.cells[window._mapZoom.cellIdx].subZone = window._mapZoom.subZone;
+  saveSlot(); renderCurrentTab();
 }
 
 // ============================================================
