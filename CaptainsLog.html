@@ -559,6 +559,21 @@ const NPC_NAMES = ['T\'Rel','Kovak','Selar','Morah','Dax','Garak','Kasidy','Elar
   'Naomi','Quark','Leeta','Worf','Jadzia','Kira','Odo','Bashir','Gowron','Martok',
   'Torres','Chakotay','Tuvok','Janeway','Paris','Neelix','Kes','Seven','Harry','Doc'];
 
+const SHIP_THUMBS = {
+  centaur:'shipthumbs/Centaur.png',
+  cheyenne:'shipthumbs/Cheyenne.png',
+  constellation:'shipthumbs/Constellation.png',
+  constitution:'shipthumbs/Constitution.png',
+  galaxy:'shipthumbs/Galaxy.png',
+  malachowski:'shipthumbs/Malachowski.png',
+  miranda:'shipthumbs/Miranda.png',
+  odyssey:'shipthumbs/Odyssey.png',
+  ross:'shipthumbs/Ross.png',
+  vengeance:'shipthumbs/Vengeance.png',
+  prometheus:'shipthumbs/prometheus.png',
+  sovereign:'shipthumbs/sovereign.png',
+};
+
 const YES_NO_MATRIX = {
   'Highly Probable': {yes:16, yestwist:18, notwist:19, no:20},
   'Probable':        {yes:12, yestwist:14, notwist:17, no:20},
@@ -1924,6 +1939,14 @@ function wireMap() {}
 
 function setMapSubTab(t) { _mapSubTab=t; renderCurrentTab(); }
 
+function shipIconHtml(size, style) {
+  const cls = (S.ship && S.ship.className) ? S.ship.className.toLowerCase().trim() : '';
+  const key = Object.keys(SHIP_THUMBS).find(k => cls.includes(k));
+  if (!key) return '🚀';
+  const extraStyle = style || 'filter:drop-shadow(0 0 4px rgba(255,153,0,0.9))';
+  return `<img src="${SHIP_THUMBS[key]}" style="width:${size}px;height:${size}px;object-fit:contain;${extraStyle}" alt="ship">`;
+}
+
 function renderSectorMap() {
   const sector = S.sectors[S.activeSector];
   if (!sector) return '<div class="card"><p>No sector data.</p></div>';
@@ -1945,7 +1968,7 @@ function renderSectorMap() {
       else if(isAdj) cls += ' adjacent';
       else if(cell.type === 'explored') cls += ' explored';
       else cls += ' unexplored';
-      const icon = cell.icon || (isCurrent ? '🚀' : '·');
+      const icon = cell.icon || (isCurrent ? shipIconHtml(18) : '·');
       szGridHTML += `<div class="${cls}" onclick="clickSubZoneCell(${i})" title="${escH(cell.name)||'Zone '+i}">
         <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
         <span class="cell-icon">${icon}</span>
@@ -1964,7 +1987,7 @@ function renderSectorMap() {
       szDetailHTML = `<div class="card">
         <div class="card-title">ZONE ${szSelIdx+1}: ${escH(szSelCell.name)||'Unknown'}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-          ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpToSubZone(${szSelIdx})">🚀 Warp Here</button>` : ''}
+          ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpToSubZone(${szSelIdx})">${shipIconHtml(14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Warp Here</button>` : ''}
           <button class="btn btn-sm" onclick="toggleSubZoneVoid(${szSelIdx})">${szSelCell.isVoid?'Clear Void':'Mark Void'}</button>
         </div>
         <div class="field"><label>Zone Name</label>
@@ -2027,7 +2050,7 @@ function renderSectorMap() {
     else if(isAdj) cls += ' adjacent';
     else if(cell.type === 'explored') cls += ' explored';
     else cls += ' unexplored';
-    const icon = cell.icon || (isCurrent ? '🚀' : '·');
+    const icon = cell.icon || (isCurrent ? shipIconHtml(18) : '·');
     gridHTML += `<div class="${cls}" onclick="clickMapCell(${i})" title="${escH(cell.name)||'System '+i}">
       <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
       <span class="cell-icon">${icon}</span>
@@ -2046,7 +2069,7 @@ function renderSectorMap() {
     detailHTML = `<div class="card">
       <div class="card-title">SYSTEM ${selIdx+1}: ${escH(selCell.name)||'Unknown'}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-        ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpTo(${selIdx})">🚀 Warp Here</button>` : ''}
+        ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpTo(${selIdx})">${shipIconHtml(14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Warp Here</button>` : ''}
         <button class="btn btn-sm" onclick="toggleVoid(${selIdx})">${selCell.isVoid?'Clear Void':'Mark Void'}</button>
         <button class="btn btn-sm" onclick="enterSubZone(${selIdx})">🔍 Enter Sub-Zone</button>
       </div>
@@ -2068,7 +2091,7 @@ function renderSectorMap() {
   // Ship quick info
   const ship = S.ship;
   const shipInfo = ship.name ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-size:11px;margin-bottom:10px;display:flex;gap:10px;align-items:center">
-    <span style="font-size:20px">🚀</span>
+    <span style="font-size:20px;line-height:1;display:flex;align-items:center">${shipIconHtml(40,'filter:drop-shadow(0 0 5px rgba(255,153,0,0.9))')}</span>
     <div>
       <div style="color:var(--accent);font-weight:bold">${escH(ship.name)}</div>
       <div style="color:var(--muted)">${escH(ship.className)} · Scale ${ship.scale} · ${escH(ship.era)}</div>
