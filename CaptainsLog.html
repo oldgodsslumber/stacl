@@ -32,6 +32,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{touch-action:manipulation}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;letter-spacing:0.5px}
+body.red-alert{--accent:#CC0000;--accent-dim:#5a0000;--accent-glow:rgba(204,0,0,0.18);--text:#FFAAAA;--muted:#6a2020;--border:#2a0a0a;--surface:#0d0000;--surface2:#150000;--surface3:#1e0000}
+#ship-preview-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:16px}
+#ship-preview-modal .modal-box{background:var(--surface2);border:2px solid var(--accent);border-radius:8px;max-width:440px;width:100%;padding:20px;max-height:90vh;overflow-y:auto}
 button{font-family:var(--font);cursor:pointer}
 input,select,textarea{font-family:var(--font)}
 
@@ -262,6 +265,7 @@ input,select,textarea{font-family:var(--font)}
 </style>
 </head>
 <body>
+<div id="ship-preview-modal" style="display:none"></div>
 <div id="app">
   <div id="slot-bar">
     <h1>CAPTAIN'S LOG //</h1>
@@ -272,6 +276,7 @@ input,select,textarea{font-family:var(--font)}
       <button class="btn btn-sm" onclick="exportToFile()" title="Save all missions to a file">SAVE FILE</button>
       <button class="btn btn-sm" onclick="importFromFile()" title="Load missions from a file">LOAD FILE</button>
       <button class="btn btn-sm" onclick="toggleHudPanel()" id="hud-toggle-btn" title="Stream HUD controls" style="display:none">HUD</button>
+      <button class="btn btn-sm" onclick="toggleRedAlert()" id="red-alert-btn" title="Toggle Red Alert night mode">🔴</button>
       <button class="btn btn-sm" onclick="openSlotModal()">⚙</button>
     </div>
   </div>
@@ -838,7 +843,7 @@ const MEANING_WORDS = [
 ];
 
 const SPECIES_NAMES = {
-  'Human':      { male:['James','Jonathan','Benjamin','Jean-Luc','William','Montgomery','Leonard','Pavel','Hikaru','Miles','Julian','Chakotay','Tom','Harry','Reginald','Data','Geordi','Worf','Gabriel','Christopher','Michael','Aaron','Diego','Ethan','Kofi','Riku','Tariq','Aleksei','Priya','Soren','Matteo','Osei','Yusuf','Haruki','Emeka','Liam','Zane','Rafael','Tobias','Dmitri','Kwame','Alistair','Naveen','Ibrahim','Cian','Roshan','Desmond','Aurelio','Jovan','Caleb'], female:['Kathryn','Beverly','Nyota','Christine','Jadzia','Kira','Deanna','Lwaxana','Keiko','Ro','Hoshi','T\'Pol','Philippa','Sylvia','Tilly','Joann','Laira','Una','Rafaela','Seven','Amara','Simone','Yuki','Fatima','Ingrid','Nadia','Saoirse','Priya','Linh','Amelia','Zara','Chidinma','Marisol','Astrid','Ayasha','Rhiannon','Soraya','Leila','Caoimhe','Adaeze','Valentina','Roshani','Miriam','Solange','Elara','Kezia','Britta','Devika','Fiona','Nkechi'] },
+  'Human':      { male:['James','Jonathan','Benjamin','Jean-Luc','William','Montgomery','Leonard','Pavel','Hikaru','Miles','Julian','Chakotay','Tom','Harry','Reginald','Geordi','Gabriel','Christopher','Michael','Aaron','Diego','Ethan','Kofi','Riku','Tariq','Aleksei','Soren','Matteo','Osei','Yusuf','Haruki','Emeka','Liam','Zane','Rafael','Tobias','Dmitri','Kwame','Alistair','Naveen','Ibrahim','Cian','Roshan','Desmond','Aurelio','Jovan','Caleb','Marcus','Eliot','Cormac'], female:['Kathryn','Beverly','Nyota','Christine','Jadzia','Deanna','Lwaxana','Keiko','Philippa','Sylvia','Tilly','Joann','Laira','Una','Rafaela','Amara','Simone','Yuki','Fatima','Ingrid','Nadia','Saoirse','Priya','Linh','Amelia','Zara','Chidinma','Marisol','Astrid','Ayasha','Rhiannon','Soraya','Leila','Caoimhe','Adaeze','Valentina','Roshani','Miriam','Solange','Elara','Kezia','Britta','Devika','Fiona','Nkechi','Hana','Orla','Meara','Celeste','Rosalind'], surname:['Kirk','Picard','Sisko','Janeway','Archer','Burnham','Riker','La Forge','Crusher','Troi','Bashir','O\'Brien','Kim','Paris','Torres','Pike','McCoy','Scott','Uhura','Sulu','Chekov','Chapel','Reed','Mayweather','Stamets','Culber','Owosekun','Detmer','Cornwell','Chen','Martinez','Nakamura','Okonkwo','Petrov','Santos','Williams','Johnson','Anderson','Ibrahim','Murphy','Lee','Thompson','Rodriguez','Patel','Singh','Delacroix','Reyes','Fischer','Yamamoto','Kovacs','Nazari','Oduya','Carvalho','Eriksen','Nkosi','Blackwood','Hargreaves','Oyelaran','Castellano'] },
   'Vulcan':     { male:['Spock','Sarek','Surak','Stonn','Soval','Sybok','Skon','Solkar','Selek','Salok','Tuvok','Vorik','Taurik','Sopek','Satok','Suvek','Sirok','Sorval','Sekar','Satek','Koss','Lojal','Kuvak','Tonek','Vonek','Valek','Sivok','Sorvak','Talok','Narok','Sovek','Kaval','Tenak','Ruval','Sivak','Norval','Tarev','Solek','Kanek','Tavek','Sevik','Soral','Korev','Sulok','Tanek','Voral','Konak','Sorak','Telek','Sivrak'], female:['T\'Pol','T\'Pau','T\'Pring','T\'Pel','T\'Mir','T\'Pan','T\'Paal','T\'Hen','T\'Shael','T\'Vrea','Valeris','Selar','Sakonna','Saavik','T\'Lara','T\'Vora','T\'Nara','T\'Kela','T\'Rala','T\'Sona','T\'Peva','T\'Lyra','T\'Kara','T\'Mira','T\'Neva','T\'Reia','T\'Kova','T\'Pavi','T\'Salor','T\'Nira','Savin','Veral','T\'Vena','T\'Leva','T\'Pren','Sorel','T\'Vala','T\'Kena','T\'Sira','T\'Pova','Seleya','T\'Vren','T\'Kaya','Velara','T\'Neva','T\'Mala','Soran','T\'Peva','T\'Lira','T\'Vora'] },
   'Bajoran':    { family:['Kira','Odo','Winn','Jaro','Furel','Shakaar','Bareil','Tahna','Bek','Holza','Jatarn','Kainon','Orta','Surmak','Varis','Prylar','Ranjen','Nalas','Tarsa','Lenaris','Darvin','Cerin','Halar','Moset','Silaran','Timor','Vedek','Opaka','Yaten','Razka','Torin','Darya','Navok','Jeran','Sorel','Kavar','Timak','Danir','Havek','Rolan','Tolvar','Corat','Janir','Horak','Sirak','Bekar','Narov','Dolak','Terak','Mirval'], given:['Nerys','Laren','Neela','Pallra','Roana','Meru','Leeta','Ziyal','Senna','Lenara','Adami','Varis','Kasat','Tora','Naren','Selna','Mevra','Darena','Tamara','Linara','Sovren','Kelara','Tomari','Devra','Mirel','Jasara','Lelara','Navara','Tevin','Riara','Sarith','Molara','Devrin','Lisara','Talara','Renara','Belara','Jevara','Kasira','Narana','Torima','Sylara','Merana','Telara','Venara','Sarela','Dorima','Relara','Kenara','Sivara'] },
   'Klingon':    { male:['Worf','Martok','Gowron','Kahless','Kor','Kang','Koloth','Kruge','Chang','Gorkon','Mogh','Duras','Toral','K\'mpec','Kurn','Lursa','Nu\'Daq','Noggra','Ja\'rod','L\'Kor','Toq','Torin','Tumek','Rodek','Telok','K\'Ratak','K\'Tal','H\'Ta','Huraga','Maltz','Rektan','Gorath','Durakh','Morak','Kargan','Klaa','Koord','Targhal','Valkoth','Gorvas','Talak','Korrath','Groth','Norghak','Boral','Targon','Drakh','Kurath','Torath','Gorkon'], female:['B\'Elanna','B\'Etor','K\'Ehleyr','Lursa','Grilka','Sirella','Kurak','Kahmar','Huss','Karana','Linkasa','Lukara','Shenara','Valkris','Vixis','L\'Rell','Azetbur','Miral','Seska','Azura','Kloreth','Vrak','Morghul','Dreva','Kerith','Voral','Lureth','Karona','Beleth','Gorath','Talmora','Druvek','Kreveth','Vuldra','Moreth','Tareva','Gritha','Karveth','Lurova','Belrak','Torneth','Vixeth','Gralka','Dureva','Koreva','Talveth','Morketh','Breveth','Kolveth','Luraka'] },
@@ -1914,7 +1919,7 @@ function renderCS7() {
 
   const classRows = displayShips.length ? displayShips.map(sc => {
     const isSel = sh.className === sc.name && sh.era === sc.era;
-    return `<tr onclick="loadShipClass('${escQ(sc.name)}')" style="cursor:pointer${isSel?';background:var(--accent-glow)':''}">
+    return `<tr onclick="previewShipClass('${escQ(sc.name)}')" style="cursor:pointer${isSel?';background:var(--accent-glow)':''}">
       <td style="color:${isSel?'var(--accent)':'var(--text)'};font-weight:bold;padding:5px 8px">${escH(sc.name)}${isSel?' ✓':''}</td>
       <td style="color:var(--muted);font-size:10px;padding:5px 8px">${escH(sc.era)}</td>
       <td style="text-align:center;padding:5px 8px">${sc.scale}</td>
@@ -2203,7 +2208,7 @@ function renderShipTab() {
 
   const classRows = filtered.map(c => {
     const isSel = sh.className===c.name && sh.era===c.era;
-    return `<tr onclick="loadShipClass('${escQ(c.name)}')" style="cursor:pointer${isSel?';background:var(--accent-glow)':''}">
+    return `<tr onclick="previewShipClass('${escQ(c.name)}')" style="cursor:pointer${isSel?';background:var(--accent-glow)':''}">
       <td style="color:var(--accent);font-weight:bold;padding:5px 8px">${escH(c.name)}${isSel?' ✓':''}</td>
       <td style="color:var(--muted);font-size:10px;padding:5px 8px">${escH(c.era)}</td>
       <td style="text-align:center;padding:5px 8px">${c.scale}</td>
@@ -3395,6 +3400,9 @@ function rollRandomName() {
   } else {
     const pool = Math.random() < 0.5 ? data.male : data.female;
     name = pool[Math.floor(Math.random() * pool.length)];
+    if (data.surname) {
+      name += ' ' + data.surname[Math.floor(Math.random() * data.surname.length)];
+    }
   }
   saveCharField('name', name);
   renderCurrentTab();
@@ -3662,6 +3670,39 @@ function addShipTalent() {
 }
 function removeShipTalent(i) { S.ship.talents.splice(i,1); saveSlot(); renderCurrentTab(); }
 
+function toggleRedAlert() {
+  const on = document.body.classList.toggle('red-alert');
+  localStorage.setItem('stcl-theme', on ? 'red-alert' : 'standard');
+  const btn = document.getElementById('red-alert-btn');
+  if (btn) btn.style.opacity = on ? '1' : '0.5';
+}
+
+function previewShipClass(name) {
+  const c = SHIP_CLASSES.find(x => x.name === name);
+  if (!c) return;
+  const modal = document.getElementById('ship-preview-modal');
+  if (!modal) return;
+  const thumb = c.thumb ? `<img src="${escH(c.thumb)}" style="width:100%;max-height:200px;object-fit:contain;margin-bottom:14px;filter:drop-shadow(0 0 10px var(--accent))" onerror="this.style.display='none'">` : '';
+  const stats = `COM ${c.comms} / CPU ${c.computers} / ENG ${c.engines} / SEN ${c.sensors} / STR ${c.structure} / WPN ${c.weapons}`;
+  modal.innerHTML = `<div class="modal-box">
+    ${thumb}
+    <div style="color:var(--accent);font-size:20px;font-weight:bold;letter-spacing:2px;text-transform:uppercase">${escH(c.name)}</div>
+    <div style="color:var(--muted);font-size:11px;margin:4px 0 12px;letter-spacing:1px">${escH(c.era)} &nbsp;·&nbsp; Scale ${c.scale}</div>
+    ${c.trait ? `<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:14px;border-left:3px solid var(--accent-dim);padding-left:10px">${escH(c.trait)}</div>` : ''}
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:16px">${stats}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="loadShipClass('${escQ(c.name)}');closeShipPreview()">Select This Vessel</button>
+      <button class="btn" style="background:var(--surface3);color:var(--text)" onclick="closeShipPreview()">Back</button>
+    </div>
+  </div>`;
+  modal.style.display = 'flex';
+}
+
+function closeShipPreview() {
+  const modal = document.getElementById('ship-preview-modal');
+  if (modal) modal.style.display = 'none';
+}
+
 function loadShipClass(name) {
   const c = SHIP_CLASSES.find(x => x.name === name);
   if (!c) return;
@@ -3921,6 +3962,14 @@ function toggleCollapsible(id) {
   ACTIVE_SLOT = saved ? parseInt(saved) : 0;
   loadSlot(ACTIVE_SLOT);
   renderCurrentTab();
+  if (localStorage.getItem('stcl-theme') === 'red-alert') {
+    document.body.classList.add('red-alert');
+    const btn = document.getElementById('red-alert-btn');
+    if (btn) btn.style.opacity = '1';
+  } else {
+    const btn = document.getElementById('red-alert-btn');
+    if (btn) btn.style.opacity = '0.5';
+  }
 })();
 
 
