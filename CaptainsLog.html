@@ -1947,6 +1947,15 @@ function shipIconHtml(size, style) {
   return `<img src="${SHIP_THUMBS[key]}" style="width:${size}px;height:${size}px;object-fit:contain;${extraStyle}" alt="ship">`;
 }
 
+function areaIconHtml(sz, size, style) {
+  const humanScale = sz && ['ship','planet','station'].includes(sz.type);
+  if (humanScale) {
+    const s = style || 'filter:drop-shadow(0 0 4px rgba(153,204,255,0.9))';
+    return `<img src="uniforms/era-2409.png" style="width:${size}px;height:${size}px;object-fit:contain;${s}" alt="crew">`;
+  }
+  return shipIconHtml(size, style);
+}
+
 function renderSectorMap() {
   const sector = S.sectors[S.activeSector];
   if (!sector) return '<div class="card"><p>No sector data.</p></div>';
@@ -1968,8 +1977,8 @@ function renderSectorMap() {
       else if(isAdj) cls += ' adjacent';
       else if(cell.type === 'explored') cls += ' explored';
       else cls += ' unexplored';
-      const icon = cell.icon || (isCurrent ? shipIconHtml(18) : '·');
-      szGridHTML += `<div class="${cls}" onclick="clickSubZoneCell(${i})" title="${escH(cell.name)||'Zone '+i}">
+      const icon = cell.icon || (isCurrent ? areaIconHtml(sz, 18) : '·');
+      szGridHTML += `<div class="${cls}" onclick="clickSubZoneCell(${i})" title="${escH(cell.name)||'Area '+(i+1)}">
         <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
         <span class="cell-icon">${icon}</span>
         ${cell.name?`<span class="cell-name">${escH(cell.name)}</span>`:''}
@@ -1985,13 +1994,13 @@ function renderSectorMap() {
       const isCur = szSelIdx === sz.currentCell;
       const isAdjSel = isAdjacentCell(sz.currentCell, szSelIdx);
       szDetailHTML = `<div class="card">
-        <div class="card-title">ZONE ${szSelIdx+1}: ${escH(szSelCell.name)||'Unknown'}</div>
+        <div class="card-title">AREA ${szSelIdx+1}: ${escH(szSelCell.name)||'Unknown'}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-          ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpToSubZone(${szSelIdx})">${shipIconHtml(14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Warp Here</button>` : ''}
+          ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpToSubZone(${szSelIdx})">${areaIconHtml(sz,14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Move Here</button>` : ''}
           <button class="btn btn-sm" onclick="toggleSubZoneVoid(${szSelIdx})">${szSelCell.isVoid?'Clear Void':'Mark Void'}</button>
         </div>
-        <div class="field"><label>Zone Name</label>
-          <input value="${escH(szSelCell.name)}" placeholder="e.g. Northern Settlement, Mine Alpha…" onchange="setSubZoneCellProp(${szSelIdx},'name',this.value)">
+        <div class="field"><label>Area Name</label>
+          <input value="${escH(szSelCell.name)}" placeholder="e.g. Engineering Bay, Cargo Hold, Plaza…" onchange="setSubZoneCellProp(${szSelIdx},'name',this.value)">
         </div>
         <div class="field"><label>Icon (emoji)</label>
           <input value="${escH(szSelCell.icon)}" placeholder="e.g. 🏔 🌳 🏙 ⚡ 🌊" onchange="setSubZoneCellProp(${szSelIdx},'icon',this.value)">
@@ -2009,12 +2018,12 @@ function renderSectorMap() {
     <div class="card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="exitSubZone()">← Back to ${escH(sector.name)}</button>
-        <div class="card-title" style="margin:0">SUB-ZONE MAP</div>
+        <div class="card-title" style="margin:0">AREA MAP${sz.type?' <span style="font-size:9px;color:var(--muted);text-transform:capitalize;font-weight:normal">('+sz.type+')</span>':''}</div>
       </div>
       <div style="font-size:14px;color:var(--accent);font-weight:bold;margin-bottom:8px">
-        <input value="${escH(sz.name)}" style="background:transparent;border:none;border-bottom:1px solid var(--accent);color:var(--accent);font-weight:bold;font-size:14px;width:100%" onchange="setSubZoneName(this.value)" placeholder="Sub-zone name…">
+        <input value="${escH(sz.name)}" style="background:transparent;border:none;border-bottom:1px solid var(--accent);color:var(--accent);font-weight:bold;font-size:14px;width:100%" onchange="setSubZoneName(this.value)" placeholder="Area name…">
       </div>
-      <p style="font-size:10px;color:var(--muted);margin-bottom:8px">Sub-zone grid for <strong>${escH(sector.cells[szCellIdx].name||'Cell '+(szCellIdx+1))}</strong>. Click adjacent zone to warp. Click any cell to edit.</p>
+      <p style="font-size:10px;color:var(--muted);margin-bottom:8px">Area map for <strong>${escH(sector.cells[szCellIdx].name||'Cell '+(szCellIdx+1))}</strong>. Click adjacent area to move. Click any cell to edit.</p>
       ${szGridHTML}
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:10px;color:var(--muted)">
         <span style="color:var(--accent)">▣ Current</span>
@@ -2071,7 +2080,7 @@ function renderSectorMap() {
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
         ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpTo(${selIdx})">${shipIconHtml(14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Warp Here</button>` : ''}
         <button class="btn btn-sm" onclick="toggleVoid(${selIdx})">${selCell.isVoid?'Clear Void':'Mark Void'}</button>
-        <button class="btn btn-sm" onclick="enterSubZone(${selIdx})">🔍 Enter Sub-Zone</button>
+        <button class="btn btn-sm" onclick="enterSubZone(${selIdx})">🔍 Enter Area${selCell.subZone?' ('+selCell.subZone.type+')':''}</button>
       </div>
       <div class="field"><label>System Name</label>
         <input value="${escH(selCell.name)}" placeholder="e.g. Veridian III, Deep Space 9…" onchange="setCellProp(${selIdx},'name',this.value)">
@@ -3742,13 +3751,35 @@ function enterSubZone(cellIdx) {
   const sector = S.sectors[S.activeSector]; if(!sector) return;
   const cell = sector.cells[cellIdx];
   if(!cell.subZone) {
-    cell.subZone = {
-      name: cell.name || ('Zone ' + (cellIdx+1)),
-      currentCell: 12,
-      cells: Array.from({length:25}, () => ({name:'', icon:'', isVoid:false, notes:'', feature:'', type:'unknown'}))
-    };
-    saveSlot();
+    // Ask type before creating
+    const defaultName = cell.name || ('Area ' + (cellIdx+1));
+    openModal(`<h2>WHAT TYPE OF AREA?</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Choose the type of location. This sets the scale and position marker.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      ${['ship','planet','station','space','other'].map(t=>`
+      <button class="btn btn-accent" style="padding:12px 8px;font-size:13px" onclick="createSubZone(${cellIdx},'${t}')">
+        ${t==='ship'?'🚀 Ship':t==='planet'?'🌍 Planet':t==='station'?'🛸 Station':t==='space'?'✨ Space':'⬜ Other'}
+      </button>`).join('')}
+    </div>
+    <p style="font-size:10px;color:var(--muted)">Ship, Planet, and Station use a crew figure as the position marker. Space and Other use the ship icon.</p>`);
+    return;
   }
+  window._mapZoom = {cellIdx, subZone: cell.subZone};
+  window._selectedMapCell = null;
+  renderCurrentTab();
+}
+
+function createSubZone(cellIdx, type) {
+  dismissModal();
+  const sector = S.sectors[S.activeSector]; if(!sector) return;
+  const cell = sector.cells[cellIdx];
+  cell.subZone = {
+    name: cell.name || ('Area ' + (cellIdx+1)),
+    type,
+    currentCell: 12,
+    cells: Array.from({length:25}, () => ({name:'', icon:'', isVoid:false, notes:'', feature:'', type:'unknown'}))
+  };
+  saveSlot();
   window._mapZoom = {cellIdx, subZone: cell.subZone};
   window._selectedMapCell = null;
   renderCurrentTab();
