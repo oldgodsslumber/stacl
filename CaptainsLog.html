@@ -4250,6 +4250,11 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
     <div id="setup-no-cam">No camera</div>
   </div>
   <div><div class="slbl">Camera</div><select class="ssel" id="cam-sel" onchange="startSetupPreview()"><option value="">No camera</option></select></div>
+  <div><div class="slbl">Resolution</div><select class="ssel" id="res-sel" onchange="onResChange()">
+    <option value="480">480p (faster)</option>
+    <option value="720" selected>720p</option>
+    <option value="1080">1080p (sharper)</option>
+  </select></div>
   <div><div class="slbl">Microphone</div><select class="ssel" id="mic-sel"><option value="">No microphone</option></select></div>
   <div>
     <div class="slbl">Virtual Background</div>
@@ -4264,6 +4269,17 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
       <div class="bg-opt" data-type="image" data-src="ds93.avif" onclick="selectBg(this)" style="background-image:url(${bgBase}ds93.avif)">DS9 C</div>
       <div class="bg-opt" data-type="image" data-src="earth.avif" onclick="selectBg(this)" style="background-image:url(${bgBase}earth.avif)">Earth</div>
     </div>
+  </div>
+  <div id="seg-controls" style="display:none;margin-top:6px;border-top:1px solid #2a1200;padding-top:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div class="slbl">Cutout Sharpness</div><span class="slbl" id="thresh-val">140</span></div>
+    <input type="range" id="thresh-sl" min="30" max="220" value="140" oninput="onThreshChange(this.value)" style="width:100%;accent-color:#FF9900;margin:2px 0 6px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div class="slbl">Edge Softness</div><span class="slbl" id="feather-val">4px</span></div>
+    <input type="range" id="feather-sl" min="0" max="16" value="4" oninput="onFeatherChange(this.value)" style="width:100%;accent-color:#FF9900;margin:2px 0 6px">
+    <div class="slbl">Model</div>
+    <select class="ssel" id="model-sel" onchange="onModelChange()">
+      <option value="0">Portrait — close-up / head &amp; shoulders</option>
+      <option value="1" selected>General — full body / wide shot</option>
+    </select>
   </div>
   <div class="srow">
     <button class="sbtn skip" onclick="startHUD(false)">HUD Only</button>
@@ -4374,6 +4390,7 @@ var _rec=null,_chunks=[],_timer=null,_secs=0;
 var _stream=null,_hdStream=null,_bgEffect=null,_bgDisplayStream=null;
 var _previewStream=null,_previewEffect=null;
 var _bgType='none',_bgSrc='';var BG_BASE='${bgBase}';
+var _segThreshold=140,_segFeather=4,_segModelSel=1,_camResH=720;
 var _ch=new BroadcastChannel('stcl-hud');
 _ch.onmessage=function(e){if(e.data&&e.data.type==='state')applyState(e.data);};
 
@@ -4543,6 +4560,8 @@ function selectBg(el){
   el.classList.add('selected');
   _bgType=el.dataset.type||'none';
   _bgSrc=el.dataset.src?BG_BASE+el.dataset.src:'';
+  var sc=document.getElementById('seg-controls');
+  if(sc)sc.style.display=_bgType!=='none'?'':'none';
   applyPreviewEffect();
 }
 
@@ -4662,8 +4681,10 @@ async function startSetupPreview(){
     _previewStream=opStream;
   }else{
     var cid=document.getElementById('cam-sel')?document.getElementById('cam-sel').value:'';
+    var resH=_camResH||720,resW=resH===480?640:resH===1080?1920:1280;
+    var vidCon=cid?{deviceId:{ideal:cid},width:{ideal:resW},height:{ideal:resH}}:{width:{ideal:resW},height:{ideal:resH}};
     try{
-      _previewStream=await navigator.mediaDevices.getUserMedia({video:cid?{deviceId:{ideal:cid}}:true,audio:false});
+      _previewStream=await navigator.mediaDevices.getUserMedia({video:vidCon,audio:false});
     }catch(e){if(noSig)noSig.style.display='';return;}
   }
   if(vid&&_previewStream){vid.srcObject=_previewStream;if(noSig)noSig.style.display='none';}
@@ -4686,6 +4707,27 @@ async function applyPreviewEffect(){
   }catch(e){
     if(noSig){noSig.style.display='';noSig.textContent='Effect unavailable';}
   }
+}
+
+function onThreshChange(v){
+  _segThreshold=+v;
+  var el=document.getElementById('thresh-val');if(el)el.textContent=v;
+}
+function onFeatherChange(v){
+  _segFeather=+v;
+  var el=document.getElementById('feather-val');if(el)el.textContent=v+'px';
+}
+function onModelChange(){
+  var sel=document.getElementById('model-sel');
+  _segModelSel=sel?+sel.value:1;
+  VirtualBgEffect.resetSegmenter();
+  applyPreviewEffect();
+}
+function onResChange(){
+  var sel=document.getElementById('res-sel');
+  _camResH=sel?+sel.value:720;
+  if(_previewStream){_previewStream.getTracks().forEach(function(t){t.stop();});_previewStream=null;}
+  startSetupPreview();
 }
 
 async function enumDevs(){
@@ -4751,11 +4793,13 @@ var VirtualBgEffect=(function(){
     this._tmpCanvas=null;this._tmpCtx=null;
   }
   VirtualBgEffect._getSegmenter=function(){if(!_segPromise)_segPromise=VirtualBgEffect._load();return _segPromise;};
+  VirtualBgEffect.resetSegmenter=function(){_segPromise=null;};
   VirtualBgEffect._load=function(){
     return loadScript(MEDIAPIPE_CDN+'selfie_segmentation.js').then(function(){
       if(!window.SelfieSegmentation)throw new Error('SelfieSegmentation not available');
+      var modelSel=(window._segModelSel!==undefined?+window._segModelSel:1);
       var seg=new window.SelfieSegmentation({locateFile:function(f){return MEDIAPIPE_CDN+f;}});
-      seg.setOptions({modelSelection:1});
+      seg.setOptions({modelSelection:modelSel});
       seg.onResults(function(){});
       return seg.initialize().then(function(){return seg;});
     });
@@ -4816,12 +4860,23 @@ var VirtualBgEffect=(function(){
       this._tmpCanvas.width=W;this._tmpCanvas.height=H;
       this._tmpCtx=this._tmpCanvas.getContext('2d',{willReadFrequently:true});
     }
+    // Blur the mask before reading to create soft feathered edges
+    var featherPx=+(window._segFeather!==undefined?window._segFeather:4);
+    if(featherPx>0)this._tmpCtx.filter='blur('+featherPx+'px)';
     this._tmpCtx.drawImage(results.segmentationMask,0,0,W,H);
+    if(featherPx>0)this._tmpCtx.filter='none';
     var maskPx=this._tmpCtx.getImageData(0,0,W,H).data;
     this._tmpCtx.drawImage(results.image,0,0,W,H);
     var imgD=this._tmpCtx.getImageData(0,0,W,H);
     var d=imgD.data;
-    for(var i=0;i<d.length;i+=4){d[i+3]=maskPx[i];}  // alpha = mask brightness
+    // Apply threshold curve: ramp from (thr-half)→0 to (thr+half)→255
+    var thr=+(window._segThreshold!==undefined?window._segThreshold:140);
+    var half=Math.max(1,featherPx*8);
+    var lo=thr-half,range=(half*2)||1;
+    for(var i=0;i<d.length;i+=4){
+      var v=maskPx[i];
+      d[i+3]=v<=lo?0:v>=(lo+range)?255:Math.round((v-lo)/range*255);
+    }
     this._tmpCtx.putImageData(imgD,0,0);
     ctx.drawImage(this._tmpCanvas,0,0);
   };
