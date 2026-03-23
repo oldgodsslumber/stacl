@@ -3985,6 +3985,7 @@ function toggleCollapsible(id) {
 // ============================================================
 
 let _hudVis = {stats:true, vitals:true, dice:true, log:true, encounter:true, npcSpot:-1, shipStats:false, sectorMap:false, interiorMap:false};
+let _hudCamResH = parseInt(localStorage.getItem('stcl-cam-res')||'720')||720;
 let _hudWin = null;
 let _hudChannel = null;
 let _hudPanelOpen = false;
@@ -4025,6 +4026,14 @@ function buildHudCtrlHTML() {
       <div class="hc-label">Spotlight NPC</div>
       <div class="hc-chips">${npcChips||'<span style="font-size:10px;color:var(--muted)">No NPCs</span>'}</div>
     </div>
+    <div class="hc-section">
+      <div class="hc-label">Camera Resolution</div>
+      <select style="background:#000;border:1px solid var(--accent-dim);color:var(--text);padding:3px 8px;font-size:10px;border-radius:4px;font-family:var(--font);width:100%" onchange="setHudCamRes(+this.value)">
+        <option value="480"${_hudCamResH===480?' selected':''}>480p (faster)</option>
+        <option value="720"${_hudCamResH===720?' selected':''}>720p</option>
+        <option value="1080"${_hudCamResH===1080?' selected':''}>1080p (sharper)</option>
+      </select>
+    </div>
     <button class="hud-open-btn" onclick="openHUD()">▶ OPEN HUD WINDOW</button>
     <div class="hud-rec-row">
       <button class="hud-rec-btn${recOn?' on':''}" id="hud-rec-btn" onclick="toggleHudRec()">${recOn?'⏹ STOP':'⏺ REC SCREEN'}</button>
@@ -4043,6 +4052,26 @@ function toggleHudVis(key) {
   hudBroadcast(); refreshHudCtrl();
 }
 function setHudNpc(idx) { _hudVis.npcSpot = idx; hudBroadcast(); refreshHudCtrl(); }
+function setHudCamRes(resH) {
+  _hudCamResH = resH;
+  localStorage.setItem('stcl-cam-res', resH);
+  refreshHudCtrl();
+}
+async function reacquireCamStream(resH) {
+  if (resH) { _hudCamResH = resH; localStorage.setItem('stcl-cam-res', resH); }
+  if (window._hudCamStream) { window._hudCamStream.getTracks().forEach(t=>t.stop()); window._hudCamStream=null; }
+  const h = _hudCamResH||720, w = h===480?640:h===1080?1920:1280;
+  const tries = [
+    {video:{width:{ideal:w},height:{ideal:h},frameRate:{ideal:30}},audio:true},
+    {video:{width:{ideal:w},height:{ideal:h},frameRate:{ideal:30}},audio:false},
+    {video:{width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false},
+    {video:true,audio:false}
+  ];
+  for (const con of tries) {
+    try { window._hudCamStream = await navigator.mediaDevices.getUserMedia(con); break; } catch(e) {}
+  }
+  refreshHudCtrl();
+}
 function refreshHudCtrl() {
   const wrap = document.getElementById('hud-ctrl-wrap');
   if (wrap && _hudPanelOpen) wrap.innerHTML = buildHudCtrlHTML();
@@ -4055,8 +4084,11 @@ async function openHUD() {
   // Acquire camera in main window FIRST (has established permissions).
   // HUD reads it via window.opener._hudCamStream — must be ready before document.write().
   if (window._hudCamStream) { window._hudCamStream.getTracks().forEach(t => t.stop()); window._hudCamStream = null; }
+  const resH = _hudCamResH || 720;
+  const resW = resH===480?640:resH===1080?1920:1280;
   const camTries = [
-    {video:{width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:true},
+    {video:{width:{ideal:resW},height:{ideal:resH},frameRate:{ideal:30}},audio:true},
+    {video:{width:{ideal:resW},height:{ideal:resH},frameRate:{ideal:30}},audio:false},
     {video:{width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false},
     {video:true,audio:false}
   ];
@@ -4743,7 +4775,16 @@ function onResChange(){
     _previewStream.getTracks().forEach(function(t){t.stop()});
   }
   _previewStream=null;
-  startSetupPreview();
+  // Ask the main app to re-acquire the camera at the new resolution
+  if(window.opener&&window.opener.reacquireCamStream){
+    var noSig=document.getElementById('setup-no-cam');
+    if(noSig){noSig.style.display='';noSig.textContent='Switching resolution\u2026';}
+    window.opener.reacquireCamStream(_camResH).then(function(){
+      startSetupPreview();
+    });
+  }else{
+    startSetupPreview();
+  }
 }
 
 async function enumDevs(){
