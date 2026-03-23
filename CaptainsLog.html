@@ -4738,7 +4738,11 @@ function onResChange(){
   var sel=document.getElementById('res-sel');
   _camResH=sel?+sel.value:720;
   if(_previewEffect){_previewEffect.stopEffect();_previewEffect=null;}
-  if(_previewStream){_previewStream.getTracks().forEach(function(t){t.stop();});_previewStream=null;}
+  // Never stop the opener's stream — it belongs to the main app
+  if(_previewStream&&_previewStream!==getOpenerStream()){
+    _previewStream.getTracks().forEach(function(t){t.stop()});
+  }
+  _previewStream=null;
   startSetupPreview();
 }
 
