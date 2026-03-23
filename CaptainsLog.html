@@ -4685,7 +4685,18 @@ async function startSetupPreview(){
     var vidCon=cid?{deviceId:{ideal:cid},width:{ideal:resW},height:{ideal:resH}}:{width:{ideal:resW},height:{ideal:resH}};
     try{
       _previewStream=await navigator.mediaDevices.getUserMedia({video:vidCon,audio:false});
-    }catch(e){if(noSig)noSig.style.display='';return;}
+    }catch(e){
+      // Resolution not supported — fall back to 720p
+      if(resH!==720){
+        _camResH=720;
+        var resSel=document.getElementById('res-sel');if(resSel)resSel.value='720';
+        if(noSig){noSig.style.display='';noSig.textContent=resH+'p not supported\u2014trying 720p\u2026';}
+        try{
+          var fbCon=cid?{deviceId:{ideal:cid},width:{ideal:1280},height:{ideal:720}}:{width:{ideal:1280},height:{ideal:720}};
+          _previewStream=await navigator.mediaDevices.getUserMedia({video:fbCon,audio:false});
+        }catch(e2){if(noSig)noSig.style.display='';return;}
+      }else{if(noSig)noSig.style.display='';return;}
+    }
   }
   if(vid&&_previewStream){vid.srcObject=_previewStream;if(noSig)noSig.style.display='none';}
   await applyPreviewEffect();
@@ -4726,6 +4737,7 @@ function onModelChange(){
 function onResChange(){
   var sel=document.getElementById('res-sel');
   _camResH=sel?+sel.value:720;
+  if(_previewEffect){_previewEffect.stopEffect();_previewEffect=null;}
   if(_previewStream){_previewStream.getTracks().forEach(function(t){t.stop();});_previewStream=null;}
   startSetupPreview();
 }
