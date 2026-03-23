@@ -360,7 +360,17 @@ const SPECIES_LIST = [
     _attr:{}, _attrFree:3, _discOpts:[], _discFree:1},
 ];
 
-const ERAS = ['Enterprise Era (22nd C.)','Original Series (23rd C.)','Next Generation (24th C.)','Deep Space Nine / Voyager','Picard / Discovery Era','32nd Century'];
+const ERAS = ['Enterprise Era (22nd C.)','Original Series (23rd C.)','Next Generation (24th C.)','Deep Space Nine / Voyager','Picard / Discovery Era','Star Trek Online (2409-2411)','32nd Century'];
+
+const ERA_BADGES = [
+  {keys:['Enterprise','22nd'],          src:'badges/01entbadge.png'},
+  {keys:['Original','23rd','TOS'],      src:'badges/02tosbadge.png'},
+  {keys:['Next Generation','24th','TNG'],src:'badges/03tngbadge.png'},
+  {keys:['Deep Space','Voyager','DS9','VOY'],src:'badges/04voyds9badge.png'},
+  {keys:['Picard','Discovery'],         src:'badges/05picbadge.png'},
+  {keys:['Online','STO','2409','2410','2411'],src:'badges/06stobadge.png'},
+  {keys:['32nd','DIS'],                 src:'badges/07disbadge.png'},
+];
 
 // ── Interior hull silhouette mask (5 col × 10 row = 50 cells; true = outside hull) ──
 const SHIP_INTERIOR_HULL = [
@@ -1947,11 +1957,18 @@ function shipIconHtml(size, style) {
   return `<img src="${SHIP_THUMBS[key]}" style="width:${size}px;height:${size}px;object-fit:contain;${extraStyle}" alt="ship">`;
 }
 
+function eraBadgeSrc() {
+  const era = (S.char && (S.char._selectedEra || S.char.era)) || '';
+  const match = ERA_BADGES.find(e => e.keys.some(k => era.includes(k)));
+  return match ? match.src : null;
+}
+
 function areaIconHtml(sz, size, style) {
-  const humanScale = sz && ['ship','planet','station'].includes(sz.type);
+  const humanScale = sz && ['ship','planet','station','other'].includes(sz.type);
   if (humanScale) {
+    const src = eraBadgeSrc() || 'uniforms/era-2409.png';
     const s = style || 'filter:drop-shadow(0 0 4px rgba(153,204,255,0.9))';
-    return `<img src="uniforms/era-2409.png" style="width:${size}px;height:${size}px;object-fit:contain;${s}" alt="crew">`;
+    return `<img src="${src}" style="width:${size}px;height:${size}px;object-fit:contain;${s}" alt="crew">`;
   }
   return shipIconHtml(size, style);
 }
