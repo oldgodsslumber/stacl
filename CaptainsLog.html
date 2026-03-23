@@ -362,6 +362,19 @@ const SPECIES_LIST = [
 
 const ERAS = ['Enterprise Era (22nd C.)','Original Series (23rd C.)','Golden Age (2280s–2350s)','Next Generation (24th C.)','Deep Space Nine / Voyager','Picard / Discovery Era','Star Trek Online (2409-2411)','26th Century','32nd Century'];
 
+// Maps ERAS dropdown values → exact era string used in SHIP_CLASSES
+const ERA_TO_SHIP_ERA = {
+  'Enterprise Era (22nd C.)':     'Enterprise Era',
+  'Original Series (23rd C.)':    'Original Series',
+  'Golden Age (2280s\u20132350s)':'Golden Age',
+  'Next Generation (24th C.)':    'Next Generation',
+  'Deep Space Nine / Voyager':    'Next Generation',
+  'Picard / Discovery Era':       'Picard Era',
+  'Star Trek Online (2409-2411)': 'Star Trek Online (2409-2411)',
+  '26th Century':                 '26th Century',
+  '32nd Century':                 '32nd Century',
+};
+
 const ERA_BADGES = [
   {keys:['Enterprise','22nd'],              src:'badges/01entbadge.png'},
   {keys:['Original','23rd','TOS'],          src:'badges/02tosbadge.png'},
@@ -1892,16 +1905,13 @@ function renderCS7() {
   const mode = window._csShipMode || 'era';
   const charEra = c._selectedEra || c.era || '';
 
-  // Match ship classes to character's era by keyword
-  const eraShips = SHIP_CLASSES.filter(sc => {
-    if (!charEra) return false;
-    const words = sc.era.split(/[\s\/]+/).filter(w => w.length > 3);
-    return words.some(w => charEra.includes(w));
-  });
-  const displayShips = mode === 'all' ? SHIP_CLASSES : (eraShips.length ? eraShips : SHIP_CLASSES);
+  // Match ship classes to character's era via direct lookup
+  const shipEraKey = charEra ? ERA_TO_SHIP_ERA[charEra] : null;
+  const eraShips = shipEraKey ? SHIP_CLASSES.filter(sc => sc.era === shipEraKey) : [];
+  const displayShips = mode === 'all' ? SHIP_CLASSES : (eraShips.length ? eraShips : (charEra ? [] : SHIP_CLASSES));
   const eraLabel = charEra ? charEra.replace(/\s*\(.*?\)\s*/g,'').trim() : 'Era Ships';
 
-  const classRows = displayShips.map(sc => {
+  const classRows = displayShips.length ? displayShips.map(sc => {
     const isSel = sh.className === sc.name && sh.era === sc.era;
     return `<tr onclick="loadShipClass('${escQ(sc.name)}')" style="cursor:pointer${isSel?';background:var(--accent-glow)':''}">
       <td style="color:${isSel?'var(--accent)':'var(--text)'};font-weight:bold;padding:5px 8px">${escH(sc.name)}${isSel?' ✓':''}</td>
@@ -1909,7 +1919,7 @@ function renderCS7() {
       <td style="text-align:center;padding:5px 8px">${sc.scale}</td>
       <td style="font-size:10px;padding:5px 8px;color:var(--muted)">${sc.comms}/${sc.computers}/${sc.engines}/${sc.sensors}/${sc.structure}/${sc.weapons}</td>
     </tr>`;
-  }).join('');
+  }).join('') : `<tr><td colspan="4" style="padding:12px 8px;color:var(--muted);font-size:11px;font-style:italic">${charEra ? 'No ships in library for this era — try All Classes.' : 'Select an era in an earlier step to filter ships.'}</td></tr>`;
 
   const selectedBadge = (sh.className || sh.name) ? `<div style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <div>
