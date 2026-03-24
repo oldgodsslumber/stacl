@@ -3754,19 +3754,19 @@ if(!window._combatOpp) window._combatOpp = [];
 
 function addCombatOpponent() {
   window._combatOpp.push({name:'Opponent', circles:3, stress:Array(3).fill(false)});
-  renderCurrentTab();
+  renderCurrentTab(); hudBroadcast();
 }
-function removeOpp(i) { window._combatOpp.splice(i,1); renderCurrentTab(); }
-function renameOpp(i,v) { window._combatOpp[i].name=v; }
-function resetOppStress(i) { window._combatOpp[i].stress=Array(window._combatOpp[i].circles).fill(false); renderCurrentTab(); }
+function removeOpp(i) { window._combatOpp.splice(i,1); renderCurrentTab(); hudBroadcast(); }
+function renameOpp(i,v) { window._combatOpp[i].name=v; hudBroadcast(); }
+function resetOppStress(i) { window._combatOpp[i].stress=Array(window._combatOpp[i].circles).fill(false); renderCurrentTab(); hudBroadcast(); }
 function toggleOppStress(i,j) {
-  window._combatOpp[i].stress[j]=!window._combatOpp[i].stress[j]; renderCurrentTab();
+  window._combatOpp[i].stress[j]=!window._combatOpp[i].stress[j]; renderCurrentTab(); hudBroadcast();
 }
 function adjustOppCircles(i,d) {
   const opp = window._combatOpp[i];
   opp.circles = Math.max(1, Math.min(20, opp.circles+d));
   opp.stress = Array(opp.circles).fill(false).map((v,j)=>opp.stress[j]||false);
-  renderCurrentTab();
+  renderCurrentTab(); hudBroadcast();
 }
 function togglePlayerStress(i) {
   S.playerStress[i]=!S.playerStress[i]; saveSlot(); renderCurrentTab();
@@ -4801,6 +4801,7 @@ function hudBroadcast(extra) {
     interiorMap: { cells: (sh.interiorCells||[]).map(c=>({name:c.name, icon:c.icon, isVoid:c.isVoid})) },
     npcs: S.npcs || [],
     encounter: S.combatEnemies || [],
+    combatOpps: window._combatOpp || [],
     playerStress: S.playerStress || [false,false,false],
     dice: _lastRollData,
     log: (S.log || []).slice(-3).reverse(),
@@ -5232,19 +5233,22 @@ function applyState(d){
     return '<div class="log-entry"><div class="log-title">'+(e.title||e.type||'Log')+'</div><div class="log-date">'+(e.date||'')+'</div>'+(e.body?'<div class="log-body">'+e.body.slice(0,140)+'</div>':'')+'</div>';
   }).join(''):'<span class="sml">No entries</span>');
 
-  // Encounter — player stress at top, then combat enemies
+  // Encounter — player stress at top, then combat enemies (both NPC encounter + manual opponents)
   var enc=d.encounter||[];
+  var opps=d.combatOpps||[];
+  var allOpps=enc.concat(opps);
   var ps=d.playerStress||[false,false,false];
   var charName=(d.char&&d.char.name)||'Crew';
   var psDots=ps.map(function(s){return '<div class="sdot'+(s?' hit':'')+'"></div>';}).join('');
   var playerRow='<div class="enc-row"><div class="enc-name" style="color:#FF9900">'+charName+'</div><div class="stress-dots">'+psDots+'</div></div>';
-  var npcRows=enc.map(function(e){
+  var oppRows=allOpps.map(function(e){
     var stress=e.stress||[];
+    var count=e.circles||stress.length||3;
     var dots='';
-    for(var i=0;i<3;i++) dots+='<div class="sdot'+(stress[i]?' hit':'')+'"></div>';
+    for(var i=0;i<count;i++) dots+='<div class="sdot'+(stress[i]?' hit':'')+'"></div>';
     return '<div class="enc-row"><div class="enc-name">'+(e.name||'Unknown')+'</div><div class="stress-dots">'+dots+'</div></div>';
   }).join('');
-  setHTML('h-enc-content',playerRow+(enc.length?'<div class="sec-div" style="margin:4px 0"></div>'+npcRows:''));
+  setHTML('h-enc-content',playerRow+(allOpps.length?'<div class="sec-div" style="margin:4px 0"></div>'+oppRows:''));
 }
 
 function show(id,v){var el=document.getElementById(id);if(el)el.style.display=v?'':'none';}
