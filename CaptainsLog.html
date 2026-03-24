@@ -4776,7 +4776,7 @@ function hudBroadcast(extra) {
       command: c.command, conn: c.conn, security: c.security,
       engineering: c.engineering, science: c.science, medicine: c.medicine,
       determination: c.determination, momentum: c.momentum, threat: c.threat,
-      values: c.values, focuses: c.focuses
+      stress: c.stress, values: c.values, focuses: c.focuses
     },
     creation: isCreating ? {
       step: c.creationStep || 0,
@@ -4801,6 +4801,7 @@ function hudBroadcast(extra) {
     interiorMap: { cells: (sh.interiorCells||[]).map(c=>({name:c.name, icon:c.icon, isVoid:c.isVoid})) },
     npcs: S.npcs || [],
     encounter: S.combatEnemies || [],
+    playerStress: S.playerStress || [false,false,false],
     dice: _lastRollData,
     log: (S.log || []).slice(-3).reverse(),
     vis: _hudVis,
@@ -5231,12 +5232,19 @@ function applyState(d){
     return '<div class="log-entry"><div class="log-title">'+(e.title||e.type||'Log')+'</div><div class="log-date">'+(e.date||'')+'</div>'+(e.body?'<div class="log-body">'+e.body.slice(0,140)+'</div>':'')+'</div>';
   }).join(''):'<span class="sml">No entries</span>');
 
-  // Encounter — always shows combat enemies with stress dots
+  // Encounter — player stress at top, then combat enemies
   var enc=d.encounter||[];
-  setHTML('h-enc-content',enc.length?enc.map(function(e){
-    var dots=(e.stress||[]).map(function(s){return '<div class="sdot'+(s?' hit':'')+'"></div>';}).join('');
+  var ps=d.playerStress||[false,false,false];
+  var charName=(d.char&&d.char.name)||'Crew';
+  var psDots=ps.map(function(s){return '<div class="sdot'+(s?' hit':'')+'"></div>';}).join('');
+  var playerRow='<div class="enc-row"><div class="enc-name" style="color:#FF9900">'+charName+'</div><div class="stress-dots">'+psDots+'</div></div>';
+  var npcRows=enc.map(function(e){
+    var stress=e.stress||[];
+    var dots='';
+    for(var i=0;i<3;i++) dots+='<div class="sdot'+(stress[i]?' hit':'')+'"></div>';
     return '<div class="enc-row"><div class="enc-name">'+(e.name||'Unknown')+'</div><div class="stress-dots">'+dots+'</div></div>';
-  }).join(''):'<span class="sml">No active encounter</span>');
+  }).join('');
+  setHTML('h-enc-content',playerRow+(enc.length?'<div class="sec-div" style="margin:4px 0"></div>'+npcRows:''));
 }
 
 function show(id,v){var el=document.getElementById(id);if(el)el.style.display=v?'':'none';}
