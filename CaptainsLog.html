@@ -1564,12 +1564,6 @@ function renderSheet() {
     gearHTML = '<ul class="gear-list">' + c.gear.map((g,i)=>`<li class="gear-item"><span class="gear-name">${escH(g.name)}</span><span style="color:var(--muted);font-size:10px">${escH(g.qty||'')}</span><button class="btn btn-xs btn-danger" onclick="removeGear(${i})">✕</button></li>`).join('') + '</ul>';
   }
 
-  // Talents
-  let talentHTML = '';
-  if(c.talents.length) {
-    talentHTML = c.talents.map((t,i)=>`<div class="perk-item"><span class="perk-name">${escH(t.name)}</span> — ${escH(t.desc||'')} <button class="btn btn-xs btn-danger" onclick="removeTalent(${i})">✕</button></div>`).join('');
-  }
-
   // Mission progress
   let progHTML = '<div style="display:flex;gap:3px;flex-wrap:wrap">';
   for(let i=0;i<15;i++) progHTML += `<div style="width:22px;height:22px;border-radius:3px;border:1px solid var(--border);background:${i<c.missionProgress?'var(--accent)':'var(--surface2)'};cursor:pointer;transition:all 0.2s" onclick="setMissionProgress(${i+1})" title="Step ${i+1}"></div>`;
@@ -1647,21 +1641,6 @@ function renderSheet() {
       <div style="display:flex;gap:6px;margin-top:8px">
         <input id="trait-in" placeholder="Add a Trait…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">
         <button class="btn btn-sm btn-accent" onclick="addTrait()">ADD</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="collapsible-header" onclick="toggleCollapsible('talents-body')">
-      <span class="card-title" style="margin:0">TALENTS</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="collapsible-body" id="talents-body">
-      ${talentHTML||'<p style="color:var(--muted);font-size:11px">No talents yet.</p>'}
-      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-        <input id="talent-name-in" placeholder="Talent name" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
-        <input id="talent-desc-in" placeholder="Description" style="flex:2;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
-        <button class="btn btn-sm btn-accent" onclick="addTalent()">ADD</button>
       </div>
     </div>
   </div>
