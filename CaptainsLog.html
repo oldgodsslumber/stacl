@@ -757,6 +757,127 @@ const ALIEN_NAME_GEN = {
 const PLANET_NAME_LETTERS = ['Alpha','Beta','Gamma','Delta','Epsilon','Zeta','Eta','Theta','Iota','Kappa','Lambda','Mu','Nu','Xi','Chi','Omicron','Sigma','Tau','Psi','Omega'];
 const PLANET_NAME_DESIGNATORS = ['I','II','III','IV','V','VI','VII','VIII','IX','X','Prime','Secundus','Major','Minor','A','B','C','D','E','F'];
 
+// ── Civilization Generation Tables ──
+const CIV_NOTABLE_SYSTEMS = [3,3,3,5,5,5,5,5,7,7,7,7,7,7,7,9,9,9,9,11];
+const CIV_SPATIAL_PHENOMENA = [
+  'Asteroid belt','Asteroid belt','Asteroid belt','Asteroid belt',
+  'Dust cloud','Dust cloud','Dust cloud','Dust cloud',
+  'Nebula','Nebula','Nebula','Nebula',
+  'Radiation belt','Radiation belt','Radiation belt','Radiation belt',
+  'Subspace anomaly','Subspace anomaly','Subspace anomaly','Subspace anomaly'
+];
+const CIV_GOVERNMENT = [
+  'Anarchy','Anarchy','Anarchy','Anarchy',
+  'Democracy','Democracy','Democracy','Democracy',
+  'Oligarchy','Oligarchy','Oligarchy','Oligarchy','Oligarchy','Oligarchy',
+  'Monarchy','Monarchy','Monarchy','Monarchy',
+  'Theocracy','Theocracy'
+];
+const CIV_RELIGION = [
+  'Agnosticism','Agnosticism','Agnosticism','Agnosticism',
+  'Animism','Animism','Animism','Animism',
+  'Deism','Deism','Deism','Deism',
+  'Monotheism','Monotheism','Monotheism','Monotheism',
+  'Polytheism','Polytheism','Polytheism','Polytheism'
+];
+const CIV_POLITY = [
+  'Alliance','Alliance','Alliance','Alliance','Alliance',
+  'Confederation','Confederation','Confederation','Confederation','Confederation',
+  'Empire','Empire','Empire','Empire','Empire',
+  'Federation','Federation','Federation','Federation','Federation'
+];
+const CIV_SOCIETY = [
+  'Foraging','Foraging','Foraging',
+  'Agrarian','Agrarian','Agrarian','Agrarian',
+  'Industrial','Industrial','Industrial','Industrial','Industrial',
+  'Information','Information','Information','Information','Information',
+  'Advanced','Advanced','Advanced'
+];
+const CIV_RESOURCES = [
+  'Mineral deposits','Mineral deposits','Mineral deposits',
+  'Rare metals','Rare metals','Rare metals',
+  'Dilithium deposits','Dilithium deposits','Dilithium deposits',
+  'Foodstuffs','Foodstuffs','Foodstuffs',
+  'Medicines','Medicines','Medicines',
+  'Technology','Technology','Technology',
+  'Natural/stellar phenomena','Natural/stellar phenomena'
+];
+
+// ── Location Themes ──
+const LOCATION_THEME_NAMES = ['Alien','Cataclysmic','Contaminated','Cosmic','Dimensional','Habitat','Military','Political','Religious','Research'];
+const LOCATION_THEMES = {
+  'Alien': [
+    'Alien burial mound','Alien cave system','Alien city ruins','Alien crashed vessel',
+    'Alien cultist shrine','Alien gladiatorial arena','Alien hunting ground','Alien laboratory',
+    'Alien library/archive','Alien marketplace','Alien memorial','Alien military installation',
+    'Alien observatory','Alien outpost','Alien prison facility','Alien religious complex',
+    'Alien research outpost','Alien royal compound','Alien weapon cache','Alien zoo/menagerie'
+  ],
+  'Cataclysmic': [
+    'Asteroid impact crater','Collapsing cave system','Erupting volcano','Flooded settlement',
+    'Frozen wasteland','Gravity anomaly zone','Irradiated zone','Landslide area',
+    'Magnetic storm region','Massive sinkhole','Meteor shower zone','Nuclear/plasma explosion site',
+    'Pandemic outbreak zone','Ravaged ecosystem','Seismic activity region','Solar flare impact zone',
+    'Storm-ravaged landscape','Tectonic disruption zone','Toxic gas cloud','Warzone aftermath'
+  ],
+  'Contaminated': [
+    'Acid rain region','Biological hazard zone','Chemical spill site','Corrupted food supply',
+    'Disease-ridden settlement','Energy field contamination','Hazardous radiation zone','Industrial waste zone',
+    'Infected water supply','Mutagenic compound area','Nanite infestation','Plague quarantine zone',
+    'Poison gas fields','Polluted atmosphere','Radioactive debris field','Sewage overflow site',
+    'Spore-infested area','Subspace contamination','Toxic waste dump','Virulent outbreak zone'
+  ],
+  'Cosmic': [
+    'Accretion disk','Binary star system','Black hole vicinity','Comet trail',
+    'Dark matter concentration','Dyson sphere remnant','Gas giant with complex moons','Ion storm',
+    'Magnetic anomaly','Nebula interior','Neutron star vicinity','Plasma storm',
+    'Proto-planetary disk','Pulsar vicinity','Quantum singularity','Radiation belt',
+    'Rogue planet','Stellar nursery','Subspace rift','Supernova remnant'
+  ],
+  'Dimensional': [
+    'Alternate timeline nexus','Antimatter void','Crossover dimensional tear','Duplicate reality bubble',
+    'Energy plane interface','Ghost dimension overlap','Holographic reality layer','Inter-dimensional portal',
+    'Mirror universe breach','Multi-dimensional crossroads','Null space pocket','Parallel world junction',
+    'Phase-shifted reality','Pocket dimension entrance','Quantum parallel zone','Reality fold',
+    'Subspace dimension pocket','Temporal anomaly zone','Trans-dimensional corridor','Universe bubble boundary'
+  ],
+  'Habitat': [
+    'Abandoned colony','Agricultural settlement','Dome habitat','Emergency shelter',
+    'Enclosed biosphere','Generation ship interior','Hidden refuge','Makeshift settlement',
+    'Mining colony','Mobile habitat','Orbital station','Outpost colony',
+    'Prison colony','Refugee camp','Research outpost','Resort colony',
+    'Self-sufficient commune','Space habitat','Underground bunker','Water-based settlement'
+  ],
+  'Military': [
+    'Armory','Barracks','Battle-damaged installation','Command bunker',
+    'Defense perimeter','Demilitarized zone','Fallen fortress','Forward operating base',
+    'Garrison outpost','Intelligence facility','Military academy','Missile/torpedo storage',
+    'Naval shipyard','POW facility','Refugee processing','Restricted weapons test site',
+    'Siege lines','Starship graveyard','Training ground','War memorial'
+  ],
+  'Political': [
+    'Ambassadorial residence','Annexed territory','Coalition headquarters','Colonial administration',
+    'Conference center','Diplomatic safe house','Embassy compound','Free trade zone',
+    'Contested territory','Government archive','Inter-faction neutral zone','Occupied territory',
+    'Propaganda broadcast center','Rebel safe house','Refugee processing zone','Seat of government',
+    'Summit location','Treaty signing site','Tribunal grounds','Underground resistance HQ'
+  ],
+  'Religious': [
+    'Ancient temple complex','Burial grounds','Cathedral/great hall','Crusader stronghold',
+    'Cult headquarters','Divine oracle site','Forbidden sacred site','Holy city',
+    'Holy reliquary','Meditation retreat','Monastery','Mythic birthplace',
+    'Mythic gateway','Pilgrimage route','Place of atonement','Prophetic site',
+    'Religious archive','Religious council seat','Sacred grove/forest','Shrine of miracles'
+  ],
+  'Research': [
+    'Abandoned laboratory','Biological research station','Computer core','Cryogenic facility',
+    'Deep space sensor array','Experimental weapons lab','Genetics research lab','Geological survey station',
+    'Holographic research lab','Medical research facility','Particle physics lab','Planetary survey post',
+    'Prototype testing facility','Quantum research center','Research colony','Science academy',
+    'Stellar cartography center','Terraforming research station','Time research facility','Xenobiology lab'
+  ]
+};
+
 const SHIP_THUMBS = {
   centaur:'shipthumbs/Centaur.png',
   cheyenne:'shipthumbs/Cheyenne.png',
@@ -3040,6 +3161,88 @@ function renderOracleTab() {
   </div>
 
   <div class="card">
+    <div class="collapsible-header" onclick="toggleCollapsible('civ-gen')">
+      <span class="card-title" style="margin:0">CIVILIZATION GENERATOR</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="collapsible-body collapsed" id="civ-gen">
+      <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Generate the characteristics of a civilization, sector, or alien culture.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">NOTABLE SYSTEMS</div>
+          <button class="btn btn-xs" style="width:100%" onclick="genOracle('civ_systems')">Roll d20</button>
+          ${rCard('civ_systems','NOTABLE SYSTEMS','var(--lcars-ltblue)')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">SPATIAL PHENOMENA</div>
+          <button class="btn btn-xs" style="width:100%" onclick="genOracle('civ_phenomena')">Roll d20</button>
+          ${rCard('civ_phenomena','SPATIAL PHENOMENA','var(--lcars-blue)')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">GOVERNMENT</div>
+          <button class="btn btn-xs" style="width:100%" onclick="genOracle('civ_government')">Roll d20</button>
+          ${rCard('civ_government','GOVERNMENT','var(--accent)')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">RELIGION</div>
+          <button class="btn btn-xs" style="width:100%" onclick="genOracle('civ_religion')">Roll d20</button>
+          ${rCard('civ_religion','RELIGION','var(--lcars-lavender)')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">POLITY</div>
+          <button class="btn btn-xs" style="width:100%" onclick="genOracle('civ_polity')">Roll d20</button>
+          ${rCard('civ_polity','POLITY','var(--accent-dim)')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">SOCIETY TYPE</div>
+          <button class="btn btn-xs" style="width:100%" onclick="genOracle('civ_society')">Roll d20</button>
+          ${rCard('civ_society','SOCIETY TYPE','var(--success)')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">RESOURCES FOR TRADE</div>
+          <button class="btn btn-xs" style="width:100%" onclick="genOracle('civ_resources')">Roll d20</button>
+          ${rCard('civ_resources','RESOURCES','var(--warning)')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ROLL ALL</div>
+          <button class="btn btn-xs btn-accent" style="width:100%" onclick="['civ_systems','civ_phenomena','civ_government','civ_religion','civ_polity','civ_society','civ_resources'].forEach(t=>genOracle(t))">Generate Full Civilization</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="collapsible-header" onclick="toggleCollapsible('loc-themes')">
+      <span class="card-title" style="margin:0">LOCATION THEMES</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="collapsible-body collapsed" id="loc-themes">
+      <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Generate a location by theme. Roll a theme first, then roll a specific location within it.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">THEME (d10)</div>
+          <button class="btn btn-xs" style="width:100%;margin-bottom:4px" onclick="genOracle('loc_theme')">Roll Theme</button>
+          ${rCard('loc_theme','THEME','')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SELECT THEME</div>
+          <select style="background:#000;border:1px solid var(--accent-dim);color:var(--text);padding:3px 6px;font-size:10px;border-radius:3px;font-family:var(--font);width:100%;margin-bottom:6px" onchange="window._locTheme=this.value">
+            ${LOCATION_THEME_NAMES.map(t=>\`<option value="\${t}"\${(window._locTheme||'Alien')===t?' selected':''}>\${t}</option>\`).join('')}
+          </select>
+          <button class="btn btn-xs btn-accent" style="width:100%" onclick="genOracle('loc_location')">Roll Location (d20)</button>
+          ${rCard('loc_location','LOCATION','')}
+        </div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ALL THEMES REFERENCE</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px">
+          ${LOCATION_THEME_NAMES.map(t=>\`<div style="font-size:10px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border)"><span style="color:var(--accent)">\${t}:</span> \${LOCATION_THEMES[t][0]}, \${LOCATION_THEMES[t][9]}, …</div>\`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="collapsible-header" onclick="toggleCollapsible('momentum-ref')">
       <span class="card-title" style="margin:0">MOMENTUM & THREAT REFERENCE</span>
       <span class="collapse-icon">▼</span>
@@ -3596,6 +3799,24 @@ function genOracle(type) {
       const desig = PLANET_NAME_DESIGNATORS[Math.floor(Math.random()*20)];
       const sys = `${PLANET_NAME_LETTERS[Math.floor(Math.random()*20)]} System`;
       window._storyResults['planet_name']={name:`${letter} ${desig}`,desc:`System: ${sys}`};
+      break;
+    }
+    case 'civ_systems': window._storyResults['civ_systems']={name:`${CIV_NOTABLE_SYSTEMS[r]} Notable Systems`}; break;
+    case 'civ_phenomena': window._storyResults['civ_phenomena']={desc:`${r+1}: ${CIV_SPATIAL_PHENOMENA[r]}`}; break;
+    case 'civ_government': window._storyResults['civ_government']={desc:`${r+1}: ${CIV_GOVERNMENT[r]}`}; break;
+    case 'civ_religion': window._storyResults['civ_religion']={desc:`${r+1}: ${CIV_RELIGION[r]}`}; break;
+    case 'civ_polity': window._storyResults['civ_polity']={desc:`${r+1}: ${CIV_POLITY[r]}`}; break;
+    case 'civ_society': window._storyResults['civ_society']={desc:`${r+1}: ${CIV_SOCIETY[r]}`}; break;
+    case 'civ_resources': window._storyResults['civ_resources']={desc:`${r+1}: ${CIV_RESOURCES[r]}`}; break;
+    case 'loc_theme': {
+      const ti = Math.floor(Math.random()*10);
+      window._storyResults['loc_theme']={desc:`${ti+1}: ${LOCATION_THEME_NAMES[ti]}`};
+      break;
+    }
+    case 'loc_location': {
+      const theme = window._locTheme || LOCATION_THEME_NAMES[Math.floor(Math.random()*10)];
+      const tbl = LOCATION_THEMES[theme];
+      window._storyResults['loc_location']={name:tbl[r],desc:`Theme: ${theme} (${r+1})`};
       break;
     }
   }
