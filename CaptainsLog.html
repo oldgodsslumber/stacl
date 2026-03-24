@@ -2194,12 +2194,9 @@ function renderCS7() {
     </tr>`;
   }).join('') : `<tr><td colspan="4" style="padding:12px 8px;color:var(--muted);font-size:11px;font-style:italic">${charEra ? 'No ships in library for this era — try All Classes.' : 'Select an era in an earlier step to filter ships.'}</td></tr>`;
 
-  const selectedBadge = (sh.className || sh.name) ? `<div style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <div>
-      <div style="color:var(--accent);font-size:12px;font-weight:bold">${escH(sh.className||sh.name)}</div>
-      <div style="font-size:10px;color:var(--muted)">${sh.era?escH(sh.era)+' · ':''}Scale ${sh.scale}</div>
-    </div>
-    ${sh.name?`<div style="font-size:12px"><strong>${escH(sh.name)}</strong>${sh.registry?' <span style="color:var(--muted)">'+escH(sh.registry)+'</span>':''}</div>`:''}
+  const selectedBadge = sh.className ? `<div style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:8px 12px;margin-bottom:10px">
+    <div style="color:var(--accent);font-size:12px;font-weight:bold">${escH(sh.className)}</div>
+    <div style="font-size:10px;color:var(--muted)">${sh.era?escH(sh.era)+' · ':''}Scale ${sh.scale}</div>
   </div>` : `<div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic">No vessel selected yet — you can skip this and fill it in later.</div>`;
 
   const classTable = `<div style="overflow-x:auto;max-height:260px;overflow-y:auto">
@@ -2214,8 +2211,13 @@ function renderCS7() {
     </table>
   </div>
   ${buildShipPreviewPanel()}
-  <div class="field" style="margin-top:8px"><label>Ship Name</label>
-    <input value="${escH(sh.name)}" placeholder="e.g. USS Vigilance, USS Theseus…" onchange="saveShipField('name',this.value)">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+    <div class="field" style="flex:2;margin:0"><label>Ship Name</label>
+      <input value="${escH(sh.name)}" placeholder="e.g. USS Vigilance" onchange="saveShipField('name',this.value)">
+    </div>
+    <div class="field" style="flex:1;margin:0"><label>Registry</label>
+      <input value="${escH(sh.registry)}" placeholder="NCC-74656" onchange="saveShipField('registry',this.value)">
+    </div>
   </div>
   <p style="font-size:10px;color:var(--muted);margin-top:4px">Tap a class to preview it. All stats can be adjusted later on the Ship tab.</p>`;
 
@@ -2311,7 +2313,7 @@ function renderSectorMap() {
       else if(isAdj) cls += ' adjacent';
       else if(cell.type === 'explored') cls += ' explored';
       else cls += ' unexplored';
-      const icon = cell.icon || (isCurrent ? areaIconHtml(sz, 18) : '·');
+      const icon = cell.icon || (isCurrent ? areaIconHtml(sz, 24) : '·');
       szGridHTML += `<div class="${cls}" onclick="clickSubZoneCell(${i})" title="${escH(cell.name)||'Area '+(i+1)}">
         <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
         <span class="cell-icon">${icon}</span>
@@ -2393,7 +2395,7 @@ function renderSectorMap() {
     else if(isAdj) cls += ' adjacent';
     else if(cell.type === 'explored') cls += ' explored';
     else cls += ' unexplored';
-    const icon = cell.icon || (isCurrent ? shipIconHtml(18) : '·');
+    const icon = cell.icon || (isCurrent ? shipIconHtml(24) : '·');
     gridHTML += `<div class="${cls}" onclick="clickMapCell(${i})" title="${escH(cell.name)||'System '+i}">
       <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
       <span class="cell-icon">${icon}</span>
