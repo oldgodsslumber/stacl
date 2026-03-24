@@ -143,6 +143,7 @@ input,select,textarea{font-family:var(--font)}
 #map-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:100%;max-width:440px;margin:0 auto 14px}
 .map-cell{aspect-ratio:1;background:#000;border:2px solid var(--border);border-radius:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;position:relative;transition:all 0.2s;overflow:hidden}
 @media(max-width:480px){.cell-icon{font-size:14px}.cell-name{font-size:7px}}
+@media(min-width:481px){.map-cell{font-size:12px}.cell-name{font-size:10px}.cell-num{font-size:11px}.cell-icon img{width:45px!important;height:45px!important}}
 .map-cell:hover{border-color:var(--accent-dim)}
 .map-cell.current{border-color:var(--accent);box-shadow:0 0 10px rgba(255,153,0,0.5)}
 .map-cell.explored{background:#0d0500}
