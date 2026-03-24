@@ -2487,7 +2487,7 @@ function renderSectorMap() {
     detailHTML = `<div class="card">
       <div class="card-title">SYSTEM ${selIdx+1}: ${escH(selCell.name)||'Unknown'}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-        ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpTo(${selIdx})">${shipIconHtml(14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Warp Here</button>` : ''}
+        ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpTo(${selIdx})">${shipIconHtml(14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Travel Here</button>` : ''}
         <button class="btn btn-sm" onclick="toggleVoid(${selIdx})">${selCell.isVoid?'Clear Void':'Mark Void'}</button>
         <button class="btn btn-sm" onclick="enterSubZone(${selIdx})">🔍 Enter Area${selCell.subZone?' ('+selCell.subZone.type+')':''}</button>
       </div>
@@ -3150,12 +3150,25 @@ function renderOracleTab() {
         ${rCard('enc_planet','PLANET ENCOUNTER','var(--accent-dim)')}
       </div>
 
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">NPC</div>
-        <button class="btn btn-sm" style="margin-bottom:4px;width:100%" onclick="genOracle('npc')">Generate NPC</button>
-        <button class="btn btn-sm" style="width:100%" onclick="genOracle('npc_goal')">NPC Goal</button>
-        ${rCard('npc','NPC','')}
-        ${rCard('npc_goal','NPC GOAL','')}
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">NPC</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+          <button class="btn btn-xs" onclick="genOracle('npc_archetype')">Archetype</button>
+          <button class="btn btn-xs" onclick="genOracle('npc_upbringing')">Upbringing</button>
+          <button class="btn btn-xs" onclick="genOracle('npc_cultural')">Cultural Trait</button>
+          <button class="btn btn-xs" onclick="genOracle('npc_goals_tbl')">Goal</button>
+          <button class="btn btn-xs" onclick="genOracle('npc_tactics')">Tactics</button>
+          <button class="btn btn-xs" onclick="genOracle('npc_fed_outlook')">Fed. Outlook</button>
+          <button class="btn btn-xs btn-accent" onclick="['npc_archetype','npc_upbringing','npc_cultural','npc_goals_tbl','npc_tactics','npc_fed_outlook'].forEach(k=>genOracle(k))">Roll All</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${rCard('npc_archetype','ARCHETYPE','')}
+          ${rCard('npc_upbringing','UPBRINGING ENV','')}
+          ${rCard('npc_cultural','CULTURAL TRAIT','')}
+          ${rCard('npc_goals_tbl','GOAL','')}
+          ${rCard('npc_tactics','TACTICS','')}
+          ${rCard('npc_fed_outlook','FED. OUTLOOK','')}
+        </div>
       </div>
 
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
@@ -3188,25 +3201,6 @@ function renderOracleTab() {
         ${rCard('threat_spend','THREAT SPEND','var(--danger)')}
       </div>
 
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">NPC DETAIL TABLES (d20)</div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
-          <button class="btn btn-xs" onclick="genOracle('npc_archetype')">Archetype</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_upbringing')">Upbringing</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_cultural')">Cultural Trait</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_goals_tbl')">Goal</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_tactics')">Tactics</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_fed_outlook')">Fed. Outlook</button>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${rCard('npc_archetype','ARCHETYPE','')}
-          ${rCard('npc_upbringing','UPBRINGING ENV','')}
-          ${rCard('npc_cultural','CULTURAL TRAIT','')}
-          ${rCard('npc_goals_tbl','GOAL','')}
-          ${rCard('npc_tactics','TACTICS','')}
-          ${rCard('npc_fed_outlook','FED. OUTLOOK','')}
-        </div>
-      </div>
 
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
         <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">NAME & TIME GENERATORS</div>
