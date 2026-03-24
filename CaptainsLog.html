@@ -1280,9 +1280,9 @@ function defaultChar() {
     ...discs,
     stress:0,
     determination:3,
-    values:['','',''],
-    valuesUsed:[false,false,false],
-    valuesChallenged:[false,false,false],
+    values:['','','',''],
+    valuesUsed:[false,false,false,false],
+    valuesChallenged:[false,false,false,false],
     focuses:[],
     traits:[],
     gear:[],
@@ -1827,7 +1827,12 @@ function renderCS0() {
       <tbody>${speciesRows}</tbody>
     </table>
   </div>
-  ${bonusPicker}`;
+  ${bonusPicker}
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:10px">
+    <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Species Value</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">A belief or principle that defines your species' identity or your personal connection to it.</div>
+    <input value="${escH((c.values||[])[0]||'')}" placeholder="e.g. Infinite Diversity in Infinite Combinations…" style="width:100%;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(0,this.value)">
+  </div>`;
 }
 
 function renderCS1() {
@@ -1927,7 +1932,12 @@ function renderCS1() {
       <tbody>${upRows}</tbody>
     </table>
   </div>
-  ${upbrPicker}`;
+  ${upbrPicker}
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:10px">
+    <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Environment Value</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">A value shaped by where you grew up and how you were raised.</div>
+    <input value="${escH((c.values||[])[1]||'')}" placeholder="e.g. Home is wherever you find family…" style="width:100%;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(1,this.value)">
+  </div>`;
 }
 
 function renderCS2() {
@@ -2032,7 +2042,12 @@ function renderCS2() {
       <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-event-in')">ADD FOCUS</button>
     </div>
     ${(c.focuses||[]).length > 0 ? `<div style="font-size:10px;color:var(--muted);margin-top:5px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>` : ''}
-  </div>` : ''}`;
+  </div>` : ''}
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:10px">
+    <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Academy Value</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">A value forged by your Starfleet training and career so far.</div>
+    <input value="${escH((c.values||[])[2]||'')}" placeholder="e.g. No obstacle is too great for a Starfleet crew…" style="width:100%;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(2,this.value)">
+  </div>`;
 }
 
 function renderCS3() {
@@ -2119,16 +2134,32 @@ function renderCS4() {
 
 function renderCS5() {
   const c = S.char;
+  const vals = c.values || ['','','',''];
+  const phases = ['Species','Environment','Academy','Personal'];
+  const placeholders = [
+    'e.g. Infinite Diversity in Infinite Combinations…',
+    'e.g. Home is wherever you find family…',
+    'e.g. No obstacle is too great for a Starfleet crew…',
+    'e.g. There is always a peaceful solution…'
+  ];
+  let valHTML = phases.map((label, i) => {
+    const v = vals[i] || '';
+    const isPrev = i < 3;
+    return `<div style="margin-bottom:8px">
+      <div style="font-size:9px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">${label} Value${isPrev && !v ? ' <span style="color:var(--danger)">← not yet set</span>' : ''}</div>
+      <input value="${escH(v)}" placeholder="${placeholders[i]}" style="width:100%;background:var(--surface2);border:1px solid ${v?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(${i},this.value)">
+    </div>`;
+  }).join('');
   let focHTML = (c.focuses||[]).map((f,i)=>`<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
     <input value="${escH(f)}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px" onchange="updateFocus(${i},this.value)">
     <button class="btn btn-xs btn-danger" onclick="removeFocus(${i})">✕</button>
   </div>`).join('');
-  let valHTML = (c.values||['','']).map((v,i)=>`<input value="${escH(v)}" placeholder="Value ${i+1}…" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;margin-bottom:6px" onchange="setValueText(${i},this.value)">`).join('');
+  const defined = vals.filter(v=>v).length;
   return `
-  <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Add at least 3 Values (beliefs, principles, personal codes) and at least 6 Focuses (specific areas of expertise).</p>
-  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">VALUES (${(c.values||[]).filter(v=>v).length} defined)</div>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Each phase of your life gave you one Value. Review and complete any you missed, then add at least 6 Focuses.</p>
+  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">VALUES (${defined}/4 defined)</div>
   ${valHTML}
-  <button class="btn btn-sm" onclick="addValue()" style="margin-bottom:14px">+ Add Value</button>
+  <button class="btn btn-sm" onclick="addValue()" style="margin-bottom:14px">+ Extra Value</button>
   <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">FOCUSES (${(c.focuses||[]).length} defined)</div>
   ${focHTML}
   <div style="display:flex;gap:6px;margin-top:4px">
