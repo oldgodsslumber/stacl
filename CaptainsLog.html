@@ -3230,7 +3230,7 @@ function renderOracleTab() {
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
           <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SELECT THEME</div>
           <select style="background:#000;border:1px solid var(--accent-dim);color:var(--text);padding:3px 6px;font-size:10px;border-radius:3px;font-family:var(--font);width:100%;margin-bottom:6px" onchange="window._locTheme=this.value">
-            ${LOCATION_THEME_NAMES.map(t=>\`<option value="\${t}"\${(window._locTheme||'Alien')===t?' selected':''}>\${t}</option>\`).join('')}
+            ${LOCATION_THEME_NAMES.map(t=>`<option value="${t}"${(window._locTheme||'Alien')===t?' selected':''}>${t}</option>`).join('')}
           </select>
           <button class="btn btn-xs btn-accent" style="width:100%" onclick="genOracle('loc_location')">Roll Location (d20)</button>
           ${rCard('loc_location','LOCATION','')}
@@ -3239,7 +3239,7 @@ function renderOracleTab() {
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
         <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ALL THEMES REFERENCE</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px">
-          ${LOCATION_THEME_NAMES.map(t=>\`<div style="font-size:10px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border)"><span style="color:var(--accent)">\${t}:</span> \${LOCATION_THEMES[t][0]}, \${LOCATION_THEMES[t][9]}, …</div>\`).join('')}
+          ${LOCATION_THEME_NAMES.map(t=>`<div style="font-size:10px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border)"><span style="color:var(--accent)">${t}:</span> ${LOCATION_THEMES[t][0]}, ${LOCATION_THEMES[t][9]}, \u2026</div>`).join('')}
         </div>
       </div>
     </div>
