@@ -658,6 +658,29 @@ const CAREER_EVENTS = [
   {d:20, name:'Life-Changing Event', desc:'Something profound changed your path. Gain an Attribute +1 and a new Value.'},
 ];
 
+const CAREER_LENGTH = [
+  {d:'1',   label:'1 Year',    bonus:'Any Discipline +1'},
+  {d:'2',   label:'2 Years',   bonus:'Any Discipline +1'},
+  {d:'3',   label:'3 Years',   bonus:'Any Discipline +1'},
+  {d:'4',   label:'4 Years',   bonus:'Any Discipline +1'},
+  {d:'5',   label:'5 Years',   bonus:'Any Attribute +1'},
+  {d:'6',   label:'6 Years',   bonus:'Any Attribute +1'},
+  {d:'7',   label:'7 Years',   bonus:'Any Attribute +1'},
+  {d:'8',   label:'8 Years',   bonus:'Any Attribute +1'},
+  {d:'9',   label:'9 Years',   bonus:'Any Discipline +1, any Attribute +1'},
+  {d:'10',  label:'10 Years',  bonus:'Any Discipline +1, any Attribute +1'},
+  {d:'11',  label:'11 Years',  bonus:'Any Discipline +1, any Attribute +1'},
+  {d:'12',  label:'12 Years',  bonus:'Any Discipline +1, any Attribute +1'},
+  {d:'13',  label:'13 Years',  bonus:'Any two Disciplines +1'},
+  {d:'14',  label:'14 Years',  bonus:'Any two Disciplines +1'},
+  {d:'15',  label:'15 Years',  bonus:'Any two Disciplines +1'},
+  {d:'16',  label:'16 Years',  bonus:'Any two Attributes +1'},
+  {d:'17',  label:'17 Years',  bonus:'Any two Attributes +1'},
+  {d:'18',  label:'18 Years',  bonus:'Any two Attributes +1'},
+  {d:'19',  label:'19 Years',  bonus:'Any two Attributes +1, any Discipline +1'},
+  {d:'20',  label:'20 Years',  bonus:'Any two Attributes +1, any two Disciplines +1'},
+];
+
 const DIRECTIVE_TABLE = [
   {d:1,  name:'Seek Out New Life',    desc:'Explore an uncharted region and make contact with whatever you find.'},
   {d:2,  name:'Diplomatic Resolution',desc:'Broker peace or agreement between two conflicting parties.'},
@@ -1260,6 +1283,7 @@ const CREATION_STEPS = [
   {title:'Species & Era',        sub:'Choose your species and mission era'},
   {title:'Environment',          sub:'Where you grew up and your upbringing'},
   {title:'Academy Track',        sub:'Your Starfleet training path'},
+  {title:'Career',               sub:'Years of service and the event that defined your career'},
   {title:'Attributes',           sub:'Distribute attribute points (base 7 each, +14 total)'},
   {title:'Disciplines',          sub:'Set discipline ranks (base 1 each, +10 total)'},
   {title:'Values & Focuses',     sub:'What you believe and what you know'},
@@ -1280,16 +1304,16 @@ function defaultChar() {
     ...discs,
     stress:0,
     determination:3,
-    values:['','','',''],
-    valuesUsed:[false,false,false,false],
-    valuesChallenged:[false,false,false,false],
+    values:['','','','','',''],
+    valuesUsed:[false,false,false,false,false,false],
+    valuesChallenged:[false,false,false,false,false,false],
     focuses:[],
     traits:[],
     gear:[],
     talents:[],
     directive:'', directiveNotes:'',
     missionProgress:0,
-    background:'', homeworld:'', upbringing:'', careerEvent:'', crewNotes:'',
+    background:'', homeworld:'', upbringing:'', careerEvent:'', careerLength:'', crewNotes:'',
     momentum:0, threat:0,
     creationComplete:false, creationStep:0,
     // creation-only
@@ -1722,6 +1746,7 @@ function renderCreation() {
     case 5: body = renderCS5(); break;
     case 6: body = renderCS6(); break;
     case 7: body = renderCS7(); break;
+    case 8: body = renderCS8(); break;
   }
 
   return `<div class="card">
@@ -1840,6 +1865,10 @@ function renderCS1() {
     const chosen = lp.envAttr;
     envPicker = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px">
       <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Environment Bonus — ${escH(env.name)}</div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Environment Value</div>
+        <input value="${escH((c.values||[])[1]||'')}" placeholder="e.g. Home is wherever you find family…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[1]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(1,this.value)">
+      </div>
       <div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
         <span style="color:var(--muted)">Attribute +1:</span>`;
     env._attrOpts.forEach(k => {
@@ -1847,15 +1876,7 @@ function renderCS1() {
       envPicker += `<button class="btn btn-xs${chosen===k?' btn-accent':''}" onclick="setLPEnvAttr('${k}')">${a?a.abbr:k}</button>`;
     });
     if (!chosen) envPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-    envPicker += `</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:4px">Environment Focus — gain 1 focus related to your environment</div>
-      <div style="display:flex;gap:6px">
-        <input id="focus-env-in" placeholder="Enter environment focus…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
-        <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-env-in')">ADD FOCUS</button>
-      </div>`;
-    if ((c.focuses||[]).length > 0) {
-      envPicker += `<div style="font-size:10px;color:var(--muted);margin-top:5px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>`;
-    }
+    envPicker += `</div>`;
     envPicker += `</div>`;
   }
 
@@ -1866,6 +1887,10 @@ function renderCS1() {
     const chosenDisc = lp.upbrDisc;
     upbrPicker = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:6px">
       <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Upbringing Bonus — ${escH(upbr.name)}</div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Upbringing Value</div>
+        <input value="${escH((c.values||[])[2]||'')}" placeholder="e.g. Discipline is the foundation of excellence…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[2]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(2,this.value)">
+      </div>
       <div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">
         <span style="color:var(--muted);min-width:90px">Attribute +1:</span>`;
     upbr._attrOpts.forEach(k => {
@@ -1893,10 +1918,6 @@ function renderCS1() {
   }
 
   return `
-  <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">
-    <button class="btn btn-accent btn-sm" onclick="rollUpbringing()">Roll Upbringing (d20)</button>
-    ${c._selectedUpbringing?`<span style="color:var(--accent);font-size:12px">Upbringing: <strong>${escH(c._selectedUpbringing)}</strong></span>`:''}
-  </div>
   <p style="font-size:11px;color:var(--muted);margin-bottom:6px">Choose your childhood environment, then roll or pick an upbringing. Assign bonuses below.</p>
   <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Environment</div>
   <table class="roll-table" style="margin-bottom:4px">
@@ -1905,18 +1926,17 @@ function renderCS1() {
   </table>
   ${envPicker}
   <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;margin-top:10px">Upbringing</div>
+  <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-accent btn-sm" onclick="rollUpbringing()">Roll Upbringing (d20)</button>
+    ${c._selectedUpbringing?`<span style="color:var(--accent);font-size:12px"><strong>${escH(c._selectedUpbringing)}</strong></span>`:''}
+  </div>
   <div style="max-height:180px;overflow-y:auto">
     <table class="roll-table">
       <thead><tr><th>d20</th><th>Upbringing</th><th>Attr</th><th>Disc</th></tr></thead>
       <tbody>${upRows}</tbody>
     </table>
   </div>
-  ${upbrPicker}
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:10px">
-    <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Environment Value</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">A value shaped by where you grew up and how you were raised.</div>
-    <input value="${escH((c.values||[])[1]||'')}" placeholder="e.g. Home is wherever you find family…" style="width:100%;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(1,this.value)">
-  </div>`;
+  ${upbrPicker}`;
 }
 
 function renderCS2() {
@@ -1930,14 +1950,6 @@ function renderCS2() {
       <td style="color:var(--muted);font-size:10px">${t.focus}</td>
     </tr>`;
   }).join('');
-  let eventRows = CAREER_EVENTS.map(e=>{
-    const sel = c.careerEvent === e.name;
-    return `<tr onclick="selectCareerEvent('${escQ(e.name)}')" class="${sel?'selected':''}">
-      <td style="color:var(--muted)">${e.d}</td>
-      <td><strong${sel?' style="color:var(--accent)"':''}>${e.name}</strong><br><span style="color:var(--muted)">${e.desc}</span></td>
-    </tr>`;
-  }).join('');
-
   let trackPicker = '';
   const tr = ACADEMY_TRACKS.find(t => t.name === c._selectedTrack);
   if (tr) {
@@ -1982,10 +1994,20 @@ function renderCS2() {
       }
     }
     // Focus input for this track
-    trackPicker += `<div style="font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:4px">Track Focus suggestion: <em>${escH(tr.focus)}</em></div>
+    trackPicker += `<div style="font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:4px">Focus 1 — Track: <em>${escH(tr.focus)}</em></div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input id="focus-edu-1" placeholder="Enter track focus…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
+        <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-edu-1')">ADD</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Focus 2 — Academic study (free choice)</div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input id="focus-edu-2" placeholder="e.g. Astrophysics, Xenobiology, Tactical Analysis…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
+        <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-edu-2')">ADD</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Focus 3 — Academic study (free choice)</div>
       <div style="display:flex;gap:6px">
-        <input id="focus-in" placeholder="Enter track focus…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
-        <button class="btn btn-sm btn-accent" onclick="addFocus()">ADD FOCUS</button>
+        <input id="focus-edu-3" placeholder="e.g. Leadership, Warp Theory, Emergency Medicine…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
+        <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-edu-3')">ADD</button>
       </div>`;
     if ((c.focuses||[]).length > 0) {
       trackPicker += `<div style="font-size:10px;color:var(--muted);margin-top:6px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>`;
@@ -1994,7 +2016,7 @@ function renderCS2() {
   }
 
   return `
-  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Choose your Academy track, assign discipline bonuses, add your track focus, then pick a Career Event.</p>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Choose your Academy track, assign discipline bonuses, and add your focuses.</p>
   ${c._selectedTrack?`<div style="color:var(--accent);font-size:12px;margin-bottom:6px">Track: <strong>${escH(c._selectedTrack)}</strong></div>`:''}
   <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">Academy Track</div>
   <table class="roll-table" style="margin-bottom:6px">
@@ -2002,34 +2024,66 @@ function renderCS2() {
     <tbody>${trackRows}</tbody>
   </table>
   ${trackPicker}
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:10px">
+    <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Education Value</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">A value forged by your Starfleet training.</div>
+    <input value="${escH((c.values||[])[3]||'')}" placeholder="e.g. No obstacle is too great for a Starfleet crew…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[3]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(3,this.value)">
+  </div>
+  `;
+}
+
+function renderCS3() {
+  const c = S.char;
+  let eventRows = CAREER_EVENTS.map(e=>{
+    const sel = c.careerEvent === e.name;
+    return `<tr onclick="selectCareerEvent('${escQ(e.name)}')" class="${sel?'selected':''}">
+      <td style="color:var(--muted)">${e.d}</td>
+      <td><strong${sel?' style="color:var(--accent)"':''}>${e.name}</strong><br><span style="color:var(--muted)">${e.desc}</span></td>
+    </tr>`;
+  }).join('');
+  return `
+  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Determine your career length and choose a career event that shaped your service.</p>
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px">
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Career Length</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-accent btn-sm" onclick="rollCareerLength()">Roll d20</button>
+      ${c.careerLength?`<span style="color:var(--accent);font-size:12px"><strong>${escH(c.careerLength)}</strong></span>`:'<span style="font-size:11px;color:var(--muted)">Roll to determine years of service</span>'}
+    </div>
+    <div style="max-height:160px;overflow-y:auto;margin-bottom:8px">
+      <table class="roll-table">
+        <thead><tr><th>d20</th><th>Years</th><th>Bonus</th></tr></thead>
+        <tbody>${CAREER_LENGTH.map(cl=>`<tr onclick="saveCharField('careerLength','${escQ(cl.label)}');renderCurrentTab()" class="${c.careerLength===cl.label?'selected':''}">
+          <td style="color:var(--muted)">${cl.d}</td>
+          <td><strong${c.careerLength===cl.label?' style="color:var(--accent)"':''}>${cl.label}</strong></td>
+          <td style="color:var(--muted);font-size:10px">${cl.bonus}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Career Length Value</div>
+    <input value="${escH((c.values||[])[4]||'')}" placeholder="e.g. Every year of service has made me stronger…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[4]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(4,this.value)">
+  </div>
+  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Career Event</div>
   <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
-    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Career Event</div>
     <button class="btn btn-accent btn-sm" onclick="rollCareerEvent()">Roll d20</button>
     ${c.careerEvent?`<span style="color:var(--accent);font-size:11px"><strong>${escH(c.careerEvent)}</strong></span>`:''}
   </div>
-  <div style="max-height:200px;overflow-y:auto">
+  <div style="max-height:200px;overflow-y:auto;margin-bottom:8px">
     <table class="roll-table">
       <thead><tr><th>d20</th><th>Event</th></tr></thead>
       <tbody>${eventRows}</tbody>
     </table>
   </div>
-  ${c.careerEvent ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:8px">
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px">
     <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Career Event Focus</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">If your career event grants a focus, add it here.</div>
     <div style="display:flex;gap:6px">
       <input id="focus-event-in" placeholder="Enter career event focus…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
       <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-event-in')">ADD FOCUS</button>
     </div>
     ${(c.focuses||[]).length > 0 ? `<div style="font-size:10px;color:var(--muted);margin-top:5px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>` : ''}
-  </div>` : ''}
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:10px">
-    <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Academy Value</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">A value forged by your Starfleet training and career so far.</div>
-    <input value="${escH((c.values||[])[2]||'')}" placeholder="e.g. No obstacle is too great for a Starfleet crew…" style="width:100%;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(2,this.value)">
   </div>`;
 }
 
-function renderCS3() {
+function renderCS4() {
   const c = S.char;
   const base = 7; const pool = 14;
   const lpA = lpAttrBonuses();
@@ -2071,7 +2125,7 @@ function renderCS3() {
   ${attrHTML}`;
 }
 
-function renderCS4() {
+function renderCS5() {
   const c = S.char;
   const base = 1; const pool = 10;
   const lpD = lpDiscBonuses();
@@ -2111,19 +2165,21 @@ function renderCS4() {
   ${discHTML}`;
 }
 
-function renderCS5() {
+function renderCS6() {
   const c = S.char;
-  const vals = c.values || ['','','',''];
-  const phases = ['Species','Environment','Academy','Personal'];
+  const vals = c.values || ['','','','','',''];
+  const phases = ['Species','Environment','Upbringing','Education','Career Length','Final'];
   const placeholders = [
     'e.g. Infinite Diversity in Infinite Combinations…',
     'e.g. Home is wherever you find family…',
+    'e.g. Discipline is the foundation of excellence…',
     'e.g. No obstacle is too great for a Starfleet crew…',
+    'e.g. Every year of service has made me stronger…',
     'e.g. There is always a peaceful solution…'
   ];
   let valHTML = phases.map((label, i) => {
     const v = vals[i] || '';
-    const isPrev = i < 3;
+    const isPrev = i < 5;
     return `<div style="margin-bottom:8px">
       <div style="font-size:9px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">${label} Value${isPrev && !v ? ' <span style="color:var(--danger)">← not yet set</span>' : ''}</div>
       <input value="${escH(v)}" placeholder="${placeholders[i]}" style="width:100%;background:var(--surface2);border:1px solid ${v?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(${i},this.value)">
@@ -2136,7 +2192,7 @@ function renderCS5() {
   const defined = vals.filter(v=>v).length;
   return `
   <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Each phase of your life gave you one Value. Review and complete any you missed, then add at least 6 Focuses.</p>
-  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">VALUES (${defined}/4 defined)</div>
+  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">VALUES (${defined}/6 defined)</div>
   ${valHTML}
   <button class="btn btn-sm" onclick="addValue()" style="margin-bottom:14px">+ Extra Value</button>
   <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">FOCUSES (${(c.focuses||[]).length} defined)</div>
@@ -2147,8 +2203,15 @@ function renderCS5() {
   </div>`;
 }
 
-function renderCS6() {
+function renderCS7() {
   const c = S.char;
+  // Sync ship name from assignment if ship name not yet set
+  if (!S.ship.name && c.assignment) {
+    S.ship.name = c.assignment.replace(/\s+NCC-\S+$/i,'').trim();
+    const _rm = c.assignment.match(/NCC-\S+$/i);
+    if (_rm) S.ship.registry = _rm[0];
+    saveSlot();
+  }
   const species = c.species || '';
   const rankOpts = ['Cadet','Ensign','Lieutenant Junior Grade','Lieutenant','Lieutenant Commander','Commander','Captain','Commodore','Admiral'].map(r=>`<option${c.rank===r?' selected':''}>${r}</option>`).join('');
   let dirRows = DIRECTIVE_TABLE.map(d=>{
@@ -2165,7 +2228,7 @@ function renderCS6() {
     </div>
   </div>
   <div class="field"><label>Rank</label><select onchange="saveCharField('rank',this.value)"><option>— Select Rank —</option>${rankOpts}</select></div>
-  <div class="field"><label>Assignment / Ship</label><input value="${escH(c.assignment)}" placeholder="e.g. USS Enterprise NCC-1701" onchange="saveCharField('assignment',this.value);if(!S.ship.name){saveShipField('name',this.value.replace(/\\s+NCC-\\S+/i,'').trim());}"></div>
+  <div class="field"><label>Assignment / Ship</label><input value="${escH(S.ship.name?(S.ship.name+(S.ship.registry?' '+S.ship.registry:'')):c.assignment)}" placeholder="e.g. USS Enterprise NCC-1701" onchange="saveCharField('assignment',this.value);saveShipField('name',this.value.replace(/\\s+NCC-\\S+$/i,'').trim());var _r=this.value.match(/NCC-\\S+$/i);if(_r)saveShipField('registry',_r[0]);"></div>
   <div class="field"><label>Role / Department Head</label><input value="${escH(c.role)}" placeholder="e.g. Chief Science Officer" onchange="saveCharField('role',this.value)"></div>
   <div class="field"><label>Homeworld</label><input value="${escH(c.homeworld)}" placeholder="e.g. Vulcan, Earth, Andoria…" onchange="saveCharField('homeworld',this.value)"></div>
   <button class="btn btn-accent btn-sm" style="margin-bottom:8px" onclick="rollDirective()">Roll Directive (d20)</button>
@@ -2180,7 +2243,7 @@ function renderCS6() {
   </div>`;
 }
 
-function renderCS7() {
+function renderCS8() {
   const c = S.char;
   const sh = S.ship;
   const mode = window._csShipMode || 'era';
@@ -2223,10 +2286,10 @@ function renderCS7() {
   ${buildShipPreviewPanel()}
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
     <div class="field" style="flex:2;margin:0"><label>Ship Name</label>
-      <input value="${escH(sh.name)}" placeholder="e.g. USS Vigilance" onchange="saveShipField('name',this.value)">
+      <input value="${escH(sh.name)}" placeholder="e.g. USS Vigilance" onchange="saveShipField('name',this.value);saveCharField('assignment',this.value+(S.ship.registry?' '+S.ship.registry:''));">
     </div>
     <div class="field" style="flex:1;margin:0"><label>Registry</label>
-      <input value="${escH(sh.registry)}" placeholder="NCC-74656" onchange="saveShipField('registry',this.value)">
+      <input value="${escH(sh.registry)}" placeholder="NCC-74656" onchange="saveShipField('registry',this.value);saveCharField('assignment',S.ship.name+(this.value?' '+this.value:''));">
     </div>
   </div>
   <p style="font-size:10px;color:var(--muted);margin-top:4px">Tap a class to preview it. All stats can be adjusted later on the Ship tab.</p>`;
@@ -4101,6 +4164,11 @@ function rollUpbringing() {
     if(r+1>=lo&&r+1<=(hi||lo)){up=u;break;}
   }
   S.char._selectedUpbringing=up.name; saveSlot(); renderCurrentTab();
+}
+function rollCareerLength() {
+  const r = Math.floor(Math.random()*20);
+  S.char.careerLength = CAREER_LENGTH[r].label;
+  saveSlot(); renderCurrentTab();
 }
 function rollCareerEvent() {
   const e=CAREER_EVENTS[Math.floor(Math.random()*CAREER_EVENTS.length)];
