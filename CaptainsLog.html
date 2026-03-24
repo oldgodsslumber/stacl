@@ -2386,7 +2386,7 @@ function renderSectorMap() {
       else if(isAdj) cls += ' adjacent';
       else if(cell.type === 'explored') cls += ' explored';
       else cls += ' unexplored';
-      const icon = cell.icon || (isCurrent ? areaIconHtml(sz, 24) : '·');
+      const icon = cell.icon || (isCurrent ? areaIconHtml(sz, 30) : '·');
       szGridHTML += `<div class="${cls}" onclick="clickSubZoneCell(${i})" title="${escH(cell.name)||'Area '+(i+1)}">
         <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
         <span class="cell-icon">${icon}</span>
@@ -2468,7 +2468,7 @@ function renderSectorMap() {
     else if(isAdj) cls += ' adjacent';
     else if(cell.type === 'explored') cls += ' explored';
     else cls += ' unexplored';
-    const icon = cell.icon || (isCurrent ? shipIconHtml(24) : '·');
+    const icon = cell.icon || (isCurrent ? shipIconHtml(30) : '·');
     gridHTML += `<div class="${cls}" onclick="clickMapCell(${i})" title="${escH(cell.name)||'System '+i}">
       <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
       <span class="cell-icon">${icon}</span>
@@ -2509,7 +2509,7 @@ function renderSectorMap() {
   // Ship quick info
   const ship = S.ship;
   const shipInfo = ship.name ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-size:11px;margin-bottom:10px;display:flex;gap:10px;align-items:center">
-    <span style="font-size:20px;line-height:1;display:flex;align-items:center">${shipIconHtml(40,'filter:drop-shadow(0 0 5px rgba(255,153,0,0.9))')}</span>
+    <span style="font-size:20px;line-height:1;display:flex;align-items:center">${shipIconHtml(50,'filter:drop-shadow(0 0 5px rgba(255,153,0,0.9))')}</span>
     <div>
       <div style="color:var(--accent);font-weight:bold">${escH(ship.name)}</div>
       <div style="color:var(--muted)">${escH(ship.className)} · Scale ${ship.scale} · ${escH(ship.era)}</div>
