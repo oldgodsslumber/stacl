@@ -2214,6 +2214,9 @@ function renderCS7() {
     </table>
   </div>
   ${buildShipPreviewPanel()}
+  <div class="field" style="margin-top:8px"><label>Ship Name</label>
+    <input value="${escH(sh.name)}" placeholder="e.g. USS Vigilance, USS Theseus…" onchange="saveShipField('name',this.value)">
+  </div>
   <p style="font-size:10px;color:var(--muted);margin-top:4px">Tap a class to preview it. All stats can be adjusted later on the Ship tab.</p>`;
 
   const customForm = `<div style="font-size:11px;color:var(--muted);margin-bottom:10px">Enter your ship's basics. Full stats and systems can be set on the Ship tab.</div>
@@ -3835,7 +3838,7 @@ function genAlienName(sylCount) {
 }
 
 function rollRandomName() {
-  const species = S.char && S.char.species ? S.char.species : 'Human';
+  const species = (S.char && (S.char._selectedSpecies || S.char.species)) || 'Human';
   let key = Object.keys(SPECIES_NAMES).find(k => species.toLowerCase().includes(k.toLowerCase())) || 'Human';
   const data = SPECIES_NAMES[key];
   let name;
@@ -4168,6 +4171,7 @@ function loadShipClass(name) {
   if (suggested && suggested.length) {
     sh.talents = suggested.map(t => ({name: t, desc: ''}));
   }
+  window._shipClassPreview = name;
   saveSlot(); renderCurrentTab();
 }
 
@@ -4413,6 +4417,9 @@ function toggleCollapsible(id) {
   const saved = localStorage.getItem('stcl_active_slot');
   ACTIVE_SLOT = saved ? parseInt(saved) : 0;
   loadSlot(ACTIVE_SLOT);
+  if (S.ship.className && !window._shipClassPreview) {
+    window._shipClassPreview = S.ship.className;
+  }
   renderCurrentTab();
   if (localStorage.getItem('stcl-theme') === 'red-alert') {
     document.body.classList.add('red-alert');
