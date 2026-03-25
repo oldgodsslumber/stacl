@@ -3005,7 +3005,23 @@ function renderDiceTab() {
 
   <div class="card">
     <div class="card-title">OPPOSITION ROLLER</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Roll for NPCs, enemies, or any opposition. Enter a target number directly. Excess successes add to Threat.</p>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Roll for NPCs, enemies, or any opposition. Enter a target number directly. Excess successes add to Threat.</p>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">NPC Quality Reference</div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:6px">Add the NPC's quality score to the task's base difficulty to get the Target Number.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead><tr>
+          <th style="text-align:left;padding:3px 6px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">NPC Quality</th>
+          <th style="text-align:left;padding:3px 6px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Score</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:3px 6px;color:var(--text)">Basic</td><td style="padding:3px 6px;color:var(--muted)">9–10</td></tr>
+          <tr style="background:var(--surface3)"><td style="padding:3px 6px;color:var(--text)">Proficient</td><td style="padding:3px 6px;color:var(--muted)">11–12</td></tr>
+          <tr><td style="padding:3px 6px;color:var(--text)">Talented</td><td style="padding:3px 6px;color:var(--muted)">13–14</td></tr>
+          <tr style="background:var(--surface3)"><td style="padding:3px 6px;color:var(--text)">Exceptional</td><td style="padding:3px 6px;color:var(--muted)">15+</td></tr>
+        </tbody>
+      </table>
+    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end">
       <div class="field" style="margin:0">
         <label>Target Number</label>
