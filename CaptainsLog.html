@@ -3849,21 +3849,21 @@ function toggleOppRoller() {
 }
 function addExtTask() {
   window._extTasks.push({name:'Extended Task', circles:5, progress:Array(5).fill(false)});
-  renderCurrentTab();
+  renderCurrentTab(); hudBroadcast();
 }
-function removeExtTask(i) { window._extTasks.splice(i,1); renderCurrentTab(); }
-function renameExtTask(i,v) { window._extTasks[i].name=v; }
+function removeExtTask(i) { window._extTasks.splice(i,1); renderCurrentTab(); hudBroadcast(); }
+function renameExtTask(i,v) { window._extTasks[i].name=v; hudBroadcast(); }
 function adjustExtTaskCircles(i,d) {
   const t=window._extTasks[i];
   t.circles=Math.max(1,Math.min(20,t.circles+d));
   t.progress=Array(t.circles).fill(false).map((v,j)=>t.progress[j]||false);
-  renderCurrentTab();
+  renderCurrentTab(); hudBroadcast();
 }
 function toggleExtTaskProgress(i,j) {
-  window._extTasks[i].progress[j]=!window._extTasks[i].progress[j]; renderCurrentTab();
+  window._extTasks[i].progress[j]=!window._extTasks[i].progress[j]; renderCurrentTab(); hudBroadcast();
 }
 function resetExtTask(i) {
-  window._extTasks[i].progress=Array(window._extTasks[i].circles).fill(false); renderCurrentTab();
+  window._extTasks[i].progress=Array(window._extTasks[i].circles).fill(false); renderCurrentTab(); hudBroadcast();
 }
 function renderExtTasks() {
   if(!window._extTasks.length) return '<p style="font-size:11px;color:var(--muted)">No extended tasks. Add one above.</p>';
@@ -4848,7 +4848,7 @@ function buildHudCtrlHTML() {
   // on = not explicitly false (default-on chips show as active unless turned off)
   // Determine active key per zone for chip highlighting
   const rightActive = _hudVis.sectorMap===true ? 'sectorMap' : _hudVis.interiorMap===true ? 'interiorMap' : 'log';
-  const centerActive = _hudVis.encounter===true ? 'encounter' : _hudVis.oracle===true ? 'oracle' : 'mission';
+  const centerActive = _hudVis.encounter===true ? 'encounter' : _hudVis.oracle===true ? 'oracle' : _hudVis.extTasks===true ? 'extTasks' : 'mission';
   const visChip  = (key, label) =>
     `<button class="hc-chip${_hudVis[key]!==false?' on':''}" onclick="toggleHudVis('${key}')">${label}</button>`;
   const leftChip = (key, label) =>
@@ -4877,6 +4877,7 @@ function buildHudCtrlHTML() {
         ${centerChip('mission','Mission')}
         ${centerChip('encounter','Encounter')}
         ${centerChip('oracle','Oracle')}
+        ${centerChip('extTasks','Ext. Tasks')}
       </div>
       <div class="hc-chips" style="margin-top:3px">${visChip('dice','Dice')}</div>
     </div>
@@ -4912,7 +4913,7 @@ function buildHudCtrlHTML() {
 
 const HUD_LEFT_KEYS   = ['stats','shipStats'];
 const HUD_RIGHT_KEYS  = ['log','sectorMap','interiorMap'];
-const HUD_CENTER_KEYS = ['mission','encounter','oracle'];
+const HUD_CENTER_KEYS = ['mission','encounter','oracle','extTasks'];
 function toggleHudVis(key) {
   _hudVis[key] = !_hudVis[key];
   if (_hudVis[key]) {
@@ -5018,6 +5019,7 @@ function hudBroadcast(extra) {
     combatOpps: window._combatOpp || [],
     playerStress: S.playerStress || [false,false,false],
     oracle: window._lastOracleResult || null,
+    extTasks: (window._extTasks || []).map(t=>({name:t.name, circles:t.circles, progress:t.progress.slice()})),
     dice: _lastRollData,
     log: (S.log || []).slice(-3).reverse(),
     vis: _hudVis,
@@ -5280,6 +5282,9 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
     <div id="h-oracle-result" style="font-size:20px;font-weight:700;color:#CC99FF;text-transform:uppercase;letter-spacing:2px;line-height:1.2"></div>
     <div id="h-oracle-sub" style="font-size:10px;color:#7a4a1a;margin-top:6px"></div>
   </div>
+  <div id="h-ext-tasks-section" style="display:none">
+    <div id="h-ext-tasks-list"></div>
+  </div>
 </div>
 
 <!-- BOTTOM CENTER: Dice -->
@@ -5354,14 +5359,31 @@ function applyState(d){
   show('h-right-smap',showSmap);
   show('h-right-imap',showImap);
   setText('p-right-header',showSmap?'Sector Map':showImap?'Ship Interior':'Captain\'s Log');
-  // Center panel: Mission, Encounter, or Oracle (exclusive)
+  // Center panel: Mission, Encounter, Oracle, or Extended Tasks (exclusive)
   var showEnc=vis.encounter===true;
   var showOracle=vis.oracle===true;
+  var showExtTasks=vis.extTasks===true;
+  var showMission=!showEnc&&!showOracle&&!showExtTasks;
   show('p-center',true);
-  show('h-mission-section',!showEnc&&!showOracle);
+  show('h-mission-section',showMission);
   show('h-enc-section',showEnc);
   show('h-oracle-section',showOracle);
-  setText('p-center-header',showEnc?'Encounter':showOracle?'Oracle':'Mission');
+  show('h-ext-tasks-section',showExtTasks);
+  setText('p-center-header',showEnc?'Encounter':showOracle?'Oracle':showExtTasks?'Extended Tasks':'Mission');
+  if(showExtTasks){
+    var tasks=d.extTasks||[];
+    var listEl=document.getElementById('h-ext-tasks-list');
+    if(listEl){
+      if(!tasks.length){listEl.innerHTML='<div style="font-size:11px;color:#7a4a1a">No extended tasks</div>';}
+      else{listEl.innerHTML=tasks.map(function(t){
+        var filled=t.progress.filter(Boolean).length;
+        var circles=t.progress.map(function(p,j){
+          return '<div style="width:18px;height:18px;border-radius:50%;border:2px solid '+(p?'#66CC66':'#7a4a1a')+';background:'+(p?'#66CC66':'#000')+';display:inline-block;margin:1px"></div>';
+        }).join('');
+        return '<div style="margin-bottom:10px"><div style="font-size:11px;color:#FFCC99;font-weight:700;letter-spacing:1px;margin-bottom:4px">'+t.name+'</div><div style="font-size:9px;color:#7a4a1a;margin-bottom:4px">'+filled+'/'+t.circles+' complete</div><div style="display:flex;flex-wrap:wrap;gap:2px">'+circles+'</div></div>';
+      }).join('');}
+    }
+  }
   if(showOracle){
     var orc=d.oracle||null;
     setText('h-oracle-type',(orc&&orc.type)||'No result yet');
