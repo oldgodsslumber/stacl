@@ -2897,37 +2897,41 @@ function renderDiceTab() {
   const attrOpts = ATTRIBUTES.map(a=>`<option value="${a.key}|${c[a.key]}">${a.full} (${c[a.key]})</option>`).join('');
   const discOpts = DISCIPLINES.map(d=>`<option value="${d.key}|${c[d.key]}">${d.full} (${c[d.key]})</option>`).join('');
 
-  // Combat tracker
-  let ctHTML = '';
+  // Encounter NPC stress rows
+  let encHTML = '';
   if(S.combatEnemies.length){
-    ctHTML = `<div class="card"><div class="card-title">ENCOUNTER — STRESS TRACKING</div>`;
+    encHTML += `<div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="font-size:10px;color:var(--lcars-peach);letter-spacing:1px;text-transform:uppercase;flex:1">ENCOUNTER NPCs</div>
+        <button class="btn btn-xs btn-danger" onclick="clearEncounter()">Clear</button>
+      </div>`;
     S.combatEnemies.forEach((ae,idx)=>{
       const stress = ae.stress||[false,false,false];
       let circles = '<div class="stress-track">';
       for(let i=0;i<3;i++) circles += `<div class="stress-circle${stress[i]?' hit':''}" onclick="toggleEnemyStress(${idx},${i})"></div>`;
       circles += '</div>';
-      ctHTML += `<div style="margin-bottom:8px">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${escH(ae.name)} STRESS</div>${circles}</div>`;
+      encHTML += `<div style="margin-bottom:8px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${escH(ae.name)}</div>${circles}</div>`;
     });
-    ctHTML += `<button class="btn btn-xs btn-danger" onclick="clearEncounter()">Clear Encounter</button></div>`;
+    encHTML += `</div>`;
   }
 
   return `
   <div class="card">
-    <div class="card-title">COMBAT — STRESS CIRCLES</div>
+    <div class="card-title">COMBAT — STRESS TRACKING</div>
     <p style="font-size:10px;color:var(--muted);margin-bottom:10px">3 circles each. Click to fill.</p>
     <div style="margin-bottom:12px">
       <div style="font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:5px">CREW (YOU)</div>
       ${psHTML}
       <button class="btn btn-xs" style="margin-top:6px" onclick="resetPlayerStress()">Reset</button>
     </div>
-    <div id="combat-opponents">
-      ${renderCombatOpponents()}
+    ${encHTML}
+    <div style="border-top:1px solid var(--border);padding-top:10px">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">CUSTOM TRACKERS</div>
+      <div id="combat-opponents">${renderCombatOpponents()}</div>
+      <button class="btn btn-sm btn-accent" style="margin-top:8px" onclick="addCombatOpponent()">+ Add</button>
     </div>
-    <button class="btn btn-sm btn-accent" style="margin-top:8px" onclick="addCombatOpponent()">+ Add Opponent</button>
   </div>
-
-  ${ctHTML}
 
   <div class="card">
     <div class="card-title">2D20 TASK ROLLER</div>
