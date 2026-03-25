@@ -3867,6 +3867,7 @@ function toggleNPC(id) {
 
 if(!window._combatOpp) window._combatOpp = [];
 if(!window._extTasks) window._extTasks = [];
+if(!window._hudOracleQueue) window._hudOracleQueue = [];
 var _focusDrafts = {};
 var _oppRollerOpen = false;
 
@@ -4045,6 +4046,7 @@ function oracleRoll(likelihood) {
   document.getElementById('oracle-result-text').textContent=result;
   document.getElementById('oracle-sub-text').textContent=sub;
   window._lastOracleResult = { type: `Yes/No · ${likelihood}`, result, sub };
+  pushHudOracle(window._lastOracleResult);
   hudBroadcast();
 }
 
@@ -4137,6 +4139,7 @@ function genOracle(type) {
   if (_res) {
     const _label = type.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     window._lastOracleResult = { type: _label, result: [_res.name, _res.desc].filter(Boolean).join(' — ') };
+    pushHudOracle(window._lastOracleResult);
     hudBroadcast();
   }
   const _sy = window.scrollY;
@@ -4147,6 +4150,18 @@ function genOracle(type) {
 }
 
 function clearOracleResults() { window._storyResults={}; renderCurrentTab(); }
+
+function pushHudOracle(entry) {
+  if(!window._hudOracleQueue) window._hudOracleQueue = [];
+  window._hudOracleQueue.unshift(Object.assign({}, entry, {id: Date.now()}));
+  if(window._hudOracleQueue.length > 10) window._hudOracleQueue.length = 10;
+}
+function clearHudOracle() {
+  window._hudOracleQueue = [];
+  window._lastOracleResult = null;
+  hudBroadcast();
+  refreshHudCtrl();
+}
 
 function genAlienName(sylCount) {
   const d20=()=>Math.floor(Math.random()*20);
@@ -4925,7 +4940,10 @@ function buildHudCtrlHTML() {
         ${centerChip('oracle','Oracle')}
         ${centerChip('extTasks','Ext. Tasks')}
       </div>
-      <div class="hc-chips" style="margin-top:3px">${visChip('dice','Dice')}</div>
+      <div class="hc-chips" style="margin-top:3px">
+        ${visChip('dice','Dice')}
+        <button class="hc-chip" onclick="clearHudOracle()" style="color:#FF6644;font-size:9px;padding:2px 7px" title="Clear oracle ticker">Clear Oracle</button>
+      </div>
     </div>
     <!-- RIGHT PANEL — Journal, Sector Map, or Ship Interior -->
     <div class="hc-zone">
@@ -5067,6 +5085,7 @@ function hudBroadcast(extra) {
     combatOpps: window._combatOpp || [],
     playerStress: S.playerStress || [false,false,false],
     oracle: window._lastOracleResult || null,
+    oracleQueue: window._hudOracleQueue || [],
     extTasks: (window._extTasks || []).map(t=>({name:t.name, circles:t.circles, progress:t.progress.slice()})),
     dice: _lastRollData,
     log: (S.log || []).slice(-3).reverse(),
@@ -5193,6 +5212,11 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 #setup-preview-wrap{position:relative;width:280px;height:158px;border:1px solid #2a1200;border-radius:4px;background:#000;overflow:hidden;flex-shrink:0}
 #setup-preview{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 #setup-no-cam{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#2a1200;text-transform:uppercase;letter-spacing:2px}
+/* Oracle ticker */
+@keyframes tick-in{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+.oracle-tick{border-left:3px solid #CC99FF;padding:3px 0 3px 8px;margin-bottom:4px}
+.oracle-tick.tick-new{animation:tick-in 0.4s ease-out forwards}
+.oracle-tick:not(:first-child){opacity:0.6}
 </style></head><body>
 <div id="webcam-wrap"><video id="webcam-video" autoplay muted playsinline></video><span id="no-signal"></span></div>
 
@@ -5327,9 +5351,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
     <div id="h-enc-content"><span class="sml">No active encounter</span></div>
   </div>
   <div id="h-oracle-section" style="display:none">
-    <div class="sml" id="h-oracle-type" style="margin-bottom:6px"></div>
-    <div id="h-oracle-result" style="font-size:20px;font-weight:700;color:#CC99FF;text-transform:uppercase;letter-spacing:2px;line-height:1.2"></div>
-    <div id="h-oracle-sub" style="font-size:10px;color:#7a4a1a;margin-top:6px"></div>
+    <div id="h-oracle-ticker"><span class="sml">No results yet</span></div>
   </div>
   <div id="h-ext-tasks-section" style="display:none">
     <div id="h-ext-tasks-list"></div>
@@ -5434,10 +5456,21 @@ function applyState(d){
     }
   }
   if(showOracle){
-    var orc=d.oracle||null;
-    setText('h-oracle-type',(orc&&orc.type)||'No result yet');
-    setText('h-oracle-result',(orc&&orc.result)||'\u2014');
-    setText('h-oracle-sub',(orc&&orc.sub)||'');
+    var queue=d.oracleQueue||[];
+    var ticker=document.getElementById('h-oracle-ticker');
+    if(ticker){
+      var lastId=+(ticker.dataset.lastId||0);
+      var newTop=queue.length>0?queue[0].id:0;
+      ticker.innerHTML=queue.length?queue.map(function(orc,i){
+        var isNew=(orc.id||0)>lastId;
+        return '<div class="oracle-tick'+(i===0&&isNew?' tick-new':'')+'">'+
+          '<div style="font-size:8px;color:#7a4a1a;letter-spacing:1px;text-transform:uppercase">'+orc.type+'</div>'+
+          '<div style="font-size:15px;font-weight:700;color:#CC99FF;text-transform:uppercase;letter-spacing:1px;line-height:1.2">'+orc.result+'</div>'+
+          (orc.sub?'<div style="font-size:9px;color:#7a4a1a;margin-top:1px">'+orc.sub+'</div>':'')+
+          '</div>';
+      }).join(''):'<span class="sml">No results yet</span>';
+      if(newTop)ticker.dataset.lastId=newTop;
+    }
   }
   show('p-dice',vis.dice!==false);
   show('h-vitals-wrap',vis.vitals!==false);
@@ -5928,13 +5961,17 @@ var VirtualBgEffect=(function(){
   };
   VirtualBgEffect.prototype._scheduleFrame=function(){
     var self=this;if(!self._running||!self._seg||!self._video)return;
-    self._rafId=requestAnimationFrame(function(){
+    // setTimeout instead of requestAnimationFrame: rAF throttles to ~1fps when the
+    // HUD window loses focus (user is clicking in the main app). setTimeout continues
+    // at the requested rate regardless of window focus.
+    self._rafId=setTimeout(function(){
+      if(!self._running)return;
       self._seg.send({image:self._video}).catch(function(){}).finally(function(){self._scheduleFrame();});
-    });
+    },33);
   };
   VirtualBgEffect.prototype.stopEffect=function(){
     this._running=false;
-    if(this._rafId)cancelAnimationFrame(this._rafId);
+    if(this._rafId)clearTimeout(this._rafId);
     if(this._video){this._video.srcObject=null;this._video=null;}
     if(this._outStream){this._outStream.getTracks().forEach(function(t){t.stop();});this._outStream=null;}
   };
