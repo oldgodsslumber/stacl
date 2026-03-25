@@ -5354,6 +5354,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 </div>
 
 <script>
+window.onerror=function(msg,src,line,col,err){var el=document.getElementById('setup-no-cam');if(el){el.style.display='';el.style.color='#ff4444';el.textContent='JS ERROR: '+msg+' (line '+line+')';}return false;};
 var _rec=null,_chunks=[],_timer=null,_secs=0;
 var _stream=null,_hdStream=null,_bgEffect=null,_bgDisplayStream=null;
 var _previewStream=null,_previewEffect=null;
