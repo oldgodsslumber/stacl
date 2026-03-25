@@ -2945,12 +2945,6 @@ function renderDiceTab() {
         <label>Discipline</label>
         <select id="roll-disc" onchange="updateTN()">${discOpts}</select>
       </div>
-      <div class="field" style="margin:0">
-        <label>Difficulty (1–5)</label>
-        <select id="roll-difficulty" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-size:12px">
-          ${[1,2,3,4,5].map(n=>`<option value="${n}">${n}</option>`).join('')}
-        </select>
-      </div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
       <div style="font-size:12px;color:var(--muted)">TN =</div>
@@ -2982,12 +2976,6 @@ function renderDiceTab() {
         <label>Department</label>
         <select id="ship-roll-dept" onchange="updateShipTN()">${DISCIPLINES.map(d=>`<option value="${d.key}|${S.ship[d.key]||1}">${d.full} (${S.ship[d.key]||1})</option>`).join('')}</select>
       </div>
-      <div class="field" style="margin:0">
-        <label>Difficulty (1–5)</label>
-        <select id="ship-roll-difficulty" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-size:12px">
-          ${[1,2,3,4,5].map(n=>`<option value="${n}">${n}</option>`).join('')}
-        </select>
-      </div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
       <div style="font-size:12px;color:var(--muted)">TN =</div>
@@ -3012,7 +3000,7 @@ function renderDiceTab() {
     <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Roll for NPCs, enemies, or any opposition. Enter a target number directly. Excess successes add to Threat.</p>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;margin-bottom:10px">
       <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">NPC Quality Reference</div>
-      <p style="font-size:11px;color:var(--muted);margin-bottom:6px">Add the NPC's quality score to the task's base difficulty to get the Target Number.</p>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:6px">The NPC's quality score is the target number.</p>
       <table style="width:100%;border-collapse:collapse;font-size:11px">
         <thead><tr>
           <th style="text-align:left;padding:3px 6px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">NPC Quality</th>
@@ -3030,12 +3018,6 @@ function renderDiceTab() {
       <div class="field" style="margin:0">
         <label>Target Number</label>
         <input type="number" id="opp-tn" min="1" max="30" value="10" style="width:70px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-size:16px;font-weight:bold;text-align:center">
-      </div>
-      <div class="field" style="margin:0">
-        <label>Difficulty (1–5)</label>
-        <select id="opp-difficulty" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-size:12px">
-          ${[1,2,3,4,5].map(n=>`<option value="${n}">${n}</option>`).join('')}
-        </select>
       </div>
       <div class="field" style="margin:0">
         <label>Dice</label>
@@ -3078,7 +3060,7 @@ function wireDice() { updateTN(); updateShipTN(); }
 
 function rollOpposition() {
   const tn=parseInt(document.getElementById('opp-tn')?.value||10);
-  const diff=parseInt(document.getElementById('opp-difficulty')?.value||1);
+  const diff=1;
   const numDice=parseInt(document.getElementById('opp-dice')?.value||2);
   const focusCheck=document.getElementById('opp-focus-check')?.checked||false;
   const focusThreshold=Math.floor(tn/2);
@@ -3104,13 +3086,13 @@ function rollOpposition() {
 
   let resultColor=success?'var(--danger)':'var(--success)';
   let resultText=success
-    ?`OPPOSITION SUCCEEDS (${totalSucc}/${diff} successes${excess>0?`, +${excess} Threat`:''})`
-    :`OPPOSITION FAILS (${totalSucc}/${diff} successes needed)`;
+    ?`OPPOSITION SUCCEEDS (${totalSucc} success${totalSucc!==1?'es':''}${excess>0?`, +${excess} Threat`:''})`
+    :`OPPOSITION FAILS (${totalSucc} success${totalSucc!==1?'es':''})`;
   if(complications>0) resultText+=` — ${complications} COMPLICATION${complications>1?'S':''}!`;
 
   const html=`<div class="dice-result-row">${diceHTML}</div>
     <div style="font-size:14px;font-weight:bold;color:${resultColor};margin:8px 0">${resultText}</div>
-    <div style="font-size:10px;color:var(--muted)">TN: ${tn} | Difficulty: ${diff} | ${numDice} dice${focusCheck?` | Focus/Talent (≤${focusThreshold})`:''}</div>`;
+    <div style="font-size:10px;color:var(--muted)">TN: ${tn} | ${numDice} dice${focusCheck?` | Focus/Talent (≤${focusThreshold})`:''}</div>`;
 
   window._lastOppRollResult=html;
   const resultEl=document.getElementById('opp-roll-result');
@@ -3124,7 +3106,7 @@ function rollOpposition() {
 function rollShipTask() {
   const sEl=document.getElementById('ship-roll-sys');
   const dEl=document.getElementById('ship-roll-dept');
-  const diff=parseInt(document.getElementById('ship-roll-difficulty').value)||1;
+  const diff=1;
   const extra=parseInt(document.getElementById('ship-extra-dice')?.value||0);
   const talentCheck=document.getElementById('ship-talent-check')?.checked||false;
   const [sKey,sv]=sEl.value.split('|');
@@ -3159,14 +3141,14 @@ function rollShipTask() {
   if(momentum>0){ S.char.momentum=Math.min(6,S.char.momentum+momentum); }
 
   let resultColor=success?'var(--success)':'var(--danger)';
-  let resultText=success?`SUCCESS (${totalSucc}/${diff} successes, +${momentum} Momentum)`:`FAILURE (${totalSucc}/${diff} successes needed)`;
+  let resultText=success?`SUCCESS (${totalSucc} success${totalSucc!==1?'es':''}, +${momentum} Momentum)`:`FAILURE (${totalSucc} success${totalSucc!==1?'es':''})`;
   if(complications>0) resultText+=` — ${complications} COMPLICATION${complications>1?'S':''}!`;
 
   const sysLabel=SYS_FULL[SYS_KEYS.indexOf(sKey)]||sKey;
   const deptLabel=DISCIPLINES.find(d=>d.key===dKey)?.full||dKey;
   const html=`<div class="dice-result-row">${diceHTML}</div>
     <div style="font-size:14px;font-weight:bold;color:${resultColor};margin:8px 0">${resultText}</div>
-    <div style="font-size:10px;color:var(--muted)">TN: ${tn} (${sysLabel} ${sysVal} + ${deptLabel} ${dv}) | Difficulty: ${diff} | ${numDice} dice${talentCheck?' | Talent active':''}</div>`;
+    <div style="font-size:10px;color:var(--muted)">TN: ${tn} (${sysLabel} ${sysVal} + ${deptLabel} ${dv}) | ${numDice} dice${talentCheck?' | Talent active':''}</div>`;
 
   window._lastShipRollResult=html;
   const resultEl=document.getElementById('ship-roll-result');
@@ -3866,7 +3848,7 @@ function updateShipTN() {
 function rollSkillTest() {
   const aEl=document.getElementById('roll-attr');
   const dEl=document.getElementById('roll-disc');
-  const diff=parseInt(document.getElementById('roll-difficulty').value)||1;
+  const diff=1;
   const extra=parseInt(document.getElementById('extra-dice')?.value||0);
   const focusCheck=document.getElementById('focus-check')?.checked||false;
   const [aKey,av]=aEl.value.split('|');
@@ -3902,12 +3884,12 @@ function rollSkillTest() {
   if(momentum>0){ S.char.momentum=Math.min(6,S.char.momentum+momentum); }
 
   let resultColor=success?'var(--success)':'var(--danger)';
-  let resultText=success?`SUCCESS (${totalSucc}/${diff} successes, +${momentum} Momentum)`:`FAILURE (${totalSucc}/${diff} successes needed)`;
+  let resultText=success?`SUCCESS (${totalSucc} success${totalSucc!==1?'es':''}, +${momentum} Momentum)`:`FAILURE (${totalSucc} success${totalSucc!==1?'es':''})`;
   if(complications>0) resultText+=` — ${complications} COMPLICATION${complications>1?'S':''}!`;
 
   const html=`<div class="dice-result-row">${diceHTML}</div>
     <div style="font-size:14px;font-weight:bold;color:${resultColor};margin:8px 0">${resultText}</div>
-    <div style="font-size:10px;color:var(--muted)">TN: ${tn} | Difficulty: ${diff} | ${numDice} dice | ${focusCheck?'Focus active':'No focus'}</div>`;
+    <div style="font-size:10px;color:var(--muted)">TN: ${tn} | ${numDice} dice | ${focusCheck?'Focus active':'No focus'}</div>`;
 
   window._lastRollResult = html;
   const resultEl = document.getElementById('skill-roll-result');
