@@ -3229,12 +3229,16 @@ function renderOracleTab() {
         </div>` : ''}
       </div>
 
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
         <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ENCOUNTER</div>
-        <button class="btn btn-sm" style="margin-bottom:4px;width:100%" onclick="genOracle('enc_space')">Space (d20)</button>
-        <button class="btn btn-sm" style="width:100%" onclick="genOracle('enc_planet')">Planet (d20)</button>
-        ${rCard('enc_space','SPACE ENCOUNTER','var(--accent-dim)')}
-        ${rCard('enc_planet','PLANET ENCOUNTER','var(--accent-dim)')}
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <button class="btn btn-sm" onclick="genOracle('enc_space')">Space (d20)</button>
+          <button class="btn btn-sm" onclick="genOracle('enc_planet')">Planet (d20)</button>
+        </div>
+        ${(results.enc_space||results.enc_planet) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          ${results.enc_space ? `<div style="flex:1;min-width:140px">${rCard('enc_space','SPACE ENCOUNTER','var(--accent-dim)')}</div>` : ''}
+          ${results.enc_planet ? `<div style="flex:1;min-width:140px">${rCard('enc_planet','PLANET ENCOUNTER','var(--accent-dim)')}</div>` : ''}
+        </div>` : ''}
       </div>
 
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
