@@ -661,26 +661,9 @@ const CAREER_EVENTS = [
 ];
 
 const CAREER_LENGTH = [
-  {d:'1',   label:'1 Year',    bonus:'Any Discipline +1'},
-  {d:'2',   label:'2 Years',   bonus:'Any Discipline +1'},
-  {d:'3',   label:'3 Years',   bonus:'Any Discipline +1'},
-  {d:'4',   label:'4 Years',   bonus:'Any Discipline +1'},
-  {d:'5',   label:'5 Years',   bonus:'Any Attribute +1'},
-  {d:'6',   label:'6 Years',   bonus:'Any Attribute +1'},
-  {d:'7',   label:'7 Years',   bonus:'Any Attribute +1'},
-  {d:'8',   label:'8 Years',   bonus:'Any Attribute +1'},
-  {d:'9',   label:'9 Years',   bonus:'Any Discipline +1, any Attribute +1'},
-  {d:'10',  label:'10 Years',  bonus:'Any Discipline +1, any Attribute +1'},
-  {d:'11',  label:'11 Years',  bonus:'Any Discipline +1, any Attribute +1'},
-  {d:'12',  label:'12 Years',  bonus:'Any Discipline +1, any Attribute +1'},
-  {d:'13',  label:'13 Years',  bonus:'Any two Disciplines +1'},
-  {d:'14',  label:'14 Years',  bonus:'Any two Disciplines +1'},
-  {d:'15',  label:'15 Years',  bonus:'Any two Disciplines +1'},
-  {d:'16',  label:'16 Years',  bonus:'Any two Attributes +1'},
-  {d:'17',  label:'17 Years',  bonus:'Any two Attributes +1'},
-  {d:'18',  label:'18 Years',  bonus:'Any two Attributes +1'},
-  {d:'19',  label:'19 Years',  bonus:'Any two Attributes +1, any Discipline +1'},
-  {d:'20',  label:'20 Years',  bonus:'Any two Attributes +1, any two Disciplines +1'},
+  {range:'1–6',   label:'Novice',      desc:'Early in your career. Still finding your footing among the stars.'},
+  {range:'7–13',  label:'Experienced', desc:'Seasoned and sure. Years of service have sharpened your instincts.'},
+  {range:'14–20', label:'Veteran',     desc:'A long record of service. You have seen things most officers never will.'},
 ];
 
 const DIRECTIVE_TABLE = [
@@ -2098,31 +2081,59 @@ function renderCS2() {
 }
 
 function renderCS3() {
-  const c = S.char;
-  let eventRows = CAREER_EVENTS.map(e=>{
-    const sel = c.careerEvent === e.name;
-    return `<tr onclick="selectCareerEvent('${escQ(e.name)}')" class="${sel?'selected':''}">
-      <td style="color:var(--muted)">${e.d}</td>
-      <td><strong${sel?' style="color:var(--accent)"':''}>${e.name}</strong><br><span style="color:var(--muted)">${e.desc}</span></td>
-    </tr>`;
-  }).join('');
+  const c = S.char; const lp = c._lp||{};
+  function eventPickerHTML(idx, selectedName, eventAttrKey, eventDiscKey) {
+    const rows = CAREER_EVENTS.map(e=>{
+      const sel = selectedName === e.name;
+      return `<tr onclick="${idx===1?'selectCareerEvent':'selectCareerEvent2'}('${escQ(e.name)}')" class="${sel?'selected':''}">
+        <td style="color:var(--muted)">${e.d}</td>
+        <td><strong${sel?' style="color:var(--accent)"':''}>${e.name}</strong><br><span style="color:var(--muted)">${e.desc}</span></td>
+      </tr>`;
+    }).join('');
+    const attrSel = selectedName ? `
+      <div style="margin-top:8px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Attribute +1 from this event</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${ATTRIBUTES.map(a=>`<button class="btn btn-xs${eventAttrKey===a.key?' btn-accent':''}" onclick="setLPEventAttr(${idx},'${a.key}')">${a.label}</button>`).join('')}
+        </div>
+      </div>` : '';
+    const discSel = selectedName ? `
+      <div style="margin-top:6px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Discipline +1 from this event</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${DISCIPLINES.map(d=>`<button class="btn btn-xs${eventDiscKey===d.key?' btn-accent':''}" onclick="setLPEventDisc(${idx},'${d.key}')">${d.label}</button>`).join('')}
+        </div>
+      </div>` : '';
+    return `
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Career Event ${idx}</div>
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+      <button class="btn btn-accent btn-sm" onclick="${idx===1?'rollCareerEvent':'rollCareerEvent2'}()">Roll d20</button>
+      ${selectedName?`<span style="color:var(--accent);font-size:11px"><strong>${escH(selectedName)}</strong></span>`:''}
+    </div>
+    <div style="max-height:180px;overflow-y:auto;margin-bottom:4px">
+      <table class="roll-table">
+        <thead><tr><th>d20</th><th>Event</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${attrSel}${discSel}`;
+  }
   return `
-  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Determine your career length and choose a career event that shaped your service.</p>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Determine your career length and choose two career events that shaped your service. Each event grants +1 to an Attribute and +1 to a Discipline.</p>
   <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px">
     <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Career Length</div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
       <button class="btn btn-accent btn-sm" onclick="rollCareerLength()">Roll d20</button>
-      ${c.careerLength?`<span style="color:var(--accent);font-size:12px"><strong>${escH(c.careerLength)}</strong></span>`:'<span style="font-size:11px;color:var(--muted)">Roll to determine years of service</span>'}
+      ${c.careerLength?`<span style="color:var(--accent);font-size:13px"><strong>${escH(c.careerLength)}</strong></span>`:'<span style="font-size:11px;color:var(--muted)">Roll to determine your tier of service</span>'}
     </div>
-    <div style="max-height:160px;overflow-y:auto;margin-bottom:8px">
-      <table class="roll-table">
-        <thead><tr><th>d20</th><th>Years</th><th>Bonus</th></tr></thead>
-        <tbody>${CAREER_LENGTH.map(cl=>`<tr onclick="saveCharField('careerLength','${escQ(cl.label)}');renderCurrentTab()" class="${c.careerLength===cl.label?'selected':''}">
-          <td style="color:var(--muted)">${cl.d}</td>
-          <td><strong${c.careerLength===cl.label?' style="color:var(--accent)"':''}>${cl.label}</strong></td>
-          <td style="color:var(--muted);font-size:10px">${cl.bonus}</td>
-        </tr>`).join('')}</tbody>
-      </table>
+    <div style="margin-bottom:8px">
+      ${CAREER_LENGTH.map(cl=>`<div onclick="saveCharField('careerLength','${escQ(cl.label)}');renderCurrentTab()" style="padding:7px 10px;border-radius:4px;border:1px solid ${c.careerLength===cl.label?'var(--accent)':'var(--border)'};background:${c.careerLength===cl.label?'var(--surface3)':'transparent'};cursor:pointer;margin-bottom:4px">
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <strong style="color:${c.careerLength===cl.label?'var(--accent)':'var(--text)'};font-size:13px">${cl.label}</strong>
+          <span style="color:var(--muted);font-size:10px">d20 ${cl.range}</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${cl.desc}</div>
+      </div>`).join('')}
     </div>
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
       <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase">Career Length Value</div>
@@ -2130,16 +2141,11 @@ function renderCS3() {
     </div>
     <input value="${escH((c.values||[])[4]||'')}" placeholder="e.g. Every year of service has made me stronger…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[4]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(4,this.value)">
   </div>
-  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Career Event</div>
-  <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
-    <button class="btn btn-accent btn-sm" onclick="rollCareerEvent()">Roll d20</button>
-    ${c.careerEvent?`<span style="color:var(--accent);font-size:11px"><strong>${escH(c.careerEvent)}</strong></span>`:''}
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px">
+    ${eventPickerHTML(1, c.careerEvent||'', lp.event1Attr||'', lp.event1Disc||'')}
   </div>
-  <div style="max-height:200px;overflow-y:auto;margin-bottom:8px">
-    <table class="roll-table">
-      <thead><tr><th>d20</th><th>Event</th></tr></thead>
-      <tbody>${eventRows}</tbody>
-    </table>
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px">
+    ${eventPickerHTML(2, c.careerEvent2||'', lp.event2Attr||'', lp.event2Disc||'')}
   </div>
   <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px">
     <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Career Event Focus</div>
@@ -4042,6 +4048,7 @@ function creationAdjAttr(key,d) {
   const current=ATTRIBUTES.reduce((s,a)=>s+(c[a.key]-base),0);
   if(d>0&&current>=pool) return;
   if(d>0&&c[key]>=12) return;
+  if(d>0&&c[key]===11&&ATTRIBUTES.some(a=>a.key!==key&&c[a.key]>=12)) return;
   if(d<0&&c[key]<=base) return;
   c[key]+=d; saveSlot(); renderCurrentTab();
 }
@@ -4050,14 +4057,18 @@ function creationSetDisc(key,v) {
   const c=S.char; const base=1; const pool=10;
   const currentOthers=DISCIPLINES.reduce((s,d)=>d.key===key?s:s+(c[d.key]-base),0);
   const maxVal=Math.min(5,base+pool-currentOthers);
-  c[key]=Math.max(base,Math.min(maxVal,v)); saveSlot(); renderCurrentTab();
+  const otherAt5=DISCIPLINES.some(d=>d.key!==key&&c[d.key]>=5);
+  const effectiveMax=otherAt5?Math.min(4,maxVal):maxVal;
+  c[key]=Math.max(base,Math.min(effectiveMax,v)); saveSlot(); renderCurrentTab();
 }
 function randomizeAttrs() {
   const c = S.char;
   ATTRIBUTES.forEach(a => c[a.key] = 7);
   let rem = 14;
   while (rem > 0) {
-    const eligible = ATTRIBUTES.filter(a => c[a.key] < 12);
+    const maxHit = ATTRIBUTES.some(a => c[a.key] >= 12);
+    const ceiling = maxHit ? 11 : 12;
+    const eligible = ATTRIBUTES.filter(a => c[a.key] < ceiling);
     if (!eligible.length) break;
     const a = eligible[Math.floor(Math.random() * eligible.length)];
     c[a.key]++; rem--;
@@ -4069,7 +4080,9 @@ function randomizeDiscs() {
   DISCIPLINES.forEach(d => c[d.key] = 1);
   let rem = 10;
   while (rem > 0) {
-    const eligible = DISCIPLINES.filter(d => c[d.key] < 5);
+    const maxHit = DISCIPLINES.some(d => c[d.key] >= 5);
+    const ceiling = maxHit ? 4 : 5;
+    const eligible = DISCIPLINES.filter(d => c[d.key] < ceiling);
     if (!eligible.length) break;
     const d = eligible[Math.floor(Math.random() * eligible.length)];
     c[d.key]++; rem--;
@@ -4239,6 +4252,8 @@ function lpAttrBonuses() {
   }
   if (lp.envAttr && b[lp.envAttr]!==undefined) b[lp.envAttr]++;
   if (lp.upbrAttr && b[lp.upbrAttr]!==undefined) b[lp.upbrAttr]++;
+  if (lp.event1Attr && b[lp.event1Attr]!==undefined) b[lp.event1Attr]++;
+  if (lp.event2Attr && b[lp.event2Attr]!==undefined) b[lp.event2Attr]++;
   return b;
 }
 function lpDiscBonuses() {
@@ -4253,6 +4268,8 @@ function lpDiscBonuses() {
     }
   }
   if (lp.upbrDisc && b[lp.upbrDisc]!==undefined) b[lp.upbrDisc]++;
+  if (lp.event1Disc && b[lp.event1Disc]!==undefined) b[lp.event1Disc]++;
+  if (lp.event2Disc && b[lp.event2Disc]!==undefined) b[lp.event2Disc]++;
   const tr = ACADEMY_TRACKS.find(t => t.name === c._selectedTrack);
   if (tr) {
     Object.entries(tr._disc||{}).forEach(([k,v]) => { if(b[k]!==undefined) b[k]+=v; });
@@ -4338,15 +4355,29 @@ function rollUpbringing() {
   S.char._selectedUpbringing=up.name; saveSlot(); renderCurrentTab();
 }
 function rollCareerLength() {
-  const r = Math.floor(Math.random()*20);
-  S.char.careerLength = CAREER_LENGTH[r].label;
+  const r = Math.floor(Math.random()*20)+1;
+  const tier = r<=6 ? 'Novice' : r<=13 ? 'Experienced' : 'Veteran';
+  S.char.careerLength = tier;
   saveSlot(); renderCurrentTab();
 }
 function rollCareerEvent() {
   const e=CAREER_EVENTS[Math.floor(Math.random()*CAREER_EVENTS.length)];
   S.char.careerEvent=e.name; saveSlot(); renderCurrentTab();
 }
+function rollCareerEvent2() {
+  const e=CAREER_EVENTS[Math.floor(Math.random()*CAREER_EVENTS.length)];
+  S.char.careerEvent2=e.name; saveSlot(); renderCurrentTab();
+}
 function selectCareerEvent(name) { S.char.careerEvent=name; saveSlot(); renderCurrentTab(); }
+function selectCareerEvent2(name) { S.char.careerEvent2=name; saveSlot(); renderCurrentTab(); }
+function setLPEventAttr(idx,key) {
+  if(!S.char._lp) S.char._lp={};
+  S.char._lp['event'+idx+'Attr']=key; saveSlot(); renderCurrentTab();
+}
+function setLPEventDisc(idx,key) {
+  if(!S.char._lp) S.char._lp={};
+  S.char._lp['event'+idx+'Disc']=key; saveSlot(); renderCurrentTab();
+}
 function setCreationDirective(desc) { S.char.directive=desc; saveSlot(); renderCurrentTab(); }
 function rollDirective() {
   const d=DIRECTIVE_TABLE[Math.floor(Math.random()*DIRECTIVE_TABLE.length)];
