@@ -5740,18 +5740,25 @@ function onResChange(){
 }
 
 async function enumDevs(){
-  // Request permission from this window so labels are populated and virtual cameras appear
+  // Try to acquire permission in this window — needed for labels and virtual cameras
   try{
-    var s=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    var s=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
     s.getTracks().forEach(function(t){t.stop();});
-  }catch(e){
-    try{
-      var s=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
-      s.getTracks().forEach(function(t){t.stop();});
-    }catch(e2){}
-  }
+  }catch(e){}
+
+  // Enumerate from this window first (sees virtual cameras if permission was granted)
   var devs=[];
   try{devs=await navigator.mediaDevices.enumerateDevices();}catch(e){}
+
+  // If this popup context returned no video devices, fall back to opener's enumeration
+  if(!devs.some(function(d){return d.kind==='videoinput';})){
+    try{
+      if(window.opener&&window.opener.navigator&&window.opener.navigator.mediaDevices){
+        devs=await window.opener.navigator.mediaDevices.enumerateDevices();
+      }
+    }catch(e){}
+  }
+
   var cs=document.getElementById('cam-sel'),ms=document.getElementById('mic-sel');
   devs.forEach(function(d){
     var o=document.createElement('option');o.value=d.deviceId;
