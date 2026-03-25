@@ -3566,34 +3566,56 @@ function clearSlot(i) {
 // ============================================================
 
 function showAddLogEntry() {
-  const bigBtnStyle = `background:var(--surface2);border:2px solid var(--border);border-radius:8px;
-    padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;
-    transition:all 0.15s;color:var(--text);font-family:var(--font);text-align:left;margin-bottom:6px`;
+  const [primary, secondary, ...rest] = LOG_TYPES;
 
-  const bigButtons = LOG_TYPES.slice(0, 2).map(t => `
-    <button onclick="showAddLogEntryTyped('${t.key}')" style="${bigBtnStyle}"
+  const lvl1 = `
+    <button onclick="showAddLogEntryTyped('${primary.key}')" style="
+      background:var(--surface2);border:2px solid var(--border);border-radius:8px;
+      padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;
+      transition:all 0.15s;color:var(--text);font-family:var(--font);text-align:left;margin-bottom:4px"
       onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-      <span style="font-size:28px">${t.emoji}</span>
+      <span style="font-size:28px">${primary.emoji}</span>
       <div>
-        <div style="font-size:13px;font-weight:bold;letter-spacing:1px;text-transform:uppercase">${t.label}</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">${t.desc}</div>
+        <div style="font-size:13px;font-weight:bold;letter-spacing:1px;text-transform:uppercase">${primary.label}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${primary.desc}</div>
       </div>
-    </button>`).join('');
+    </button>`;
 
-  const gridButtons = LOG_TYPES.slice(2).map(t => `
-    <button onclick="showAddLogEntryTyped('${t.key}')" style="
-      background:var(--surface2);border:1px solid var(--border);border-radius:6px;
-      padding:10px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;
-      gap:3px;transition:all 0.15s;color:var(--text);font-family:var(--font);text-align:center
-    " onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-      <span style="font-size:22px">${t.emoji}</span>
-      <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase">${t.label}</span>
-      <span style="font-size:9px;color:var(--muted);line-height:1.3">${t.desc}</span>
-    </button>`).join('');
+  const lvl2 = `
+    <div style="margin-left:20px;margin-bottom:4px;border-left:2px solid var(--border);padding-left:10px">
+      <button onclick="showAddLogEntryTyped('${secondary.key}')" style="
+        background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+        padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;
+        transition:all 0.15s;color:var(--text);font-family:var(--font);text-align:left"
+        onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:22px">${secondary.emoji}</span>
+        <div>
+          <div style="font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase">${secondary.label}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px">${secondary.desc}</div>
+        </div>
+      </button>
+    </div>`;
+
+  const lvl3 = `
+    <div style="margin-left:40px;border-left:2px solid var(--border);padding-left:10px;margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px">
+        ${rest.map(t=>`
+        <button onclick="showAddLogEntryTyped('${t.key}')" style="
+          background:var(--surface2);border:1px solid var(--border);border-radius:5px;
+          padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:8px;
+          transition:all 0.15s;color:var(--text);font-family:var(--font);text-align:left"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:18px">${t.emoji}</span>
+          <div>
+            <div style="font-size:10px;font-weight:bold;letter-spacing:1px;text-transform:uppercase">${t.label}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:1px;line-height:1.3">${t.desc}</div>
+          </div>
+        </button>`).join('')}
+      </div>
+    </div>`;
 
   openModal(`<h2>NEW LOG ENTRY</h2>
-    ${bigButtons}
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">${gridButtons}</div>
+    ${lvl1}${lvl2}${lvl3}
     <button class="btn" onclick="closeModal()" style="width:100%">Cancel</button>
   `);
 }
