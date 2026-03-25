@@ -5017,8 +5017,10 @@ async function openHUD() {
   // HUD reads window.opener._hudDeviceList to avoid cross-window method call issues.
   _hudWin = window.open('', 'stcl-hud', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
   if (!_hudWin) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
+  const _hudHtml = buildHUDHtml();
+  console.log('=== HUD HTML ===\n' + _hudHtml);
   _hudWin.document.open();
-  _hudWin.document.write(buildHUDHtml());
+  _hudWin.document.write(_hudHtml);
   _hudWin.document.close();
   setTimeout(() => hudBroadcast(), 400);
   setTimeout(() => hudBroadcast(), 1000);
