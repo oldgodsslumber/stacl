@@ -3251,7 +3251,7 @@ function renderOracleTab() {
   </div>
 
   <div class="card">
-    <div class="card-title">MISSION & SCENE GENERATORS</div>
+    <div class="card-title">MISSION &amp; ENCOUNTER</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
 
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
@@ -3266,20 +3266,20 @@ function renderOracleTab() {
         ${rCard('incident','INCIDENT','var(--info)')}
       </div>
 
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
         <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">MISSION GENERATOR (d100 × d100)</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-          <button class="btn btn-sm" onclick="genOracle('action_word')">Roll Action Word (d100)</button>
-          <button class="btn btn-sm" onclick="genOracle('meaning_word')">Roll Meaning Word (d100)</button>
+          <button class="btn btn-sm" onclick="genOracle('action_word')">Action Word</button>
+          <button class="btn btn-sm" onclick="genOracle('meaning_word')">Meaning Word</button>
           <button class="btn btn-sm btn-accent" onclick="genOracle('mission_gen')">Roll Both</button>
         </div>
         ${(results.actionWord||results.meaningWord) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-          ${results.actionWord ? `<div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--accent-dim);border-radius:4px;padding:8px">
+          ${results.actionWord ? `<div style="flex:1;min-width:110px;background:var(--surface);border:1px solid var(--accent-dim);border-radius:4px;padding:8px">
             <div style="font-size:9px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">ACTION WORD</div>
             <div style="font-size:15px;font-weight:bold;color:var(--accent)">${escH(results.actionWord.word)}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:4px">${escH(results.actionWord.prompt)}</div>
           </div>` : ''}
-          ${results.meaningWord ? `<div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--info);border-radius:4px;padding:8px">
+          ${results.meaningWord ? `<div style="flex:1;min-width:110px;background:var(--surface);border:1px solid var(--info);border-radius:4px;padding:8px">
             <div style="font-size:9px;color:var(--info);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">MEANING WORD</div>
             <div style="font-size:15px;font-weight:bold;color:var(--info)">${escH(results.meaningWord.word)}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:4px">${escH(results.meaningWord.prompt)}</div>
@@ -3287,55 +3287,102 @@ function renderOracleTab() {
         </div>` : ''}
       </div>
 
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
         <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ENCOUNTER</div>
-        <div style="display:flex;gap:6px;margin-bottom:6px">
+        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
           <button class="btn btn-sm" onclick="genOracle('enc_space')">Space (d20)</button>
           <button class="btn btn-sm" onclick="genOracle('enc_planet')">Planet (d20)</button>
         </div>
         ${(results.enc_space||results.enc_planet) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-          ${results.enc_space ? `<div style="flex:1;min-width:140px">${rCard('enc_space','SPACE ENCOUNTER','var(--accent-dim)')}</div>` : ''}
-          ${results.enc_planet ? `<div style="flex:1;min-width:140px">${rCard('enc_planet','PLANET ENCOUNTER','var(--accent-dim)')}</div>` : ''}
+          ${results.enc_space ? `<div style="flex:1;min-width:110px">${rCard('enc_space','SPACE ENCOUNTER','var(--accent-dim)')}</div>` : ''}
+          ${results.enc_planet ? `<div style="flex:1;min-width:110px">${rCard('enc_planet','PLANET ENCOUNTER','var(--accent-dim)')}</div>` : ''}
         </div>` : ''}
       </div>
 
+    </div>
+    <button class="btn btn-sm btn-danger" style="margin-top:10px" onclick="clearOracleResults()">Clear All Results</button>
+  </div>
+
+  <div style="font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 4px 4px;border-top:1px solid var(--border);margin-top:4px">SCENE &amp; SETTING</div>
+
+  <div class="card-row">
+    <div class="card">
+      <div class="card-title">NPC</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+        <button class="btn btn-xs" onclick="genOracle('npc_archetype')">Archetype</button>
+        <button class="btn btn-xs" onclick="genOracle('npc_upbringing')">Upbringing</button>
+        <button class="btn btn-xs" onclick="genOracle('npc_cultural')">Cultural Trait</button>
+        <button class="btn btn-xs" onclick="genOracle('npc_goals_tbl')">Goal</button>
+        <button class="btn btn-xs" onclick="genOracle('npc_tactics')">Tactics</button>
+        <button class="btn btn-xs" onclick="genOracle('npc_fed_outlook')">Fed. Outlook</button>
+        <button class="btn btn-xs btn-accent" onclick="['npc_archetype','npc_upbringing','npc_cultural','npc_goals_tbl','npc_tactics','npc_fed_outlook'].forEach(k=>genOracle(k))">Roll All</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${rCard('npc_archetype','ARCHETYPE','')}
+        ${rCard('npc_upbringing','UPBRINGING ENV','')}
+        ${rCard('npc_cultural','CULTURAL TRAIT','')}
+        ${rCard('npc_goals_tbl','GOAL','')}
+        ${rCard('npc_tactics','TACTICS','')}
+        ${rCard('npc_fed_outlook','FED. OUTLOOK','')}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SECTOR &amp; SYSTEM</div>
+      <button class="btn btn-sm" style="margin-bottom:4px;width:100%" onclick="genOracle('sector_trait')">Sector Trait</button>
+      <button class="btn btn-sm" style="margin-bottom:4px;width:100%" onclick="genOracle('sys_feature')">System Feature</button>
+      <button class="btn btn-sm" style="width:100%" onclick="genOracle('planet_feature')">Planet Feature</button>
+      ${rCard('sector_trait','SECTOR TRAIT','var(--muted)')}
+      ${rCard('sys_feature','SYSTEM FEATURE','var(--muted)')}
+      ${rCard('planet_feature','PLANET FEATURE','var(--muted)')}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="collapsible-header" onclick="toggleCollapsible('loc-themes')">
+      <span class="card-title" style="margin:0">LOCATION THEMES</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="collapsible-body collapsed" id="loc-themes">
+      <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Generate a location by theme. Roll a theme first, then roll a specific location within it.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">THEME (d10)</div>
+          <button class="btn btn-xs" style="width:100%;margin-bottom:4px" onclick="genOracle('loc_theme')">Roll Theme</button>
+          ${rCard('loc_theme','THEME','')}
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SELECT THEME</div>
+          <select style="background:#000;border:1px solid var(--accent-dim);color:var(--text);padding:3px 6px;font-size:10px;border-radius:3px;font-family:var(--font);width:100%;margin-bottom:6px" onchange="window._locTheme=this.value">
+            ${LOCATION_THEME_NAMES.map(t=>`<option value="${t}"${(window._locTheme||'Alien')===t?' selected':''}>${t}</option>`).join('')}
+          </select>
+          <button class="btn btn-xs btn-accent" style="width:100%" onclick="genOracle('loc_location')">Roll Location (d20)</button>
+          ${rCard('loc_location','LOCATION','')}
+        </div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ALL THEMES REFERENCE</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px">
+          ${LOCATION_THEME_NAMES.map(t=>`<div style="font-size:10px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border)"><span style="color:var(--accent)">${t}:</span> ${LOCATION_THEMES[t][0]}, ${LOCATION_THEMES[t][9]}, \u2026</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 4px 4px;border-top:1px solid var(--border);margin-top:4px">SCENE OUTCOMES</div>
+
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">NPC</div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
-          <button class="btn btn-xs" onclick="genOracle('npc_archetype')">Archetype</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_upbringing')">Upbringing</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_cultural')">Cultural Trait</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_goals_tbl')">Goal</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_tactics')">Tactics</button>
-          <button class="btn btn-xs" onclick="genOracle('npc_fed_outlook')">Fed. Outlook</button>
-          <button class="btn btn-xs btn-accent" onclick="['npc_archetype','npc_upbringing','npc_cultural','npc_goals_tbl','npc_tactics','npc_fed_outlook'].forEach(k=>genOracle(k))">Roll All</button>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${rCard('npc_archetype','ARCHETYPE','')}
-          ${rCard('npc_upbringing','UPBRINGING ENV','')}
-          ${rCard('npc_cultural','CULTURAL TRAIT','')}
-          ${rCard('npc_goals_tbl','GOAL','')}
-          ${rCard('npc_tactics','TACTICS','')}
-          ${rCard('npc_fed_outlook','FED. OUTLOOK','')}
-        </div>
-      </div>
-
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
         <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">COMPLICATION / ADVANTAGE</div>
-        <button class="btn btn-sm" style="margin-bottom:4px;width:100%" onclick="genOracle('complication')">Complication (d20)</button>
-        <button class="btn btn-sm" style="width:100%" onclick="genOracle('advantage')">Advantage (d20)</button>
-        ${rCard('complication','COMPLICATION','var(--danger)')}
-        ${rCard('advantage','ADVANTAGE','var(--success)')}
-      </div>
-
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">SECTOR & SYSTEM</div>
-        <button class="btn btn-sm" style="margin-bottom:4px;width:100%" onclick="genOracle('sector_trait')">Sector Trait</button>
-        <button class="btn btn-sm" style="margin-bottom:4px;width:100%" onclick="genOracle('sys_feature')">System Feature</button>
-        <button class="btn btn-sm" style="width:100%" onclick="genOracle('planet_feature')">Planet Feature</button>
-        ${rCard('sector_trait','SECTOR TRAIT','var(--muted)')}
-        ${rCard('sys_feature','SYSTEM FEATURE','var(--muted)')}
-        ${rCard('planet_feature','PLANET FEATURE','var(--muted)')}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+          <button class="btn btn-sm" onclick="genOracle('complication')">Complication (d20)</button>
+          <button class="btn btn-sm" onclick="genOracle('advantage')">Advantage (d20)</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${results.complication ? `<div style="flex:1;min-width:120px">${rCard('complication','COMPLICATION','var(--danger)')}</div>` : ''}
+          ${results.advantage ? `<div style="flex:1;min-width:120px">${rCard('advantage','ADVANTAGE','var(--success)')}</div>` : ''}
+        </div>
       </div>
 
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
@@ -3349,36 +3396,33 @@ function renderOracleTab() {
         <button class="btn btn-sm" style="width:100%" onclick="genOracle('threat_spend')">Roll Spend Type</button>
         ${rCard('threat_spend','THREAT SPEND','var(--danger)')}
       </div>
-
-
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
-        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">NAME & TIME GENERATORS</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">TIME INTERVAL</div>
-            <button class="btn btn-xs" style="width:100%" onclick="genOracle('time_interval')">Roll d20</button>
-            ${rCard('time_interval','TIME INTERVAL','var(--info)')}
-          </div>
-          <div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">ALIEN NAME / WORLD</div>
-            <div style="display:flex;gap:4px;margin-bottom:4px;align-items:center">
-              <select style="background:#000;border:1px solid var(--accent-dim);color:var(--text);padding:2px 4px;font-size:10px;border-radius:3px;font-family:var(--font)" onchange="window._alienNameSyls=+this.value">
-                <option value="0">Random</option><option value="2">2 syl</option><option value="3">3 syl</option><option value="4">4 syl</option>
-              </select>
-              <button class="btn btn-xs" style="flex:1" onclick="genOracle('alien_name')">Generate ×3</button>
-            </div>
-            ${rCard('alien_name','ALIEN NAMES','var(--lcars-lavender)')}
-          </div>
-          <div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">PLANET NAME</div>
-            <button class="btn btn-xs" style="width:100%" onclick="genOracle('planet_name')">Roll d20 × 2</button>
-            ${rCard('planet_name','PLANET NAME','var(--lcars-ltblue)')}
-          </div>
-        </div>
-      </div>
-
     </div>
-    <button class="btn btn-sm btn-danger" style="margin-top:10px" onclick="clearOracleResults()">Clear All Results</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">NAME &amp; TIME GENERATORS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:4px">TIME INTERVAL</div>
+        <button class="btn btn-xs" style="width:100%" onclick="genOracle('time_interval')">Roll d20</button>
+        ${rCard('time_interval','TIME INTERVAL','var(--info)')}
+      </div>
+      <div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:4px">ALIEN NAME / WORLD</div>
+        <div style="display:flex;gap:4px;margin-bottom:4px;align-items:center">
+          <select style="background:#000;border:1px solid var(--accent-dim);color:var(--text);padding:2px 4px;font-size:10px;border-radius:3px;font-family:var(--font)" onchange="window._alienNameSyls=+this.value">
+            <option value="0">Random</option><option value="2">2 syl</option><option value="3">3 syl</option><option value="4">4 syl</option>
+          </select>
+          <button class="btn btn-xs" style="flex:1" onclick="genOracle('alien_name')">Generate ×3</button>
+        </div>
+        ${rCard('alien_name','ALIEN NAMES','var(--lcars-lavender)')}
+      </div>
+      <div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:4px">PLANET NAME</div>
+        <button class="btn btn-xs" style="width:100%" onclick="genOracle('planet_name')">Roll d20 × 2</button>
+        ${rCard('planet_name','PLANET NAME','var(--lcars-ltblue)')}
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -3433,39 +3477,8 @@ function renderOracleTab() {
   </div>
 
   <div class="card">
-    <div class="collapsible-header" onclick="toggleCollapsible('loc-themes')">
-      <span class="card-title" style="margin:0">LOCATION THEMES</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="collapsible-body collapsed" id="loc-themes">
-      <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Generate a location by theme. Roll a theme first, then roll a specific location within it.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
-          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">THEME (d10)</div>
-          <button class="btn btn-xs" style="width:100%;margin-bottom:4px" onclick="genOracle('loc_theme')">Roll Theme</button>
-          ${rCard('loc_theme','THEME','')}
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
-          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SELECT THEME</div>
-          <select style="background:#000;border:1px solid var(--accent-dim);color:var(--text);padding:3px 6px;font-size:10px;border-radius:3px;font-family:var(--font);width:100%;margin-bottom:6px" onchange="window._locTheme=this.value">
-            ${LOCATION_THEME_NAMES.map(t=>`<option value="${t}"${(window._locTheme||'Alien')===t?' selected':''}>${t}</option>`).join('')}
-          </select>
-          <button class="btn btn-xs btn-accent" style="width:100%" onclick="genOracle('loc_location')">Roll Location (d20)</button>
-          ${rCard('loc_location','LOCATION','')}
-        </div>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
-        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">ALL THEMES REFERENCE</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px">
-          ${LOCATION_THEME_NAMES.map(t=>`<div style="font-size:10px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border)"><span style="color:var(--accent)">${t}:</span> ${LOCATION_THEMES[t][0]}, ${LOCATION_THEMES[t][9]}, \u2026</div>`).join('')}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
     <div class="collapsible-header" onclick="toggleCollapsible('momentum-ref')">
-      <span class="card-title" style="margin:0">MOMENTUM & THREAT REFERENCE</span>
+      <span class="card-title" style="margin:0">MOMENTUM &amp; THREAT REFERENCE</span>
       <span class="collapse-icon">▼</span>
     </div>
     <div class="collapsible-body" id="momentum-ref">
