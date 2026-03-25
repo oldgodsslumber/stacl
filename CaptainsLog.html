@@ -1695,69 +1695,73 @@ function renderSheet() {
     </div>
   </div>
 
-  <div class="card">
-    <div class="collapsible-header" onclick="toggleCollapsible('traits-body')">
-      <span class="card-title" style="margin:0">TRAITS</span>
-      <span class="collapse-icon">▼</span>
+  <div class="card-row">
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleCollapsible('traits-body')">
+        <span class="card-title" style="margin:0">TRAITS</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="collapsible-body" id="traits-body">
+        <div style="flex-wrap:wrap;display:flex">${traitHTML||'<p style="color:var(--muted);font-size:11px">No traits.</p>'}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input id="trait-in" placeholder="Add a Trait…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">
+          <button class="btn btn-sm btn-accent" onclick="addTrait()">ADD</button>
+        </div>
+      </div>
     </div>
-    <div class="collapsible-body" id="traits-body">
-      <div style="flex-wrap:wrap;display:flex">${traitHTML||'<p style="color:var(--muted);font-size:11px">No traits.</p>'}</div>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <input id="trait-in" placeholder="Add a Trait…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">
-        <button class="btn btn-sm btn-accent" onclick="addTrait()">ADD</button>
+
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleCollapsible('gear-body')">
+        <span class="card-title" style="margin:0">EQUIPMENT</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="collapsible-body" id="gear-body">
+        ${gearHTML||'<p style="color:var(--muted);font-size:11px">No equipment.</p>'}
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <input id="gear-name-in" placeholder="Item name" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
+          <input id="gear-qty-in" placeholder="Notes" style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">
+          <button class="btn btn-sm btn-accent" onclick="addGear()">ADD</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="collapsible-header" onclick="toggleCollapsible('gear-body')">
-      <span class="card-title" style="margin:0">EQUIPMENT</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="collapsible-body" id="gear-body">
-      ${gearHTML||'<p style="color:var(--muted);font-size:11px">No equipment.</p>'}
-      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-        <input id="gear-name-in" placeholder="Item name" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
-        <input id="gear-qty-in" placeholder="Notes" style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">
-        <button class="btn btn-sm btn-accent" onclick="addGear()">ADD</button>
+  <div class="card-row">
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleCollapsible('directive-body')">
+        <span class="card-title" style="margin:0">MISSION DIRECTIVE</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="collapsible-body" id="directive-body">
+        <div class="field"><label>Directive</label>
+          <input value="${escH(c.directive)}" placeholder="Current mission directive…" onchange="saveCharField('directive',this.value)">
+        </div>
+        <div class="field"><label>Notes</label>
+          <textarea onchange="saveCharField('directiveNotes',this.value)">${escH(c.directiveNotes)}</textarea>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:6px">MISSION PROGRESS (${c.missionProgress}/15)</div>
+        ${progHTML}
       </div>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="collapsible-header" onclick="toggleCollapsible('directive-body')">
-      <span class="card-title" style="margin:0">MISSION DIRECTIVE</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="collapsible-body" id="directive-body">
-      <div class="field"><label>Directive</label>
-        <input value="${escH(c.directive)}" placeholder="Current mission directive…" onchange="saveCharField('directive',this.value)">
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleCollapsible('bg-body')">
+        <span class="card-title" style="margin:0">BACKGROUND</span>
+        <span class="collapse-icon">▼</span>
       </div>
-      <div class="field"><label>Notes</label>
-        <textarea onchange="saveCharField('directiveNotes',this.value)">${escH(c.directiveNotes)}</textarea>
-      </div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">MISSION PROGRESS (${c.missionProgress}/15)</div>
-      ${progHTML}
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="collapsible-header" onclick="toggleCollapsible('bg-body')">
-      <span class="card-title" style="margin:0">BACKGROUND</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="collapsible-body" id="bg-body">
-      <div style="font-size:11px;color:var(--muted)">
-        <p><strong style="color:var(--text)">Species:</strong> ${escH(c.species||'—')}</p>
-        <p style="margin-top:4px"><strong style="color:var(--text)">Homeworld:</strong> ${escH(c.homeworld||'—')}</p>
-        <p style="margin-top:4px"><strong style="color:var(--text)">Upbringing:</strong> ${escH(c.upbringing||'—')}</p>
-        <p style="margin-top:4px"><strong style="color:var(--text)">Career Event:</strong> ${escH(c.careerEvent||'—')}</p>
-      </div>
-      <div class="field" style="margin-top:8px"><label>Background Notes</label>
-        <textarea onchange="saveCharField('background',this.value)">${escH(c.background)}</textarea>
-      </div>
-      <div class="field"><label>Key Crew Notes</label>
-        <textarea onchange="saveCharField('crewNotes',this.value)">${escH(c.crewNotes)}</textarea>
+      <div class="collapsible-body" id="bg-body">
+        <div style="font-size:11px;color:var(--muted)">
+          <p><strong style="color:var(--text)">Species:</strong> ${escH(c.species||'—')}</p>
+          <p style="margin-top:4px"><strong style="color:var(--text)">Homeworld:</strong> ${escH(c.homeworld||'—')}</p>
+          <p style="margin-top:4px"><strong style="color:var(--text)">Upbringing:</strong> ${escH(c.upbringing||'—')}</p>
+          <p style="margin-top:4px"><strong style="color:var(--text)">Career Event:</strong> ${escH(c.careerEvent||'—')}</p>
+        </div>
+        <div class="field" style="margin-top:8px"><label>Background Notes</label>
+          <textarea onchange="saveCharField('background',this.value)">${escH(c.background)}</textarea>
+        </div>
+        <div class="field"><label>Key Crew Notes</label>
+          <textarea onchange="saveCharField('crewNotes',this.value)">${escH(c.crewNotes)}</textarea>
+        </div>
       </div>
     </div>
   </div>`;
