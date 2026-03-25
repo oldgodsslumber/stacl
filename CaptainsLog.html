@@ -4999,6 +4999,21 @@ async function openHUD() {
   if (_hudChannel) _hudChannel.close();
   _hudChannel = new BroadcastChannel('stcl-hud');
 
+  // Acquire camera in main window first — popup context can't call getUserMedia.
+  // HUD reads the stream via window.opener._hudCamStream.
+  if (window._hudCamStream) { window._hudCamStream.getTracks().forEach(t => t.stop()); window._hudCamStream = null; }
+  const resH = _hudCamResH || 720;
+  const resW = resH===480?640:resH===1080?1920:1280;
+  const camTries = [
+    {video:{width:{ideal:resW},height:{ideal:resH},frameRate:{ideal:30}},audio:true},
+    {video:{width:{ideal:resW},height:{ideal:resH},frameRate:{ideal:30}},audio:false},
+    {video:{width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false},
+    {video:true,audio:false}
+  ];
+  for (const con of camTries) {
+    try { window._hudCamStream = await navigator.mediaDevices.getUserMedia(con); break; } catch(e) {}
+  }
+
   _hudWin = window.open('', 'stcl-hud', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
   if (!_hudWin) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
   _hudWin.document.open();
@@ -5566,6 +5581,7 @@ function selectBg(el){
 
 // === Camera helpers ===
 async function startCamera(hd){
+  if(!hd){var op=getOpenerStream();if(op)return op;}
   var cid=document.getElementById('cam-sel')?document.getElementById('cam-sel').value:'';
   var mid=document.getElementById('mic-sel')?document.getElementById('mic-sel').value:'';
   var vidCon=hd?{width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30}}:{width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}};
@@ -5649,7 +5665,7 @@ function stopRec(){
   var t=document.getElementById('rec-timer');if(t)t.textContent='';
   if(_hdStream){
     if(_bgEffect){_bgEffect.stopEffect();_bgEffect=null;}
-    _hdStream.getTracks().forEach(function(t){t.stop();});
+    if(_hdStream!==getOpenerStream())_hdStream.getTracks().forEach(function(t){t.stop();});
     _hdStream=null;
     if(_stream)applyCameraStream(_stream);
   }
@@ -5673,6 +5689,9 @@ function getOpenerStream(){return window.opener&&window.opener._hudCamStream||nu
 async function startSetupPreview(){
   var noSig=document.getElementById('setup-no-cam');
   var vid=document.getElementById('setup-preview');
+  var opStream=getOpenerStream();
+  if(opStream){_previewStream=opStream;}
+  else{
   var cid=document.getElementById('cam-sel')?document.getElementById('cam-sel').value:'';
   var resH=_camResH||720,resW=resH===480?640:resH===1080?1920:1280;
   var vidCon=cid?{deviceId:{ideal:cid},width:{ideal:resW},height:{ideal:resH}}:{width:{ideal:resW},height:{ideal:resH}};
@@ -5694,6 +5713,7 @@ async function startSetupPreview(){
       if(!_previewStream){if(noSig)noSig.style.display='';return;}
     }
   }
+  }// end else (no opener stream)
   if(vid&&_previewStream){vid.srcObject=_previewStream;if(noSig)noSig.style.display='none';}
   await applyPreviewEffect();
 }
@@ -5734,33 +5754,29 @@ function onResChange(){
   var sel=document.getElementById('res-sel');
   _camResH=sel?+sel.value:720;
   if(_previewEffect){_previewEffect.stopEffect();_previewEffect=null;}
-  if(_previewStream){_previewStream.getTracks().forEach(function(t){t.stop()});}
+  if(_previewStream&&_previewStream!==getOpenerStream()){_previewStream.getTracks().forEach(function(t){t.stop()});}
   _previewStream=null;
   startSetupPreview();
 }
 
 async function enumDevs(){
-  // Try to acquire permission in this window — needed for labels and virtual cameras
+  var devs=null;
+  // Primary: use opener's navigator (already has camera permission + labels)
   try{
-    var s=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
-    s.getTracks().forEach(function(t){t.stop();});
+    if(window.opener&&window.opener.navigator&&window.opener.navigator.mediaDevices){
+      devs=await window.opener.navigator.mediaDevices.enumerateDevices();
+    }
   }catch(e){}
-
-  // Enumerate from this window first (sees virtual cameras if permission was granted)
-  var devs=[];
-  try{devs=await navigator.mediaDevices.enumerateDevices();}catch(e){}
-
-  // If this popup context returned no video devices, fall back to opener's enumeration
-  if(!devs.some(function(d){return d.kind==='videoinput';})){
+  // Fallback: acquire permission in this window and enumerate locally
+  if(!devs||!devs.length){
     try{
-      if(window.opener&&window.opener.navigator&&window.opener.navigator.mediaDevices){
-        devs=await window.opener.navigator.mediaDevices.enumerateDevices();
-      }
-    }catch(e){}
+      await navigator.mediaDevices.getUserMedia({video:true,audio:true})
+        .then(function(s){s.getTracks().forEach(function(t){t.stop();});}).catch(function(){});
+      devs=await navigator.mediaDevices.enumerateDevices();
+    }catch(e){devs=[];}
   }
-
   var cs=document.getElementById('cam-sel'),ms=document.getElementById('mic-sel');
-  devs.forEach(function(d){
+  (devs||[]).forEach(function(d){
     var o=document.createElement('option');o.value=d.deviceId;
     if(d.kind==='videoinput'){o.textContent=d.label||'Camera '+cs.options.length;cs.appendChild(o);}
     else if(d.kind==='audioinput'){o.textContent=d.label||'Mic '+ms.options.length;ms.appendChild(o);}
@@ -5772,7 +5788,8 @@ async function startHUD(cam){
   document.getElementById('setup').style.display='none';
   if(cam){
     try{
-      _stream=await startCamera(false);
+      var opStream=getOpenerStream();
+      _stream=opStream||await startCamera(false);
       if(_previewEffect){
         // Promote the already-running preview effect to the main HUD — no restart needed
         _bgEffect=_previewEffect;_previewEffect=null;
