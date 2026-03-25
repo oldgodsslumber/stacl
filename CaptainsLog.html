@@ -5052,7 +5052,7 @@ function hudBroadcast(extra) {
       rank: c.rank || '',
     } : null,
     ship: {
-      name: sh.name, className: sh.className, scale: sh.scale,
+      name: sh.name, className: sh.className, scale: sh.scale, thumb: sh.thumb||'',
       comms: sh.comms, computers: sh.computers, engines: sh.engines,
       sensors: sh.sensors, structure: sh.structure, weapons: sh.weapons,
       command: sh.command, conn: sh.conn, security: sh.security,
@@ -5258,6 +5258,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
     <div id="h-discs"></div>
   </div>
   <div id="h-shipstats-section" style="display:none">
+    <div id="h-ship-thumb" style="text-align:center;margin:6px 0 4px"></div>
     <div class="sec-div"></div>
     <div class="sec-lbl" style="color:#99CCFF">Ship Systems</div>
     <div id="h-ship-sys"></div>
@@ -5480,6 +5481,9 @@ function applyState(d){
   setText('h-mission-text',c.assignment||c.role||'No mission assigned');
   var sh=d.ship||{};
   setText('h-ship-text',sh.name?(sh.name+(sh.className?' \u00b7 '+sh.className:'')+(sh.scale?' \u00b7 Scale '+sh.scale:'')):'No ship configured');
+
+  // Ship thumbnail
+  setHTML('h-ship-thumb', sh.thumb ? '<img src="'+sh.thumb+'" style="max-width:100%;max-height:90px;object-fit:contain;filter:drop-shadow(0 0 8px #99CCFF)" onerror="this.style.display=\'none\'">' : '');
 
   // Ship Stats — systems use bars (max 12), departments use pip dots (max 5)
   var SYS=[['Comms',sh.comms],['Computers',sh.computers],['Engines',sh.engines],['Sensors',sh.sensors],['Structure',sh.structure],['Weapons',sh.weapons]];
