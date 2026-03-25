@@ -2817,9 +2817,9 @@ function renderNPCsTab() {
       <button class="btn btn-xs btn-danger" style="margin-left:auto" onclick="clearEncounter()">Clear Encounter</button>
     </div>`;
     S.combatEnemies.forEach((ae,idx)=>{
-      const stress = ae.stress || [false,false,false,false,false,false];
+      const stress = ae.stress || [false,false,false];
       let circles = '<div class="stress-track">';
-      for(let i=0;i<6;i++) circles += `<div class="stress-circle${stress[i]?' hit':''}" onclick="toggleEnemyStress(${idx},${i})"></div>`;
+      for(let i=0;i<3;i++) circles += `<div class="stress-circle${stress[i]?' hit':''}" onclick="toggleEnemyStress(${idx},${i})"></div>`;
       circles += '</div>';
       const attColor = ae.attitude==='Hostile'?'var(--danger)':ae.attitude==='Suspicious'?'var(--warning)':ae.attitude==='Friendly'?'var(--success)':ae.attitude==='Allied'?'var(--accent)':'var(--muted)';
       activeHTML += `<div style="border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:8px">
