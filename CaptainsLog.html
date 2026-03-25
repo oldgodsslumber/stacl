@@ -4699,39 +4699,46 @@ function buildHudCtrlHTML() {
   const npcChips = [['None', -1], ...npcs.map((n,i)=>[n.name.slice(0,12), i])]
     .map(([label, idx]) => `<button class="hc-chip${_hudVis.npcSpot===idx?' on':''}" onclick="setHudNpc(${idx})">${escH(label)}</button>`).join('');
   // on = not explicitly false (default-on chips show as active unless turned off)
-  const visChip = (key, label) =>
+  // Determine active key per zone for chip highlighting
+  const rightActive = _hudVis.sectorMap===true ? 'sectorMap' : _hudVis.interiorMap===true ? 'interiorMap' : 'log';
+  const centerActive = _hudVis.encounter===true ? 'encounter' : 'mission';
+  const visChip  = (key, label) =>
     `<button class="hc-chip${_hudVis[key]!==false?' on':''}" onclick="toggleHudVis('${key}')">${label}</button>`;
-  // Left-column exclusive chips (Officer/Ship Stats/Sector — only one active)
   const leftChip = (key, label) =>
     `<button class="hc-chip${_hudVis[key]===true?' on':''}" onclick="toggleHudVis('${key}')">${label}</button>`;
+  const rightChip  = (key, label) =>
+    `<button class="hc-chip${rightActive===key?' on':''}" onclick="toggleHudVis('${key}')">${label}</button>`;
+  const centerChip = (key, label) =>
+    `<button class="hc-chip${centerActive===key?' on':''}" onclick="toggleHudVis('${key}')">${label}</button>`;
   const recOn = !!_hudRec;
   const timerStr = `${String(Math.floor(_hudRecSecs/60)).padStart(2,'0')}:${String(_hudRecSecs%60).padStart(2,'0')}`;
   return `
   <div id="hud-ctrl-panel">
-    <!-- LEFT PANEL zone — mutually exclusive -->
+    <!-- LEFT PANEL — Officer or Ship Stats -->
     <div class="hc-zone">
       <div class="hc-zone-label">← Left Panel</div>
       <div class="hc-chips">
         ${leftChip('stats','Officer')}
         ${leftChip('shipStats','Ship Stats')}
-        ${leftChip('sectorMap','Sector Map')}
       </div>
       <div class="hc-chips">${visChip('vitals','Vitals')}</div>
     </div>
-    <!-- CENTER zone -->
+    <!-- CENTER — Mission or Encounter -->
     <div class="hc-zone">
       <div class="hc-zone-label">Center</div>
       <div class="hc-chips">
-        ${visChip('dice','Dice')}
-        ${visChip('interiorMap','Ship Interior')}
+        ${centerChip('mission','Mission')}
+        ${centerChip('encounter','Encounter')}
       </div>
+      <div class="hc-chips" style="margin-top:3px">${visChip('dice','Dice')}</div>
     </div>
-    <!-- RIGHT PANEL zone -->
+    <!-- RIGHT PANEL — Journal, Sector Map, or Ship Interior -->
     <div class="hc-zone">
       <div class="hc-zone-label">Right Panel →</div>
       <div class="hc-chips">
-        ${visChip('log','Log')}
-        ${visChip('encounter','Encounter')}
+        ${rightChip('log','Journal')}
+        ${rightChip('sectorMap','Sector Map')}
+        ${rightChip('interiorMap','Ship Interior')}
       </div>
       <div class="hc-zone-label" style="margin-top:3px">NPC Spotlight</div>
       <div class="hc-chips">${npcChips||'<span style="font-size:10px;color:var(--muted)">No NPCs</span>'}</div>
@@ -4755,12 +4762,15 @@ function buildHudCtrlHTML() {
   </div>`;
 }
 
-const HUD_LEFT_KEYS = ['stats','shipStats','sectorMap'];
+const HUD_LEFT_KEYS   = ['stats','shipStats'];
+const HUD_RIGHT_KEYS  = ['log','sectorMap','interiorMap'];
+const HUD_CENTER_KEYS = ['mission','encounter'];
 function toggleHudVis(key) {
   _hudVis[key] = !_hudVis[key];
-  // Left-side panels are mutually exclusive — turning one on turns the others off
-  if (_hudVis[key] && HUD_LEFT_KEYS.includes(key)) {
-    HUD_LEFT_KEYS.forEach(k => { if (k !== key) _hudVis[k] = false; });
+  if (_hudVis[key]) {
+    [HUD_LEFT_KEYS, HUD_RIGHT_KEYS, HUD_CENTER_KEYS].forEach(grp => {
+      if (grp.includes(key)) grp.forEach(k => { if (k !== key) _hudVis[k] = false; });
+    });
   }
   hudBroadcast(); refreshHudCtrl();
 }
@@ -4921,18 +4931,15 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 .stress-dots{display:flex;gap:3px}
 .sdot{width:12px;height:12px;border-radius:50%;border:2px solid #7a4a1a;background:#000}
 .sdot.hit{background:#FF2200;border-color:#FF2200}
-/* Center top — mission */
-#p-mission{top:20px;left:230px;right:285px}
-
-/* Sector mini-map — left side */
-#p-sector{top:20px;left:20px;width:200px;bottom:20px}
+/* Center panel — mission or encounter */
+#p-center{top:20px;left:230px;right:285px}
+/* Sector mini-map — inside right panel */
 .smap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
 .scell{display:flex;flex-direction:column;align-items:center;justify-content:center;height:34px;border:1px solid #1a0800;font-size:14px;position:relative;background:rgba(5,3,0,.6)}
 .scell.cur{border:2px solid #FF9900;background:rgba(255,153,0,.1)}
 .scell.void{opacity:.18}
 .scell-name{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:7px;color:#7a4a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 1px}
-/* Ship interior mini-map — popup right of camera, left of journal */
-#p-interior{top:20px;right:285px;width:240px;border-left:2px solid #FF9900;border-right:6px solid #FF9900;border-radius:10px 0 0 10px}
+/* Interior mini-map — inside right panel */
 .imap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
 .icell{display:flex;flex-direction:column;align-items:center;justify-content:center;height:32px;border:1px solid #1a0800;font-size:12px;position:relative;background:rgba(5,3,0,.6)}
 .icell.void{opacity:.12;background:#000}
@@ -5075,16 +5082,19 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
   </div>
 </div>
 
-<!-- RIGHT: Captain's Log + Encounter -->
+<!-- RIGHT: Journal / Sector Map / Ship Interior -->
 <div id="p-right" class="panel" style="display:none">
-  <div class="ph peach">Captain's Log</div>
+  <div class="ph peach" id="p-right-header">Captain's Log</div>
   <div id="h-log-section">
     <div id="h-log-content"><span class="sml">No entries</span></div>
   </div>
-  <div id="h-enc-section">
-    <div class="sec-div"></div>
-    <div class="sec-lbl" style="color:#CC3300">Active Encounter</div>
-    <div id="h-enc-content"><span class="sml">No active encounter</span></div>
+  <div id="h-right-smap" style="display:none">
+    <div style="font-size:9px;color:#CC99FF;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:5px" id="h-sector-name">Sector</div>
+    <div class="smap-grid" id="h-smap"></div>
+  </div>
+  <div id="h-right-imap" style="display:none">
+    <div style="font-size:9px;color:#FF9966;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:5px" id="h-interior-name">Ship Interior</div>
+    <div class="imap-grid" id="h-imap"></div>
   </div>
 </div>
 
@@ -5097,24 +5107,16 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
   <div id="h-spot-notes" style="font-size:10px;color:#9a6a3a;margin-top:8px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical"></div>
 </div>
 
-<!-- TOP CENTER: Mission -->
-<div id="p-mission" class="panel" style="display:none">
-  <div class="ph ltb">Mission</div>
-  <div id="h-mission-text" style="font-size:13px;font-weight:700;color:#FFCC99;text-transform:uppercase;letter-spacing:1px"></div>
-  <div id="h-ship-text" style="font-size:10px;color:#7a4a1a;margin-top:3px;text-transform:uppercase;letter-spacing:0.5px"></div>
-</div>
-
-
-<!-- CENTER: Sector Map -->
-<div id="p-sector" class="panel" style="display:none">
-  <div class="ph" style="background:#CC99FF;color:#000" id="h-sector-name">Sector</div>
-  <div class="smap-grid" id="h-smap"></div>
-</div>
-
-<!-- CENTER: Ship Interior Map -->
-<div id="p-interior" class="panel" style="display:none">
-  <div class="ph peach" id="h-interior-name">Ship Interior</div>
-  <div class="imap-grid" id="h-imap"></div>
+<!-- CENTER: Mission or Encounter -->
+<div id="p-center" class="panel" style="display:none">
+  <div class="ph ltb" id="p-center-header">Mission</div>
+  <div id="h-mission-section">
+    <div id="h-mission-text" style="font-size:13px;font-weight:700;color:#FFCC99;text-transform:uppercase;letter-spacing:1px"></div>
+    <div id="h-ship-text" style="font-size:10px;color:#7a4a1a;margin-top:3px;text-transform:uppercase;letter-spacing:0.5px"></div>
+  </div>
+  <div id="h-enc-section" style="display:none">
+    <div id="h-enc-content"><span class="sml">No active encounter</span></div>
+  </div>
 </div>
 
 <!-- BOTTOM CENTER: Dice -->
@@ -5167,10 +5169,8 @@ function applyState(d){
     setHTML('cr-body',cb||'<div class="sml">Waiting for input\u2026</div>');
     show('p-creation',true);
     show('p-left',false);
-    show('p-sector',false);
-    show('p-interior',false);
     show('p-right',vis.log!==false);
-    show('p-mission',false);
+    show('p-center',false);
     show('p-spotlight',false);
     show('p-dice',vis.dice!==false);
     return;
@@ -5182,14 +5182,23 @@ function applyState(d){
   show('h-officer-section',!showShip);
   show('h-shipstats-section',showShip);
   setText('p-left-header',showShip?'Ship':'Officer');
-  show('p-sector',vis.sectorMap===true);
-  show('p-interior',vis.interiorMap===true);
-  show('p-right',vis.log!==false||vis.encounter!==false);
+  // Right panel: Journal, Sector Map, or Ship Interior (exclusive)
+  var showSmap=vis.sectorMap===true;
+  var showImap=vis.interiorMap===true;
+  var showLog=!showSmap&&!showImap&&vis.log!==false;
+  show('p-right',showLog||showSmap||showImap);
+  show('h-log-section',showLog);
+  show('h-right-smap',showSmap);
+  show('h-right-imap',showImap);
+  setText('p-right-header',showSmap?'Sector Map':showImap?'Ship Interior':'Captain\'s Log');
+  // Center panel: Mission or Encounter (exclusive)
+  var showEnc=vis.encounter===true;
+  show('p-center',true);
+  show('h-mission-section',!showEnc);
+  show('h-enc-section',showEnc);
+  setText('p-center-header',showEnc?'Encounter':'Mission');
   show('p-dice',vis.dice!==false);
-  show('p-mission',true);
   show('h-vitals-wrap',vis.vitals!==false);
-  show('h-log-section',vis.log!==false);
-  show('h-enc-section',vis.encounter!==false);
   // NPC Spotlight — separate floating panel
   var npcSpot=(vis.npcSpot!=null?vis.npcSpot:-1);
   var npcs=d.npcs||[];
