@@ -381,19 +381,20 @@ const SPECIES_LIST = [
     _attr:{}, _attrFree:3, _discOpts:[], _discFree:1},
 ];
 
-const ERAS = ['Enterprise Era (22nd C.)','Original Series (23rd C.)','Golden Age (2280s–2350s)','Next Generation (24th C.)','Deep Space Nine / Voyager','Picard / Discovery Era','Star Trek Online (2409-2411)','26th Century','32nd Century'];
+const ERAS = ['Enterprise Era (22nd C.)','Discovery Era (Early 23rd C.)','Original Series (23rd C.)','Golden Age (2280s–2350s)','Next Generation (24th C.)','Deep Space Nine / Voyager','Picard Era (25th C.)','Star Trek Online (2409-2411)','26th Century','32nd Century'];
 
 // Maps ERAS dropdown values → exact era string used in SHIP_CLASSES
 const ERA_TO_SHIP_ERA = {
-  'Enterprise Era (22nd C.)':     'Enterprise Era',
-  'Original Series (23rd C.)':    'Original Series',
-  'Golden Age (2280s\u20132350s)':'Golden Age',
-  'Next Generation (24th C.)':    'Next Generation',
-  'Deep Space Nine / Voyager':    'Next Generation',
-  'Picard / Discovery Era':       'Picard Era',
-  'Star Trek Online (2409-2411)': 'Star Trek Online (2409-2411)',
-  '26th Century':                 '26th Century',
-  '32nd Century':                 '32nd Century',
+  'Enterprise Era (22nd C.)':       'Enterprise Era',
+  'Discovery Era (Early 23rd C.)':  'Discovery Era',
+  'Original Series (23rd C.)':      'Original Series',
+  'Golden Age (2280s\u20132350s)':  'Golden Age',
+  'Next Generation (24th C.)':      'Next Generation',
+  'Deep Space Nine / Voyager':      'Next Generation',
+  'Picard Era (25th C.)':           'Picard Era',
+  'Star Trek Online (2409-2411)':   'Star Trek Online (2409-2411)',
+  '26th Century':                   '26th Century',
+  '32nd Century':                   '32nd Century',
 };
 
 const ERA_BADGES = [
@@ -402,7 +403,8 @@ const ERA_BADGES = [
   {keys:['Golden Age'],                     src:'badges/03tngbadge.png'},
   {keys:['Next Generation','24th','TNG'],   src:'badges/03tngbadge.png'},
   {keys:['Deep Space','Voyager','DS9','VOY'],src:'badges/04voyds9badge.png'},
-  {keys:['Picard','Discovery'],             src:'badges/05picbadge.png'},
+  {keys:['Discovery'],                      src:'badges/07disbadge.png'},
+  {keys:['Picard'],                         src:'badges/05picbadge.png'},
   {keys:['Online','STO','2409','2410','2411'],src:'badges/06stobadge.png'},
   {keys:['26th','25th','Wells','29th'],      src:'badges/0626thcenturybadge.png'},
   {keys:['32nd','DIS'],                     src:'badges/07disbadge.png'},
@@ -429,16 +431,16 @@ const SHIP_CLASSES = [
   {name:"Warp Delta",era:"Enterprise Era",scale:3,comms:6,computers:5,engines:6,sensors:6,structure:7,weapons:5,command:2,conn:3,security:4,engineering:3,science:1,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_3.png",trait:"Dominating humanity's early era of exploration, the Warp Delta (or Ganges) class was a fixture of the United Earth fleet prior to the NX and Daedalus classes. Early Warp Deltas could fly at a max warp 2, and the Ganges would see warp 3 retrofits."},
   {name:"Walker",era:"Enterprise Era",scale:3,comms:7,computers:8,engines:7,sensors:10,structure:7,weapons:6,command:2,conn:2,security:2,engineering:3,science:3,medicine:3,talent:"",thumb:"shipthumbs/shipthumb_4.png",trait:"Starfleet's go-to exploration vessel prior to the launch of the Constitution. Many of the lessons learned in the half-century leading up to the 5 year mission program were learned from the crews of Walker class vessels, ensuring success in deep space."},
   {name:"Hoover",era:"Enterprise Era",scale:4,comms:6,computers:8,engines:8,sensors:7,structure:8,weapons:8,command:1,conn:2,security:3,engineering:4,science:3,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_5.png",trait:"Originally designed in the early 23rd century, the Hoover was a masterclass in design that held the eye of the engineering corps for decades. While heavily armed, the vessel was seen as versatile and fulfilled a variety of roles throughout its service period."},
-  {name:"Hiawatha",era:"Original Series",scale:3,comms:8,computers:8,engines:6,sensors:9,structure:8,weapons:5,command:2,conn:2,security:2,engineering:1,science:3,medicine:5,talent:"",thumb:"shipthumbs/shipthumb_6.png",trait:"Designed as a medical frigate, the Hiawatha is a floating hospital. With a highly modular pod design, facilities can be tailored to each emergency, ensuring that humanitarian aid is delivered promptly and precisely."},
-  {name:"Cardenas",era:"Original Series",scale:4,comms:7,computers:6,engines:9,sensors:8,structure:6,weapons:7,command:2,conn:3,security:3,engineering:2,science:3,medicine:1,talent:"",thumb:"shipthumbs/shipthumb_7.png",trait:"Designed to operate at high-warp for long periods, the Cardenas class was a fantastic response vessel, and commonly used across the neutral zones."},
-  {name:"Nimitz",era:"Original Series",scale:4,comms:10,computers:7,engines:7,sensors:7,structure:7,weapons:7,command:5,conn:1,security:3,engineering:1,science:3,medicine:1,talent:"",thumb:"shipthumbs/shipthumb_8.png",trait:"Serving as heavy battle cruisers, the Nimitz Class was able to coordinate fleet actions and handle ship formations/actions. Their size and weaponry made them formidable."},
-  {name:"Crossfield",era:"Original Series",scale:4,comms:7,computers:8,engines:8,sensors:8,structure:8,weapons:7,command:1,conn:2,security:2,engineering:4,science:4,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_9.png",trait:"Designed to test the spore drive, the Crossfield initially began as a top secret space frame. Since then, however, engineers have also fielded the frame to test other unique experiments."},
-  {name:"Engle",era:"Original Series",scale:3,comms:8,computers:8,engines:10,sensors:7,structure:6,weapons:6,command:2,conn:3,security:2,engineering:2,science:2,medicine:4,talent:"",thumb:"shipthumbs/shipthumb_10.png",trait:"An escort carrier, the Engle was designed to warp into dangerous situations and provide critical medical care. With hangars throughout the lower decks of the ship, medical shuttles can be quickly dispatched."},
-  {name:"Magee",era:"Original Series",scale:3,comms:7,computers:9,engines:7,sensors:10,structure:6,weapons:5,command:2,conn:2,security:1,engineering:4,science:5,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_11.png",trait:"During the Klingon War, Starfleet made several attempts to build a tighter, compact frame while retaining speed and weaponry. These vessels would be more efficient in war, both in damage output, as well as construction."},
-  {name:"Archer",era:"Original Series",scale:3,comms:9,computers:8,engines:10,sensors:9,structure:6,weapons:6,command:2,conn:4,security:2,engineering:2,science:3,medicine:1,talent:"",thumb:"shipthumbs/shipthumb_12.png",trait:"With a crew of only 14, the Archer was designed to be small, sleek, and fast. Very, very fast. The agile craft could chart new systems and follow up on new discoveries that the Federation would otherwise be slow to react to."},
-  {name:"Atlas",era:"Original Series",scale:6,comms:8,computers:8,engines:9,sensors:8,structure:7,weapons:9,command:3,conn:2,security:3,engineering:3,science:2,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_13.png",trait:"Starfleet's first foray into a vessel of this size, the Atlas is a dreadnought carrier. Housing type F shuttles, the Atlas can dominate and control a battlefield."},
-  {name:"Turing",era:"Original Series",scale:3,comms:7,computers:8,engines:8,sensors:9,structure:9,weapons:8,command:3,conn:2,security:3,engineering:2,science:3,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_14.png",trait:"Section 31, an intelligence branch of Starfleet, uses this class for its clandestine operations. WIth multispectral emitters, it can hide as debris/other objects, as opposed to just cloaking."},
-  {name:"Nimrod",era:"Original Series",scale:5,comms:8,computers:8,engines:8,sensors:8,structure:8,weapons:9,command:4,conn:2,security:3,engineering:2,science:3,medicine:1,talent:"",thumb:"shipthumbs/shipthumb_15.png",trait:"Designed for battle operations, the Nimrod class could operate as a mother ship, releasing a small fleet of drone vessels to intercept enemies."},
+  {name:"Hiawatha",era:"Discovery Era",scale:3,comms:8,computers:8,engines:6,sensors:9,structure:8,weapons:5,command:2,conn:2,security:2,engineering:1,science:3,medicine:5,talent:"",thumb:"shipthumbs/shipthumb_6.png",trait:"Designed as a medical frigate, the Hiawatha is a floating hospital. With a highly modular pod design, facilities can be tailored to each emergency, ensuring that humanitarian aid is delivered promptly and precisely."},
+  {name:"Cardenas",era:"Discovery Era",scale:4,comms:7,computers:6,engines:9,sensors:8,structure:6,weapons:7,command:2,conn:3,security:3,engineering:2,science:3,medicine:1,talent:"",thumb:"shipthumbs/shipthumb_7.png",trait:"Designed to operate at high-warp for long periods, the Cardenas class was a fantastic response vessel, and commonly used across the neutral zones."},
+  {name:"Nimitz",era:"Discovery Era",scale:4,comms:10,computers:7,engines:7,sensors:7,structure:7,weapons:7,command:5,conn:1,security:3,engineering:1,science:3,medicine:1,talent:"",thumb:"shipthumbs/shipthumb_8.png",trait:"Serving as heavy battle cruisers, the Nimitz Class was able to coordinate fleet actions and handle ship formations/actions. Their size and weaponry made them formidable."},
+  {name:"Crossfield",era:"Discovery Era",scale:4,comms:7,computers:8,engines:8,sensors:8,structure:8,weapons:7,command:1,conn:2,security:2,engineering:4,science:4,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_9.png",trait:"Designed to test the spore drive, the Crossfield initially began as a top secret space frame. Since then, however, engineers have also fielded the frame to test other unique experiments."},
+  {name:"Engle",era:"Discovery Era",scale:3,comms:8,computers:8,engines:10,sensors:7,structure:6,weapons:6,command:2,conn:3,security:2,engineering:2,science:2,medicine:4,talent:"",thumb:"shipthumbs/shipthumb_10.png",trait:"An escort carrier, the Engle was designed to warp into dangerous situations and provide critical medical care. With hangars throughout the lower decks of the ship, medical shuttles can be quickly dispatched."},
+  {name:"Magee",era:"Discovery Era",scale:3,comms:7,computers:9,engines:7,sensors:10,structure:6,weapons:5,command:2,conn:2,security:1,engineering:4,science:5,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_11.png",trait:"During the Klingon War, Starfleet made several attempts to build a tighter, compact frame while retaining speed and weaponry. These vessels would be more efficient in war, both in damage output, as well as construction."},
+  {name:"Archer",era:"Discovery Era",scale:3,comms:9,computers:8,engines:10,sensors:9,structure:6,weapons:6,command:2,conn:4,security:2,engineering:2,science:3,medicine:1,talent:"",thumb:"shipthumbs/shipthumb_12.png",trait:"With a crew of only 14, the Archer was designed to be small, sleek, and fast. Very, very fast. The agile craft could chart new systems and follow up on new discoveries that the Federation would otherwise be slow to react to."},
+  {name:"Atlas",era:"Discovery Era",scale:6,comms:8,computers:8,engines:9,sensors:8,structure:7,weapons:9,command:3,conn:2,security:3,engineering:3,science:2,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_13.png",trait:"Starfleet's first foray into a vessel of this size, the Atlas is a dreadnought carrier. Housing type F shuttles, the Atlas can dominate and control a battlefield."},
+  {name:"Turing",era:"Discovery Era",scale:3,comms:7,computers:8,engines:8,sensors:9,structure:9,weapons:8,command:3,conn:2,security:3,engineering:2,science:3,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_14.png",trait:"Section 31, an intelligence branch of Starfleet, uses this class for its clandestine operations. WIth multispectral emitters, it can hide as debris/other objects, as opposed to just cloaking."},
+  {name:"Nimrod",era:"Discovery Era",scale:5,comms:8,computers:8,engines:8,sensors:8,structure:8,weapons:9,command:4,conn:2,security:3,engineering:2,science:3,medicine:1,talent:"",thumb:"shipthumbs/shipthumb_15.png",trait:"Designed for battle operations, the Nimrod class could operate as a mother ship, releasing a small fleet of drone vessels to intercept enemies."},
   {name:"Miranda",era:"Original Series",scale:4,comms:7,computers:8,engines:8,sensors:9,structure:8,weapons:8,command:3,conn:3,security:2,engineering:2,science:3,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_16.png",trait:"Known for its compact design, the Miranda class has filled a variety of mission roles, from defense to exploration, logistics and diplomacy."},
   {name:"Oberth",era:"Original Series",scale:3,comms:8,computers:9,engines:8,sensors:9,structure:7,weapons:6,command:1,conn:3,security:2,engineering:3,science:4,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_17.png",trait:"With a substantial sensor array attached to the bottom of the vessel, the Oberth excels at scientific study. It's computing and sensor power makes it capable of many types of research and study."},
   {name:"Constitution (2260s)",era:"Original Series",scale:4,comms:8,computers:8,engines:8,sensors:8,structure:7,weapons:7,command:3,conn:2,security:3,engineering:2,science:3,medicine:2,talent:"",thumb:"shipthumbs/shipthumb_18.png",trait:"A heavy cruiser, the Constitution was designed for 5 year missions in deep space. With robust capabilities and facilities on-board, the Constitution could operate alone for long periods, without additional Starfleet support."},
