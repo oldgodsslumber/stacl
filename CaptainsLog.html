@@ -2921,23 +2921,8 @@ function renderDiceTab() {
   }
 
   return `
-  <div class="card">
-    <div class="card-title">MOMENTUM &amp; THREAT</div>
-    <div class="res-row">
-      <div class="res-item">
-        <span class="res-val" id="dice-momentum-val">${c.momentum}</span>
-        <span class="res-label">Momentum</span>
-        <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjMomentum(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjMomentum(1)"></button></div>
-      </div>
-      <div class="res-item">
-        <span class="res-val" id="dice-threat-val">${c.threat}</span>
-        <span class="res-label">Threat</span>
-        <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjThreat(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjThreat(1)"></button></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
+  <div class="card-row">
+  <div class="card" style="flex:2;min-width:0">
     <div class="card-title">COMBAT — STRESS TRACKING</div>
     <p style="font-size:10px;color:var(--muted);margin-bottom:10px">3 circles each. Click to fill.</p>
     <div style="margin-bottom:12px">
@@ -2954,6 +2939,24 @@ function renderDiceTab() {
   </div>
 
   <div class="card">
+    <div class="card-title">MOMENTUM &amp; THREAT</div>
+    <div class="res-row">
+      <div class="res-item">
+        <span class="res-val" id="dice-momentum-val">${c.momentum}</span>
+        <span class="res-label">Momentum</span>
+        <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjMomentum(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjMomentum(1)"></button></div>
+      </div>
+      <div class="res-item">
+        <span class="res-val" id="dice-threat-val">${c.threat}</span>
+        <span class="res-label">Threat</span>
+        <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjThreat(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjThreat(1)"></button></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="card-row">
+  <div class="card" style="flex:1;min-width:0">
     <div class="card-title">2D20 TASK ROLLER</div>
     <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Roll 2d20 vs Target Number (Attribute + Discipline). Each die ≤ TN = 1 success. Natural 1 = 2 successes. Natural 20 = complication. Excess successes = Momentum.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end">
@@ -2984,7 +2987,7 @@ function renderDiceTab() {
     <div id="skill-roll-result" style="margin-top:12px">${window._lastRollResult||''}</div>
   </div>
 
-  <div class="card">
+  <div class="card" style="flex:1;min-width:0">
     <div class="card-title">SHIP TASK ROLLER</div>
     <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Roll 2d20 vs System + Department TN. Ship Talents work like Focuses: when a talent applies, any die ≤ the System value scores 2 successes.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end">
@@ -3013,6 +3016,7 @@ function renderDiceTab() {
     </div>
     <button class="btn btn-accent" onclick="rollShipTask()">Roll 2d20</button>
     <div id="ship-roll-result" style="margin-top:12px">${window._lastShipRollResult||''}</div>
+  </div>
   </div>
 
   <div class="card">
