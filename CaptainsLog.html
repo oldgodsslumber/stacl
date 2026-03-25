@@ -67,7 +67,7 @@ input,select,textarea{font-family:var(--font)}
   #nav{position:fixed;bottom:0;left:0;right:0;width:100%;flex-direction:row;border-top:4px solid var(--accent);z-index:100;height:52px;background:#000}
   #nav::before{display:none}
   .nav-btn{flex:1;border-radius:0;margin:0;padding:2px;text-align:center;font-size:9px;height:100%;display:flex;align-items:center;justify-content:center;letter-spacing:0.5px}
-  #content{padding-bottom:68px;padding-left:10px;padding-right:10px}
+  #content{padding-bottom:68px;padding-left:10px;padding-right:10px;width:100%;box-sizing:border-box}
   #slot-bar h1{display:none}
 }
 
@@ -399,11 +399,11 @@ const ERA_TO_SHIP_ERA = {
 
 const ERA_BADGES = [
   {keys:['Enterprise','22nd'],              src:'badges/01entbadge.png'},
-  {keys:['Original','23rd','TOS'],          src:'badges/02tosbadge.png'},
+  {keys:['Discovery'],                      src:'badges/02adisbadge.png'},
+  {keys:['Original','TOS'],                 src:'badges/02tosbadge.png'},
   {keys:['Golden Age'],                     src:'badges/03tngbadge.png'},
   {keys:['Next Generation','24th','TNG'],   src:'badges/03tngbadge.png'},
   {keys:['Deep Space','Voyager','DS9','VOY'],src:'badges/04voyds9badge.png'},
-  {keys:['Discovery'],                      src:'badges/02adisbadge.png'},
   {keys:['Picard'],                         src:'badges/05picbadge.png'},
   {keys:['Online','STO','2409','2410','2411'],src:'badges/06stobadge.png'},
   {keys:['26th','25th','Wells','29th'],      src:'badges/0626thcenturybadge.png'},
