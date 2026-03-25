@@ -4872,8 +4872,8 @@ function hudBroadcast(extra) {
       command: sh.command, conn: sh.conn, security: sh.security,
       engineering: sh.engineering, science: sh.science, medicine: sh.medicine
     },
-    sectorMap: (() => { const sec = S.sectors[S.activeSector] || {}; return { name: sec.name, currentCell: sec.currentCell, cells: (sec.cells||[]).map(c=>({name:c.name, icon:c.icon, isVoid:c.isVoid})) }; })(),
-    interiorMap: { cells: (sh.interiorCells||[]).map(c=>({name:c.name, icon:c.icon, isVoid:c.isVoid})) },
+    sectorMap: (() => { const sec = S.sectors[S.activeSector] || {}; const cur = sec.cells ? sec.cells[sec.currentCell] || {} : {}; return { name: sec.name, currentCell: sec.currentCell, cells: (sec.cells||[]).map(c=>({name:c.name, icon:c.icon, isVoid:c.isVoid})), curName: cur.name||'', curFeature: cur.feature||'', curNotes: cur.notes||'', curType: cur.type||'' }; })(),
+    interiorMap: { cells: (sh.interiorCells||[]).map(c=>({name:c.name, icon:c.icon, isVoid:c.isVoid})), shipName: sh.name||'', shipClass: sh.className||'', shipScale: sh.scale||'' },
     npcs: S.npcs || [],
     encounter: S.combatEnemies || [],
     combatOpps: window._combatOpp || [],
@@ -5101,10 +5101,19 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
   <div id="h-right-smap" style="display:none">
     <div style="font-size:9px;color:#CC99FF;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:5px" id="h-sector-name">Sector</div>
     <div class="smap-grid" id="h-smap"></div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid #2a1200">
+      <div id="h-smap-cur-name" style="font-size:14px;font-weight:700;color:#FF9900;text-transform:uppercase;letter-spacing:1px;line-height:1.2"></div>
+      <div id="h-smap-cur-feature" style="font-size:10px;color:#FFCC99;margin-top:3px"></div>
+      <div id="h-smap-cur-notes" style="font-size:10px;color:#7a4a1a;margin-top:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical"></div>
+    </div>
   </div>
   <div id="h-right-imap" style="display:none">
     <div style="font-size:9px;color:#FF9966;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:5px" id="h-interior-name">Ship Interior</div>
     <div class="imap-grid" id="h-imap"></div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid #2a1200">
+      <div id="h-imap-ship-name" style="font-size:14px;font-weight:700;color:#FF9900;text-transform:uppercase;letter-spacing:1px;line-height:1.2"></div>
+      <div id="h-imap-ship-sub" style="font-size:10px;color:#FFCC99;margin-top:3px"></div>
+    </div>
   </div>
 </div>
 
@@ -5289,17 +5298,22 @@ function applyState(d){
     var nameEl=cell.name?'<div class="scell-name">'+cell.name+'</div>':'';
     return '<div class="'+cls+'">'+icon+nameEl+'</div>';
   }).join(''));
+  setText('h-smap-cur-name',sm.curName||('Location '+(smCur+1)));
+  setText('h-smap-cur-feature',sm.curFeature||'');
+  setText('h-smap-cur-notes',sm.curNotes||'');
 
   // Interior map
   var im=d.interiorMap||{};
   var imCells=im.cells||[];
-  setText('h-interior-name',(sh.name||'Ship')+' Interior');
+  setText('h-interior-name',(im.shipName||sh.name||'Ship')+' Interior');
   setHTML('h-imap',imCells.map(function(cell){
     var cls='icell'+(cell.isVoid?' void':'');
     var icon=cell.icon||'';
     var nameEl=cell.name?'<div class="icell-name">'+cell.name+'</div>':'';
     return '<div class="'+cls+'">'+(icon||(!cell.isVoid?'\u00b7':''))+nameEl+'</div>';
   }).join(''));
+  setText('h-imap-ship-name',im.shipName||sh.name||'');
+  setText('h-imap-ship-sub',(im.shipClass?im.shipClass+' Class':'')+((im.shipClass&&im.shipScale)?' \u00b7 ':'')+((im.shipScale?'Scale '+im.shipScale:'')));
 
   // Dice
   var dice=d.dice;
