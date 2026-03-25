@@ -5765,6 +5765,9 @@ function onResChange(){
 }
 
 async function enumDevs(){
+  // DIAGNOSTIC — remove after debugging
+  var _dbg=document.getElementById('setup-no-cam');
+  if(_dbg){_dbg.style.display='';_dbg.textContent='opener='+(window.opener?'yes':'NO')+' devList='+JSON.stringify(window.opener&&window.opener._hudDeviceList);}
   // Read the device list pre-enumerated by the main window (avoids cross-window method call issues)
   var devs=(window.opener&&window.opener._hudDeviceList)||[];
   // Fallback: try enumerating locally
