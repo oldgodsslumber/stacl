@@ -108,7 +108,10 @@ input,select,textarea{font-family:var(--font)}
 .disc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px}
 @media(max-width:500px){.disc-grid{grid-template-columns:1fr}}
 .disc-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:3px;border:1px solid transparent}
-.disc-name{flex:1;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+.disc-name{flex:1;min-width:0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-row{display:flex;gap:12px;align-items:flex-start}
+.card-row>.card{flex:1;min-width:0}
+@media(max-width:600px){.card-row{flex-direction:column}}
 .disc-dots{display:flex;gap:3px}
 .dot{width:14px;height:14px;border-radius:50%;background:#000;border:2px solid var(--muted);cursor:pointer;transition:all 0.2s}
 .dot.filled{background:var(--accent);border-color:var(--accent)}
@@ -1651,41 +1654,45 @@ function renderSheet() {
     ${attrHTML}
   </div>
 
-  <div class="card">
-    <div class="card-title">DISCIPLINES</div>
-    ${discHTML}
-  </div>
-
-  <div class="card">
-    <div class="card-title">FOCUSES</div>
-    ${focHTML||'<p style="color:var(--muted);font-size:11px">No focuses yet.</p>'}
-    <div style="display:flex;gap:6px;margin-top:8px">
-      <input id="focus-in" placeholder="Add a Focus…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">
-      <button class="btn btn-sm btn-accent" onclick="addFocus()">ADD</button>
+  <div class="card-row">
+    <div class="card">
+      <div class="card-title">DISCIPLINES</div>
+      ${discHTML}
     </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">VITALS</div>
-    <div class="res-row">
-      <div class="res-item">
-        <span class="res-val">${c.momentum}</span>
-        <span class="res-label">Momentum</span>
-        <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjMomentum(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjMomentum(1)"></button></div>
-      </div>
-      <div class="res-item">
-        <span class="res-val">${c.threat}</span>
-        <span class="res-label">Threat</span>
-        <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjThreat(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjThreat(1)"></button></div>
+    <div class="card">
+      <div class="card-title">FOCUSES</div>
+      ${focHTML||'<p style="color:var(--muted);font-size:11px">No focuses yet.</p>'}
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input id="focus-in" placeholder="Add a Focus…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">
+        <button class="btn btn-sm btn-accent" onclick="addFocus()">ADD</button>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">VALUES</div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:8px">Challenge a Value to spend it for a bonus — mark it as challenged for the scene.</div>
-    ${valHTML}
-    <button class="btn btn-sm" style="margin-top:4px" onclick="addValue()">+ Add Value</button>
+  <div class="card-row">
+    <div class="card">
+      <div class="card-title">VITALS</div>
+      <div class="res-row">
+        <div class="res-item">
+          <span class="res-val">${c.momentum}</span>
+          <span class="res-label">Momentum</span>
+          <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjMomentum(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjMomentum(1)"></button></div>
+        </div>
+        <div class="res-item">
+          <span class="res-val">${c.threat}</span>
+          <span class="res-label">Threat</span>
+          <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjThreat(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjThreat(1)"></button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">VALUES</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:8px">Challenge a Value to spend it for a bonus — mark it as challenged for the scene.</div>
+      ${valHTML}
+      <button class="btn btn-sm" style="margin-top:4px" onclick="addValue()">+ Add Value</button>
+    </div>
   </div>
 
   <div class="card">
@@ -2223,7 +2230,7 @@ function renderCS5() {
       <span class="disc-name">${d.full}</span>
       ${dots}
       <span style="font-size:11px;color:var(--accent);min-width:16px">${rank}</span>
-      ${lpB>0?`<span style="font-size:10px;color:var(--muted)">+${lpB} lp = ${finalRank}</span>`:''}
+      ${lpB>0?`<span style="font-size:9px;color:var(--muted);flex-shrink:0">(+${lpB})</span>`:''}
     </div>`;
   });
   discHTML+='</div>';
