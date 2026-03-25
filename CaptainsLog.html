@@ -1953,8 +1953,7 @@ function renderCS1() {
     upbrPicker += `</div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:4px">Upbringing Focus — gain 1 focus related to your upbringing</div>
       <div style="display:flex;gap:6px">
-        <input id="focus-upbr-in" placeholder="Enter upbringing focus…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
-        <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-upbr-in')">ADD FOCUS</button>
+        ${(()=>{const _d=_focusDrafts['focus-upbr-in']||'';const _c=_d&&S.char.focuses.includes(_d);return`<input id="focus-upbr-in" value="${escH(_d)}" placeholder="Enter upbringing focus…" ${_c?'readonly':''} oninput="_focusDrafts['focus-upbr-in']=this.value" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px;${_c?'opacity:0.55;cursor:default;':''}"><button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-upbr-in')" ${_c?'disabled':''}>${_c?'✓':'ADD FOCUS'}</button>`;})()}
       </div>`;
     if ((c.focuses||[]).length > 0) {
       upbrPicker += `<div style="font-size:10px;color:var(--muted);margin-top:5px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>`;
@@ -2039,21 +2038,21 @@ function renderCS2() {
       }
     }
     // Focus input for this track
-    trackPicker += `<div style="font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:4px">Focus 1 — Track: <em>${escH(tr.focus)}</em></div>
-      <div style="display:flex;gap:6px;margin-bottom:6px">
-        <input id="focus-edu-1" placeholder="Enter track focus…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
-        <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-edu-1')">ADD</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Focus 2 — Academic study (free choice)</div>
-      <div style="display:flex;gap:6px;margin-bottom:6px">
-        <input id="focus-edu-2" placeholder="e.g. Astrophysics, Xenobiology, Tactical Analysis…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
-        <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-edu-2')">ADD</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Focus 3 — Academic study (free choice)</div>
-      <div style="display:flex;gap:6px">
-        <input id="focus-edu-3" placeholder="e.g. Leadership, Warp Theory, Emergency Medicine…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
-        <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-edu-3')">ADD</button>
-      </div>`;
+    const focusInputRow = function(id, label, placeholder) {
+      const draft = _focusDrafts[id]||'';
+      const committed = draft && S.char.focuses.includes(draft);
+      const lockedStyle = committed ? 'opacity:0.55;cursor:default;' : '';
+      const addLabel = committed ? '✓' : 'ADD';
+      const addDisabled = committed ? 'disabled' : '';
+      return `<div style="font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:4px">${label}</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input id="${id}" value="${escH(draft)}" placeholder="${placeholder}" ${committed?'readonly':''} oninput="_focusDrafts['${id}']=this.value" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px;${lockedStyle}">
+          <button class="btn btn-sm btn-accent" onclick="addFocusFrom('${id}')" ${addDisabled}>${addLabel}</button>
+        </div>`;
+    }
+    trackPicker += focusInputRow('focus-edu-1', `Focus 1 — Track: <em>${escH(tr.focus)}</em>`, 'Enter track focus…');
+    trackPicker += focusInputRow('focus-edu-2', 'Focus 2 — Academic study (free choice)', 'e.g. Astrophysics, Xenobiology, Tactical Analysis…');
+    trackPicker += focusInputRow('focus-edu-3', 'Focus 3 — Academic study (free choice)', 'e.g. Leadership, Warp Theory, Emergency Medicine…');
     if ((c.focuses||[]).length > 0) {
       trackPicker += `<div style="font-size:10px;color:var(--muted);margin-top:6px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>`;
     }
@@ -2150,8 +2149,7 @@ function renderCS3() {
   <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px">
     <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Career Event Focus</div>
     <div style="display:flex;gap:6px">
-      <input id="focus-event-in" placeholder="Enter career event focus…" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">
-      <button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-event-in')">ADD FOCUS</button>
+      ${(()=>{const _d=_focusDrafts['focus-event-in']||'';const _c=_d&&S.char.focuses.includes(_d);return`<input id="focus-event-in" value="${escH(_d)}" placeholder="Enter career event focus…" ${_c?'readonly':''} oninput="_focusDrafts['focus-event-in']=this.value" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px;${_c?'opacity:0.55;cursor:default;':''}"><button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-event-in')" ${_c?'disabled':''}>${_c?'✓':'ADD FOCUS'}</button>`;})()}
     </div>
     ${(c.focuses||[]).length > 0 ? `<div style="font-size:10px;color:var(--muted);margin-top:5px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>` : ''}
   </div>`;
@@ -3766,6 +3764,7 @@ function toggleNPC(id) {
 // ============================================================
 
 if(!window._combatOpp) window._combatOpp = [];
+var _focusDrafts = {};
 
 function addCombatOpponent() {
   window._combatOpp.push({name:'Opponent', circles:3, stress:Array(3).fill(false)});
@@ -4168,8 +4167,9 @@ function addFocus() {
   S.char.focuses.push(inp.value.trim()); saveSlot(); renderCurrentTab();
 }
 function addFocusFrom(id) {
-  const inp=document.getElementById(id); if(!inp||!inp.value.trim())return;
-  S.char.focuses.push(inp.value.trim()); inp.value=''; saveSlot(); renderCurrentTab();
+  const val=(_focusDrafts[id]||'').trim(); if(!val)return;
+  if(S.char.focuses.includes(val))return;
+  S.char.focuses.push(val); saveSlot(); renderCurrentTab();
 }
 function updateFocus(i,v) { S.char.focuses[i]=v; saveSlot(); }
 function removeFocus(i) { S.char.focuses.splice(i,1); saveSlot(); renderCurrentTab(); }
