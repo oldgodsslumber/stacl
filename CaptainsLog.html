@@ -4991,7 +4991,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 #webcam-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;overflow:hidden}
 #webcam-video{max-width:100%;max-height:100%;object-fit:contain}
 #no-signal{position:absolute;color:#7a4a1a;font-size:11px;letter-spacing:2px}
-#setup{position:absolute;inset:0;background:#000;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#setup{position:absolute;inset:0;background:#000;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px 0 30px;gap:14px;overflow-y:auto}
 .slbl{font-size:10px;color:#CC99FF;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:4px}
 .ssel{background:#0d0500;border:1px solid #FF9900;color:#FFCC99;padding:6px 10px;border-radius:4px;font-family:'Antonio','Arial Narrow',Arial,sans-serif;font-size:12px;width:260px}
 .srow{display:flex;gap:10px;margin-top:4px}
@@ -5586,6 +5586,8 @@ async function startHUD(cam){
     }catch(e){document.getElementById('no-signal').textContent='Camera unavailable';}
   }
   document.getElementById('rec-btn').style.display='';
+  // Request fresh state so panels populate immediately without waiting for next user action
+  if(window.opener&&window.opener.hudBroadcast) window.opener.hudBroadcast();
 }
 enumDevs();
 
