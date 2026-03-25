@@ -5015,7 +5015,8 @@ async function openHUD() {
   }
   // Pre-enumerate devices in main window (where permissions are established).
   // HUD reads window.opener._hudDeviceList to avoid cross-window method call issues.
-  try { window._hudDeviceList = await navigator.mediaDevices.enumerateDevices(); } catch(e) { window._hudDeviceList = []; }
+  // Serialize to plain objects — native InputDeviceInfo objects are not accessible cross-window.
+  try { window._hudDeviceList = (await navigator.mediaDevices.enumerateDevices()).map(function(d){return {kind:d.kind,deviceId:d.deviceId,label:d.label};}); } catch(e) { window._hudDeviceList = []; }
 
   _hudWin = window.open('', 'stcl-hud', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
   if (!_hudWin) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
@@ -5693,7 +5694,8 @@ async function startSetupPreview(){
   var noSig=document.getElementById('setup-no-cam');
   var vid=document.getElementById('setup-preview');
   var opStream=getOpenerStream();
-  if(opStream){_previewStream=opStream;}
+  // Wrap in a new MediaStream so the HUD window owns it — cross-window srcObject assignment is unreliable.
+  if(opStream){try{_previewStream=new MediaStream(opStream.getTracks());}catch(e){_previewStream=opStream;}}
   else{
   var cid=document.getElementById('cam-sel')?document.getElementById('cam-sel').value:'';
   var resH=_camResH||720,resW=resH===480?640:resH===1080?1920:1280;
