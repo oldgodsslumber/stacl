@@ -2803,10 +2803,12 @@ function renderShipTab() {
     </div>
   </div>
 
-  ${interiorMapHTML}
-  <div class="card">
-    <div class="field"><label>Ship Notes</label>
-      <textarea rows="3" onchange="saveShipField('notes',this.value)">${escH(sh.notes)}</textarea>
+  <div class="card-row" style="align-items:flex-start">
+    ${interiorMapHTML}
+    <div class="card">
+      <div class="field"><label>Ship Notes</label>
+        <textarea rows="6" onchange="saveShipField('notes',this.value)">${escH(sh.notes)}</textarea>
+      </div>
     </div>
   </div>
 `;
