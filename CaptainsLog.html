@@ -3007,8 +3007,15 @@ function renderDiceTab() {
   </div>
 
   <div class="card">
-    <div class="card-title">OPPOSITION ROLLER</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Roll for NPCs, enemies, or any opposition. Enter a target number directly. Excess successes add to Threat.</p>
+    <div class="collapsible-header" onclick="toggleOppRoller()" style="border-bottom:1px solid var(--accent-dim);padding-bottom:6px;margin-bottom:0">
+      <div>
+        <span class="card-title" style="margin:0">OPPOSITION ROLLER</span>
+        <span style="font-size:10px;color:var(--muted);margin-left:8px">For advanced play</span>
+      </div>
+      <span id="opp-roller-icon">▼</span>
+    </div>
+    <div class="collapsible-body${_oppRollerOpen?' open':''}" id="opp-roller-body">
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px;margin-top:10px">Roll for NPCs, enemies, or any opposition. Enter a target number directly. Excess successes add to Threat.</p>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;margin-bottom:10px">
       <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">NPC Quality Reference</div>
       <p style="font-size:11px;color:var(--muted);margin-bottom:6px">The NPC's quality score is the target number.</p>
@@ -3044,6 +3051,14 @@ function renderDiceTab() {
     </div>
     <button class="btn btn-danger" onclick="rollOpposition()">Roll Opposition</button>
     <div id="opp-roll-result" style="margin-top:12px">${window._lastOppRollResult||''}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">EXTENDED TASKS</div>
+    <p style="font-size:10px;color:var(--muted);margin-bottom:10px">Track progress toward complex, multi-roll objectives. Fill circles as successes accumulate.</p>
+    <div id="ext-tasks">${renderExtTasks()}</div>
+    <button class="btn btn-sm btn-accent" style="margin-top:8px" onclick="addExtTask()">+ Add Task</button>
   </div>`;
 }
 
@@ -3805,7 +3820,9 @@ function toggleNPC(id) {
 // ============================================================
 
 if(!window._combatOpp) window._combatOpp = [];
+if(!window._extTasks) window._extTasks = [];
 var _focusDrafts = {};
+var _oppRollerOpen = false;
 
 function addCombatOpponent() {
   window._combatOpp.push({name:'Opponent', circles:3, stress:Array(3).fill(false)});
@@ -3822,6 +3839,52 @@ function adjustOppCircles(i,d) {
   opp.circles = Math.max(1, Math.min(20, opp.circles+d));
   opp.stress = Array(opp.circles).fill(false).map((v,j)=>opp.stress[j]||false);
   renderCurrentTab(); hudBroadcast();
+}
+function toggleOppRoller() {
+  _oppRollerOpen = !_oppRollerOpen;
+  const body = document.getElementById('opp-roller-body');
+  if(body) body.classList.toggle('open', _oppRollerOpen);
+  const icon = document.getElementById('opp-roller-icon');
+  if(icon) icon.textContent = _oppRollerOpen ? '▲' : '▼';
+}
+function addExtTask() {
+  window._extTasks.push({name:'Extended Task', circles:5, progress:Array(5).fill(false)});
+  renderCurrentTab();
+}
+function removeExtTask(i) { window._extTasks.splice(i,1); renderCurrentTab(); }
+function renameExtTask(i,v) { window._extTasks[i].name=v; }
+function adjustExtTaskCircles(i,d) {
+  const t=window._extTasks[i];
+  t.circles=Math.max(1,Math.min(20,t.circles+d));
+  t.progress=Array(t.circles).fill(false).map((v,j)=>t.progress[j]||false);
+  renderCurrentTab();
+}
+function toggleExtTaskProgress(i,j) {
+  window._extTasks[i].progress[j]=!window._extTasks[i].progress[j]; renderCurrentTab();
+}
+function resetExtTask(i) {
+  window._extTasks[i].progress=Array(window._extTasks[i].circles).fill(false); renderCurrentTab();
+}
+function renderExtTasks() {
+  if(!window._extTasks.length) return '<p style="font-size:11px;color:var(--muted)">No extended tasks. Add one above.</p>';
+  return window._extTasks.map((t,i)=>{
+    const filled=t.progress.filter(Boolean).length;
+    let circles='<div class="stress-track">';
+    for(let j=0;j<t.circles;j++) circles+=`<div class="stress-circle${t.progress[j]?' hit':''}${!t.progress[j]?' ext-task-circle':''}" onclick="toggleExtTaskProgress(${i},${j})" style="${t.progress[j]?'background:var(--success);border-color:var(--success)':''}"></div>`;
+    circles+='</div>';
+    return `<div style="margin-bottom:10px;padding:8px;border:1px solid var(--border);border-radius:4px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap">
+        <input value="${escH(t.name)}" placeholder="Task name…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:3px;font-size:12px;min-width:0" onchange="renameExtTask(${i},this.value)">
+        <button class="btn btn-xs" onclick="adjustExtTaskCircles(${i},-1)">−</button>
+        <span style="font-size:10px;color:var(--muted)">${t.circles}</span>
+        <button class="btn btn-xs" onclick="adjustExtTaskCircles(${i},1)">+</button>
+        <button class="btn btn-xs btn-danger" onclick="removeExtTask(${i})">✕</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Progress: ${filled}/${t.circles}</div>
+      ${circles}
+      <button class="btn btn-xs" style="margin-top:5px" onclick="resetExtTask(${i})">Reset</button>
+    </div>`;
+  }).join('');
 }
 function togglePlayerStress(i) {
   S.playerStress[i]=!S.playerStress[i]; saveSlot(); renderCurrentTab();
