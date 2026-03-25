@@ -11,9 +11,9 @@
   --surface: #0d0500;
   --surface2: #150800;
   --surface3: #1e0d00;
-  --accent: #FF9900;
+  --accent: #FF9933;
   --accent-dim: #7a3f00;
-  --accent-glow: rgba(255,153,0,0.14);
+  --accent-glow: rgba(255,153,51,0.14);
   --text: #FFCC99;
   --muted: #7a4a1a;
   --border: #2a1200;
@@ -22,7 +22,7 @@
   --info: #99CCFF;
   --success: #66CC66;
   --font: 'Antonio', 'Arial Narrow', Arial, sans-serif;
-  --lcars-orange: #FF9900;
+  --lcars-orange: #FF9933;
   --lcars-peach: #FF9966;
   --lcars-lavender: #CC99FF;
   --lcars-blue: #9999FF;
@@ -32,7 +32,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{touch-action:manipulation}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;letter-spacing:0.5px}
-body.red-alert{--accent:#CC0000;--accent-dim:#5a0000;--accent-glow:rgba(204,0,0,0.18);--text:#FFAAAA;--muted:#6a2020;--border:#2a0a0a;--surface:#0d0000;--surface2:#150000;--surface3:#1e0000}
+body.red-alert{--accent:#CD6363;--accent-dim:#5a0000;--accent-glow:rgba(205,99,99,0.18);--text:#FFAAAA;--muted:#6a2020;--border:#2a0a0a;--surface:#0d0000;--surface2:#150000;--surface3:#1e0000}
 .ship-detail-panel{margin-top:10px;background:var(--surface2);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:14px;animation:fadeIn 0.15s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 button{font-family:var(--font);cursor:pointer}
@@ -54,7 +54,7 @@ input,select,textarea{font-family:var(--font)}
 .nav-btn{background:var(--accent);border:none;color:#000;padding:10px 8px 10px 14px;text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase;transition:all 0.15s;white-space:nowrap;font-weight:700;border-radius:0 50vh 50vh 0;margin:2px 8px 2px 0;font-family:var(--font)}
 .nav-btn:hover{filter:brightness(1.2)}
 .nav-btn.active{background:#fff !important;color:#000 !important}
-#nav-character{background:#FF9900}
+#nav-character{background:#FF9933}
 #nav-map{background:#FF9966}
 #nav-npcs{background:#CC99FF}
 #nav-dice{background:#9999FF}
@@ -108,6 +108,13 @@ input,select,textarea{font-family:var(--font)}
 .disc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px}
 @media(max-width:500px){.disc-grid{grid-template-columns:1fr}}
 .disc-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:3px;border:1px solid transparent}
+.vessel-profile-mobile{display:none}
+@media(max-width:767px){.vessel-profile-desktop{display:none}.vessel-profile-mobile{display:block}}
+.oracle-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.oracle-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:600px){.oracle-grid2{grid-template-columns:1fr}.oracle-grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:400px){.oracle-grid3{grid-template-columns:1fr}}
+@media(max-width:480px){.section-row{flex-direction:column}}
 .disc-name{flex:1;min-width:0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-row{display:flex;gap:12px;align-items:flex-start}
 .card-row>.card{flex:1;min-width:0}
@@ -150,7 +157,7 @@ input,select,textarea{font-family:var(--font)}
 @media(max-width:480px){.cell-icon{font-size:14px}.cell-name{font-size:7px}}
 @media(min-width:481px){.map-cell{font-size:12px}.cell-name{font-size:10px}.cell-num{font-size:11px}.cell-icon{font-size:27px}.cell-icon img{width:45px!important;height:45px!important}.map-ship-card-icon img{width:75px!important;height:75px!important}}
 .map-cell:hover{border-color:var(--accent-dim)}
-.map-cell.current{border-color:var(--accent);box-shadow:0 0 10px rgba(255,153,0,0.5)}
+.map-cell.current{border-color:var(--accent);box-shadow:0 0 10px rgba(255,153,51,0.5)}
 .map-cell.explored{background:#0d0500}
 .map-cell.unexplored{opacity:0.35}
 .map-cell.adjacent{border-color:var(--lcars-ltblue)}
@@ -185,7 +192,7 @@ input,select,textarea{font-family:var(--font)}
 .oracle-detail{font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
 .dice-result-row{display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap}
 .die-result{width:46px;height:46px;border:3px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
-.die-result.success{border-color:var(--accent);color:var(--accent);background:rgba(255,153,0,0.1)}
+.die-result.success{border-color:var(--accent);color:var(--accent);background:rgba(255,153,51,0.1)}
 .die-result.critical{border-color:var(--success);color:var(--success);background:rgba(102,204,102,0.1)}
 .die-result.complication{border-color:var(--danger);color:var(--danger);background:rgba(255,34,0,0.08)}
 .die-result.fail{color:var(--muted)}
@@ -201,7 +208,7 @@ input,select,textarea{font-family:var(--font)}
 .roll-table th{background:var(--accent);color:#000;padding:5px 8px;text-align:left;letter-spacing:2px;text-transform:uppercase;font-size:10px;font-weight:700}
 .roll-table td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:top}
 .roll-table tr:hover td{background:var(--surface)}
-.roll-table tr.selected td{background:rgba(255,153,0,0.1);border-color:var(--accent-dim)}
+.roll-table tr.selected td{background:rgba(255,153,51,0.1);border-color:var(--accent-dim)}
 
 /* ── Wizard ── */
 .wizard-progress{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
@@ -211,9 +218,10 @@ input,select,textarea{font-family:var(--font)}
 .wizard-nav{display:flex;gap:10px;margin-top:16px}
 
 /* ── Inner tabs ── */
-.inner-tabs{display:flex;gap:6px;border-bottom:none;margin-bottom:12px}
-.inner-tab{background:var(--surface3);border:none;color:var(--muted);padding:6px 16px;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:50vh;font-weight:700;font-family:var(--font);transition:all 0.15s}
-.inner-tab.active{background:var(--accent);color:#000}
+.inner-tabs{display:flex;gap:0;border-bottom:none;margin-bottom:14px;background:var(--surface2);border-radius:50vh;padding:3px;border:1px solid var(--border)}
+.inner-tab{background:transparent;border:none;color:var(--muted);padding:9px 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:50vh;font-weight:700;font-family:var(--font);transition:all 0.15s;flex:1;text-align:center}
+.inner-tab:not(.active):hover{color:var(--text)}
+.inner-tab.active{background:var(--accent);color:#000;box-shadow:0 1px 6px rgba(255,153,51,0.35)}
 
 /* ── Collapsible ── */
 .collapsible-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:6px 0;border-bottom:1px solid var(--accent-dim)}
@@ -228,14 +236,14 @@ input,select,textarea{font-family:var(--font)}
 .modal h2{color:var(--accent);font-size:15px;letter-spacing:4px;text-transform:uppercase;margin-bottom:14px;font-weight:700}
 
 /* ── FAB ── */
-.fab{position:fixed;bottom:70px;right:16px;width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;color:transparent;font-size:0;cursor:pointer;display:inline-block;position:fixed;z-index:50;box-shadow:0 2px 16px rgba(255,153,0,0.5);transition:all 0.15s;box-sizing:border-box}
+.fab{position:fixed;bottom:70px;right:16px;width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;color:transparent;font-size:0;cursor:pointer;display:inline-block;position:fixed;z-index:50;box-shadow:0 2px 16px rgba(255,153,51,0.5);transition:all 0.15s;box-sizing:border-box}
 .fab::after{content:'+';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#000;font-size:28px;font-weight:700;line-height:1;font-family:Arial,Helvetica,sans-serif}
 .fab:hover{background:var(--lcars-peach)}
 @media(min-width:768px){.fab{bottom:16px}}
 
 /* ── Misc ── */
 .header-title{font-size:15px;font-weight:700;color:var(--accent);letter-spacing:4px;text-transform:uppercase}
-.glow{text-shadow:0 0 12px rgba(255,153,0,0.7)}
+.glow{text-shadow:0 0 12px rgba(255,153,51,0.7)}
 .hidden{display:none!important}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:#000}
@@ -252,9 +260,9 @@ input,select,textarea{font-family:var(--font)}
 
 /* ── HUD Control Panel ── */
 #hud-ctrl-wrap{position:fixed;bottom:0;left:0;right:0;z-index:300;display:none}
-@media(min-width:768px){#hud-ctrl-wrap{display:block}}
+@media(min-width:768px){#hud-ctrl-wrap{display:block}body.hud-panel-open #content{padding-bottom:130px}}
 #hud-ctrl-panel{background:rgba(0,0,0,.97);border-top:3px solid var(--accent);padding:10px 18px;display:flex;align-items:flex-start;gap:0}
-.hc-zone{display:flex;flex-direction:column;gap:5px;padding:0 18px;border-right:1px solid rgba(255,153,0,0.2);flex-shrink:0}
+.hc-zone{display:flex;flex-direction:column;gap:5px;padding:0 18px;border-right:1px solid rgba(255,153,51,0.2);flex-shrink:0}
 .hc-zone:first-child{padding-left:0}
 .hc-zone-actions{padding:0;border-right:none;margin-left:auto;display:flex;flex-direction:column;gap:5px;align-items:flex-end}
 .hc-zone-label{font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:700;white-space:nowrap}
@@ -266,10 +274,10 @@ input,select,textarea{font-family:var(--font)}
 .hud-open-btn:hover{background:var(--lcars-peach)}
 .hud-rec-row{display:flex;align-items:center;gap:8px}
 .hud-rec-btn{background:#660000;border:none;color:#FF9999;padding:4px 12px;border-radius:50vh;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:var(--font);transition:all 0.15s;white-space:nowrap}
-.hud-rec-btn.on{background:#CC0000;color:#fff;animation:recPulse 1.4s infinite}
+.hud-rec-btn.on{background:#CD6363;color:#fff;animation:recPulse 1.4s infinite}
 .hud-rec-btn:hover{background:#990000;color:#fff}
 #hud-rec-timer{font-size:10px;color:#FF4444;min-width:44px;font-family:var(--font);letter-spacing:1px}
-@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(204,0,0,.6)}50%{box-shadow:0 0 0 6px rgba(204,0,0,0)}}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(205,99,99,.6)}50%{box-shadow:0 0 0 6px rgba(205,99,99,0)}}
 </style>
 </head>
 <body>
@@ -283,7 +291,7 @@ input,select,textarea{font-family:var(--font)}
       <button class="btn btn-sm" onclick="exportToFile()" title="Save all missions to a file">SAVE FILE</button>
       <button class="btn btn-sm" onclick="importFromFile()" title="Load missions from a file">LOAD FILE</button>
       <button class="btn btn-sm" onclick="toggleHudPanel()" id="hud-toggle-btn" title="Stream HUD controls" style="display:none">HUD</button>
-      <button class="btn btn-sm" onclick="toggleRedAlert()" id="red-alert-btn" title="Toggle Red Alert night mode">🔴</button>
+      <button class="btn btn-sm" onclick="toggleRedAlert()" id="red-alert-btn" title="Toggle Red Alert night mode">NIGHT MODE</button>
       <button class="btn btn-sm" onclick="openSlotModal()">⚙</button>
     </div>
   </div>
@@ -2348,7 +2356,7 @@ function renderCS8() {
   const classRows = displayShips.length ? displayShips.map(sc => {
     const isSel = sh.className === sc.name && sh.era === sc.era;
     const isPrev = window._shipClassPreview === sc.name;
-    const rowBg = isPrev ? 'background:rgba(255,153,0,0.22)' : (isSel ? 'background:var(--accent-glow)' : '');
+    const rowBg = isPrev ? 'background:rgba(255,153,51,0.22)' : (isSel ? 'background:var(--accent-glow)' : '');
     return `<tr onclick="previewShipClass('${escQ(sc.name)}')" style="cursor:pointer;${rowBg}">
       <td style="color:${(isSel||isPrev)?'var(--accent)':'var(--text)'};font-weight:bold;padding:5px 8px">${escH(sc.name)}${isSel?' ✓':''}${isPrev?' ▼':''}</td>
       <td style="color:var(--muted);font-size:10px;padding:5px 8px">${escH(sc.era)}</td>
@@ -2433,7 +2441,7 @@ function wireMap() {}
 function setMapSubTab(t) { _mapSubTab=t; renderCurrentTab(); }
 
 function shipIconHtml(size, style) {
-  const extraStyle = style || 'filter:drop-shadow(0 0 4px rgba(255,153,0,0.9))';
+  const extraStyle = style || 'filter:drop-shadow(0 0 4px rgba(255,153,51,0.9))';
   // 1. Use thumb from ship data if available
   if (S.ship && S.ship.thumb) {
     return `<img src="${S.ship.thumb}" style="width:${size}px;height:${size}px;object-fit:contain;${extraStyle}" alt="ship">`;
@@ -2501,7 +2509,7 @@ function renderSectorMap() {
       szDetailHTML = `<div class="card">
         <div class="card-title">AREA ${szSelIdx+1}: ${escH(szSelCell.name)||'Unknown'}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-          ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpToSubZone(${szSelIdx})">${areaIconHtml(sz,14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Travel Here</button>` : ''}
+          ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpToSubZone(${szSelIdx})">${areaIconHtml(sz,14,'filter:drop-shadow(0 0 3px rgba(255,153,51,0.8))')} Travel Here</button>` : ''}
           <button class="btn btn-sm" onclick="toggleSubZoneVoid(${szSelIdx})">${szSelCell.isVoid?'Clear Void':'Mark Void'}</button>
         </div>
         <div class="field"><label>Area Name</label>
@@ -2583,7 +2591,7 @@ function renderSectorMap() {
     detailHTML = `<div class="card" style="flex:1;min-width:0">
       <div class="card-title">ZONE ${selIdx+1}: ${escH(selCell.name)||'Unknown'}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-        ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpTo(${selIdx})">${shipIconHtml(14,'filter:drop-shadow(0 0 3px rgba(255,153,0,0.8))')} Warp Here</button>` : ''}
+        ${!isCur && isAdjSel ? `<button class="btn btn-sm btn-accent" onclick="warpTo(${selIdx})">${shipIconHtml(14,'filter:drop-shadow(0 0 3px rgba(255,153,51,0.8))')} Warp Here</button>` : ''}
         <button class="btn btn-sm" onclick="toggleVoid(${selIdx})">${selCell.isVoid?'Clear Void':'Mark Void'}</button>
         <button class="btn btn-sm" onclick="enterSubZone(${selIdx})">🔍 Enter Zone${selCell.subZone?' ('+selCell.subZone.type+')':''}</button>
       </div>
@@ -2605,7 +2613,7 @@ function renderSectorMap() {
   // Ship quick info
   const ship = S.ship;
   const shipInfo = ship.name ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-size:11px;margin-bottom:10px;display:flex;gap:10px;align-items:center">
-    <span class="map-ship-card-icon" style="font-size:20px;line-height:1;display:flex;align-items:center">${shipIconHtml(50,'filter:drop-shadow(0 0 5px rgba(255,153,0,0.9))')}</span>
+    <span class="map-ship-card-icon" style="font-size:20px;line-height:1;display:flex;align-items:center">${shipIconHtml(50,'filter:drop-shadow(0 0 5px rgba(255,153,51,0.9))')}</span>
     <div>
       <div style="color:var(--accent);font-weight:bold">${escH(ship.name)}</div>
       <div style="color:var(--muted)">${escH(ship.className)} · Scale ${ship.scale} · ${escH(ship.era)}</div>
@@ -2653,7 +2661,7 @@ function renderShipTab() {
   const classRows = filtered.map(c => {
     const isSel = sh.className===c.name && sh.era===c.era;
     const isPrev = window._shipClassPreview === c.name;
-    const rowBg = isPrev ? 'background:rgba(255,153,0,0.22)' : (isSel ? 'background:var(--accent-glow)' : '');
+    const rowBg = isPrev ? 'background:rgba(255,153,51,0.22)' : (isSel ? 'background:var(--accent-glow)' : '');
     return `<tr onclick="previewShipClass('${escQ(c.name)}')" style="cursor:pointer;${rowBg}">
       <td style="color:${(isSel||isPrev)?'var(--accent)':'var(--text)'};font-weight:bold;padding:5px 8px">${escH(c.name)}${isSel?' ✓':''}${isPrev?' ▼':''}</td>
       <td style="color:var(--muted);font-size:10px;padding:5px 8px">${escH(c.era)}</td>
@@ -2668,7 +2676,7 @@ function renderShipTab() {
       <span class="card-title" style="margin:0">SHIP CLASS LIBRARY</span>
       <span class="collapse-icon">▼</span>
     </div>
-    <div class="collapsible-body" id="ship-class-body">
+    <div class="collapsible-body${window._openCollapsibles&&window._openCollapsibles['ship-class-body']?' open':''}" id="ship-class-body">
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${eraFilterBtns}</div>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -2746,6 +2754,13 @@ function renderShipTab() {
     </div>
   </div>`;
 
+  const vesselProfileCard = `<div class="card">
+    <div class="card-title">VESSEL PROFILE</div>
+    ${sh.thumb ? `<div style="text-align:center;margin-bottom:10px"><img src="${escH(sh.thumb)}" style="max-width:100%;max-height:150px;object-fit:contain;filter:drop-shadow(0 0 8px var(--accent))"></div>` : ''}
+    ${sh.trait ? `<p style="font-size:11px;color:var(--text);line-height:1.6">${escH(sh.trait)}</p>` : '<p style="font-size:11px;color:var(--muted)">Select a ship class to see its profile.</p>'}
+    ${sh.className ? `<div style="font-size:10px;color:var(--muted);margin-top:8px;letter-spacing:1px">${escH(sh.className)}${sh.era?' · '+escH(sh.era):''}${sh.scale?' · Scale '+sh.scale:''}</div>` : ''}
+  </div>`;
+
   return classPickerHTML + `
   <div class="card-row">
     <div class="card" style="flex:1;min-width:0">
@@ -2770,38 +2785,31 @@ function renderShipTab() {
         <input value="${escH(sh.trait)}" placeholder="e.g. Exploration Vessel, Warship, Diplomatic Transport" onchange="saveShipField('trait',this.value)">
       </div>
     </div>
+    <div class="vessel-profile-desktop" style="flex:1;min-width:0">${vesselProfileCard}</div>
+  </div>
 
+  <div class="card-row">
     <div class="card" style="flex:1;min-width:0">
-      <div class="card-title">VESSEL PROFILE</div>
-      ${sh.thumb ? `<div style="text-align:center;margin-bottom:10px"><img src="${escH(sh.thumb)}" style="max-width:100%;max-height:150px;object-fit:contain;filter:drop-shadow(0 0 8px var(--accent))"></div>` : ''}
-      ${sh.trait ? `<p style="font-size:11px;color:var(--text);line-height:1.6">${escH(sh.trait)}</p>` : '<p style="font-size:11px;color:var(--muted)">Select a ship class to see its profile.</p>'}
-      ${sh.className ? `<div style="font-size:10px;color:var(--muted);margin-top:8px;letter-spacing:1px">${escH(sh.className)}${sh.era?' · '+escH(sh.era):''}${sh.scale?' · Scale '+sh.scale:''}</div>` : ''}
+      <div class="card-title">SYSTEMS</div>
+      ${sysHTML}
+    </div>
+    <div class="card" style="flex:1;min-width:0">
+      <div class="card-title">DEPARTMENTS</div>
+      ${deptHTML}
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">SYSTEMS (like Attributes)</div>
-    ${sysHTML}
-  </div>
-
-  <div class="card-row">
-    <div class="card">
-      <div class="card-title">DEPARTMENTS (like Disciplines)</div>
-      ${deptHTML}
+    <div class="collapsible-header" onclick="toggleCollapsible('ship-talent-body')">
+      <span class="card-title" style="margin:0">SHIP TALENTS</span>
+      <span class="collapse-icon">▼</span>
     </div>
-
-    <div class="card">
-      <div class="collapsible-header" onclick="toggleCollapsible('ship-talent-body')">
-        <span class="card-title" style="margin:0">SHIP TALENTS</span>
-        <span class="collapse-icon">▼</span>
-      </div>
-      <div class="collapsible-body open" id="ship-talent-body">
-        ${talHTML||'<p style="color:var(--muted);font-size:11px">No talents.</p>'}
-        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          <input id="ship-talent-name-in" placeholder="Talent name" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
-          <input id="ship-talent-desc-in" placeholder="Description" style="flex:2;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
-          <button class="btn btn-sm btn-accent" onclick="addShipTalent()">ADD</button>
-        </div>
+    <div class="collapsible-body${window._openCollapsibles&&window._openCollapsibles['ship-talent-body']!==false?' open':''}" id="ship-talent-body">
+      ${talHTML||'<p style="color:var(--muted);font-size:11px">No talents.</p>'}
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <input id="ship-talent-name-in" placeholder="Talent name" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
+        <input id="ship-talent-desc-in" placeholder="Description" style="flex:2;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
+        <button class="btn btn-sm btn-accent" onclick="addShipTalent()">ADD</button>
       </div>
     </div>
   </div>
@@ -2814,6 +2822,7 @@ function renderShipTab() {
       </div>
     </div>
   </div>
+  <div class="vessel-profile-mobile">${vesselProfileCard}</div>
 `;
 }
 
@@ -3255,7 +3264,7 @@ function renderOracleTab() {
 
   <div class="card">
     <div class="card-title">MISSION &amp; ENCOUNTER</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="oracle-grid2">
 
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
         <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">MISSION TYPE</div>
@@ -3348,7 +3357,7 @@ function renderOracleTab() {
     </div>
     <div class="collapsible-body collapsed" id="loc-themes">
       <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Generate a location by theme. Roll a theme first, then roll a specific location within it.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div class="oracle-grid2" style="margin-bottom:8px">
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px">
           <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">THEME (d10)</div>
           <button class="btn btn-xs" style="width:100%;margin-bottom:4px" onclick="genOracle('loc_theme')">Roll Theme</button>
@@ -3375,7 +3384,7 @@ function renderOracleTab() {
   <div style="font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 4px 4px;border-top:1px solid var(--border);margin-top:4px">SCENE OUTCOMES</div>
 
   <div class="card">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="oracle-grid2">
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;grid-column:span 2">
         <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">COMPLICATION / ADVANTAGE</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
@@ -3404,7 +3413,7 @@ function renderOracleTab() {
 
   <div class="card">
     <div class="card-title">NAME &amp; TIME GENERATORS</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+    <div class="oracle-grid3">
       <div>
         <div style="font-size:9px;color:var(--muted);margin-bottom:4px">TIME INTERVAL</div>
         <button class="btn btn-xs" style="width:100%" onclick="genOracle('time_interval')">Roll d20</button>
@@ -4594,12 +4603,19 @@ function buildShipPreviewPanel() {
   const c = SHIP_CLASSES.find(x => x.name === name);
   if (!c) return '';
   const thumb = c.thumb ? `<img src="${escH(c.thumb)}" style="float:right;max-width:140px;max-height:110px;object-fit:contain;margin:0 0 8px 12px;filter:drop-shadow(0 0 8px var(--accent))" onerror="this.style.display='none'">` : '';
+  const suggested = SHIP_SUGGESTED_TALENTS[c.name];
+  const talentsHTML = suggested && suggested.length
+    ? `<div style="margin-top:10px;clear:both">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Suggested Talents</div>
+        ${suggested.map(t=>`<div style="font-size:11px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border)">${escH(t)}</div>`).join('')}
+      </div>` : '';
   return `<div class="ship-detail-panel">
     ${thumb}
     <div style="color:var(--accent);font-size:15px;font-weight:bold;letter-spacing:2px;text-transform:uppercase">${escH(c.name)}</div>
     <div style="color:var(--muted);font-size:10px;margin:2px 0 8px;letter-spacing:1px">${escH(c.era)} · Scale ${c.scale} &nbsp;·&nbsp; COM ${c.comms} CPU ${c.computers} ENG ${c.engines} SEN ${c.sensors} STR ${c.structure} WPN ${c.weapons}</div>
     ${c.trait ? `<div style="font-size:11px;color:var(--text);line-height:1.6;margin-bottom:10px;clear:none">${escH(c.trait)}</div>` : ''}
-    <div style="clear:both;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+    ${talentsHTML}
+    <div style="clear:both;display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
       <button class="btn" onclick="loadShipClass('${escQ(c.name)}');closeShipPreview()">Select This Vessel</button>
       <button class="btn" style="background:var(--surface3);color:var(--text);border:1px solid var(--border)" onclick="closeShipPreview()">Dismiss</button>
     </div>
@@ -4858,7 +4874,10 @@ function escQ(s) {
   return String(s).replace(/'/g,"\\'").replace(/\n/g,' ');
 }
 function toggleCollapsible(id) {
-  const el=document.getElementById(id); if(el)el.classList.toggle('open');
+  const el=document.getElementById(id); if(!el)return;
+  el.classList.toggle('open');
+  if(!window._openCollapsibles)window._openCollapsibles={};
+  window._openCollapsibles[id]=el.classList.contains('open');
 }
 
 // ============================================================
@@ -4898,6 +4917,7 @@ let _hudRec = null, _hudRecChunks = [], _hudRecTimer = null, _hudRecSecs = 0;
 
 function toggleHudPanel() {
   _hudPanelOpen = !_hudPanelOpen;
+  document.body.classList.toggle('hud-panel-open', _hudPanelOpen);
   const wrap = document.getElementById('hud-ctrl-wrap');
   if (wrap) wrap.innerHTML = _hudPanelOpen ? buildHudCtrlHTML() : '';
 }
@@ -5103,23 +5123,23 @@ function buildHUDHtml() {
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sans-serif;overflow:hidden;width:1280px;height:720px;position:relative}
 /* Tall side panels */
-.panel{position:absolute;z-index:10;background:rgba(0,0,0,.85);border:2px solid #FF9900;border-left:6px solid #FF9900;border-radius:0 10px 10px 0;padding:12px 14px;backdrop-filter:blur(4px);display:flex;flex-direction:column}
-.ph{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#000;background:#FF9900;margin:-12px -14px 10px -4px;padding:5px 12px;flex-shrink:0}
+.panel{position:absolute;z-index:10;background:rgba(0,0,0,.85);border:2px solid #FF9933;border-left:6px solid #FF9933;border-radius:0 10px 10px 0;padding:12px 14px;backdrop-filter:blur(4px);display:flex;flex-direction:column}
+.ph{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#000;background:#FF9933;margin:-12px -14px 10px -4px;padding:5px 12px;flex-shrink:0}
 .ph.lav{background:#CC99FF}.ph.ltb{background:#99CCFF}.ph.peach{background:#FF9966}.ph.blue{background:#9999FF}
 .sml{font-size:10px;color:#7a4a1a;text-transform:uppercase;letter-spacing:1px}
 .sec-lbl{font-size:9px;color:#CC99FF;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin:8px 0 5px;flex-shrink:0}
 .sec-div{border:none;border-top:1px solid #2a1200;margin:6px 0;flex-shrink:0}
 /* Left tall panel */
 #p-left{top:20px;left:20px;width:200px;bottom:20px}
-.h-name{font-size:26px;font-weight:700;color:#FF9900;line-height:1;margin-bottom:3px}
+.h-name{font-size:26px;font-weight:700;color:#FF9933;line-height:1;margin-bottom:3px}
 .h-rank{font-size:11px;color:#FFCC99;text-transform:uppercase;letter-spacing:1px}
 .h-era{font-size:10px;color:#7a4a1a;text-transform:uppercase;letter-spacing:0.5px;margin-top:1px}
 /* Attribute rows */
 .attr-item{display:flex;align-items:center;margin-bottom:5px}
 .attr-item .an{font-size:10px;letter-spacing:0.5px;text-transform:uppercase;color:#FFCC99;width:72px;flex-shrink:0}
 .attr-item .ab{flex:1;height:5px;background:#1a0800;border-radius:3px;margin:0 5px}
-.attr-item .ab-fill{height:100%;border-radius:3px;background:#FF9900}
-.attr-item .av{font-size:15px;font-weight:700;color:#FF9900;min-width:18px;text-align:right;line-height:1}
+.attr-item .ab-fill{height:100%;border-radius:3px;background:#FF9933}
+.attr-item .av{font-size:15px;font-weight:700;color:#FF9933;min-width:18px;text-align:right;line-height:1}
 /* Discipline rows */
 .disc-item-v{display:flex;align-items:center;margin-bottom:5px}
 .disc-item-v .dn{font-size:10px;letter-spacing:0.5px;text-transform:uppercase;color:#FFCC99;width:72px;flex-shrink:0}
@@ -5133,13 +5153,13 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 .det-dot.on{background:#99CCFF;border-color:#99CCFF}
 .res-mini{display:flex;gap:10px}
 .rmi{display:flex;flex-direction:column;align-items:center}
-.rmi .rv{font-size:30px;font-weight:700;color:#FF9900;line-height:1}
+.rmi .rv{font-size:30px;font-weight:700;color:#FF9933;line-height:1}
 .rmi .rl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#CC99FF;font-weight:700}
 /* Right tall panel */
 #p-right{top:20px;right:20px;width:255px;bottom:20px}
 #h-log-section{flex:1;min-height:0;overflow:hidden}
 #h-enc-section{flex-shrink:0}
-.log-entry{border-left:3px solid #FF9900;padding:3px 0 3px 8px;margin-bottom:7px}
+.log-entry{border-left:3px solid #FF9933;padding:3px 0 3px 8px;margin-bottom:7px}
 .log-title{font-size:11px;font-weight:700;color:#FFCC99;text-transform:uppercase}
 .log-date{font-size:9px;color:#7a4a1a;letter-spacing:1px}
 .log-body{font-size:10px;color:#9a6a3a;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -5154,7 +5174,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 /* Sector mini-map — inside right panel */
 .smap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
 .scell{display:flex;flex-direction:column;align-items:center;justify-content:center;height:34px;border:1px solid #1a0800;font-size:14px;position:relative;background:rgba(5,3,0,.6)}
-.scell.cur{border:2px solid #FF9900;background:rgba(255,153,0,.1)}
+.scell.cur{border:2px solid #FF9933;background:rgba(255,153,51,.1)}
 .scell.void{opacity:.18}
 .scell-name{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:7px;color:#7a4a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 1px}
 /* Interior mini-map — inside right panel */
@@ -5166,8 +5186,8 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 #p-spotlight{bottom:20px;right:285px;width:255px}
 /* Center bottom — dice */
 #p-dice{bottom:20px;left:50%;transform:translateX(-50%);min-width:300px}
-.die-box{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border:3px solid #FF9900;border-radius:8px;font-size:22px;font-weight:700}
-.die-box.suc{border-color:#FF9900;color:#FF9900;background:rgba(255,153,0,.12)}
+.die-box{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border:3px solid #FF9933;border-radius:8px;font-size:22px;font-weight:700}
+.die-box.suc{border-color:#FF9933;color:#FF9933;background:rgba(255,153,51,.12)}
 .die-box.crit{border-color:#66CC66;color:#66CC66;background:rgba(102,204,102,.12)}
 .die-box.comp{border-color:#FF2200;color:#FF2200;background:rgba(255,34,0,.08)}
 .die-box.fail{color:#7a4a1a;border-color:#2a1200}
@@ -5175,25 +5195,25 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 #h-dice-info{font-size:10px;color:#7a4a1a;margin-top:5px;text-transform:uppercase;letter-spacing:1px}
 /* Creation panel (same footprint as p-left) */
 #p-creation{top:20px;left:20px;width:200px;bottom:20px}
-.cr-title{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#000;background:#FF9900;margin:-12px -14px 10px -4px;padding:5px 12px;flex-shrink:0}
+.cr-title{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#000;background:#FF9933;margin:-12px -14px 10px -4px;padding:5px 12px;flex-shrink:0}
 .cr-dots{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;flex-shrink:0}
 .cr-dot{width:10px;height:10px;border-radius:50%;border:2px solid #7a4a1a;background:#000}
-.cr-dot.done{background:#FF9900;border-color:#FF9900}
-.cr-dot.active{background:#FFCC99;border-color:#FFCC99;box-shadow:0 0 6px #FF9900}
+.cr-dot.done{background:#FF9933;border-color:#FF9933}
+.cr-dot.active{background:#FFCC99;border-color:#FFCC99;box-shadow:0 0 6px #FF9933}
 .cr-step{font-size:9px;color:#7a4a1a;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;flex-shrink:0}
 #cr-body{overflow:hidden;flex:1}
 .cr-field{margin-bottom:8px}
 .cr-lbl{font-size:9px;color:#CC99FF;letter-spacing:2px;text-transform:uppercase;font-weight:700}
-.cr-val{font-size:15px;font-weight:700;color:#FF9900;text-transform:uppercase;letter-spacing:1px;line-height:1.2}
+.cr-val{font-size:15px;font-weight:700;color:#FF9933;text-transform:uppercase;letter-spacing:1px;line-height:1.2}
 .cr-sub{font-size:10px;color:#FFCC99;margin-top:1px}
 .cr-feats{display:flex;flex-direction:column;gap:3px;margin-top:3px}
 .cr-feat{font-size:10px;color:#99CCFF;padding:2px 6px;border:1px solid #9999FF;border-radius:3px}
 /* Controls, recording */
 #p-controls{position:absolute;top:10px;left:230px;z-index:20;display:flex;align-items:center;gap:8px;}
 .hbtn{padding:4px 12px;border-radius:50vh;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.6);color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
-.hbtn:hover{background:rgba(255,153,0,.2);border-color:#FF9900}
-.hbtn.rec-on{background:#CC0000;border-color:#FF0000;color:#fff;animation:recPulse 1.4s infinite}
-@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(204,0,0,.6)}50%{box-shadow:0 0 0 8px rgba(204,0,0,0)}}
+.hbtn:hover{background:rgba(255,153,51,.2);border-color:#FF9933}
+.hbtn.rec-on{background:#CD6363;border-color:#FF0000;color:#fff;animation:recPulse 1.4s infinite}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(205,99,99,.6)}50%{box-shadow:0 0 0 8px rgba(205,99,99,0)}}
 #rec-timer{font-size:11px;color:#FF4444;min-width:44px}
 /* Webcam + setup */
 #webcam-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;overflow:hidden}
@@ -5201,14 +5221,14 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 #no-signal{position:absolute;color:#7a4a1a;font-size:11px;letter-spacing:2px}
 #setup{position:absolute;inset:0;background:#000;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px 0 30px;gap:14px;overflow-y:auto}
 .slbl{font-size:10px;color:#CC99FF;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:4px}
-.ssel{background:#0d0500;border:1px solid #FF9900;color:#FFCC99;padding:6px 10px;border-radius:4px;font-family:'Antonio','Arial Narrow',Arial,sans-serif;font-size:12px;width:260px}
+.ssel{background:#0d0500;border:1px solid #FF9933;color:#FFCC99;padding:6px 10px;border-radius:4px;font-family:'Antonio','Arial Narrow',Arial,sans-serif;font-size:12px;width:260px}
 .srow{display:flex;gap:10px;margin-top:4px}
 .sbtn{padding:8px 24px;border-radius:50vh;border:none;cursor:pointer;font-family:'Antonio','Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
 .sbtn.skip{background:#0d0500;border:2px solid #7a4a1a;color:#7a4a1a}
-.sbtn.go{background:#FF9900;color:#000}
+.sbtn.go{background:#FF9933;color:#000}
 .bg-grid{display:flex;flex-wrap:wrap;gap:5px;max-width:380px;margin-top:4px}
 .bg-opt{width:78px;height:48px;border:2px solid #2a1200;border-radius:4px;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#FFCC99;background-size:cover;background-position:center;padding-bottom:3px;font-weight:700;font-family:'Antonio','Arial Narrow',Arial,sans-serif;text-shadow:0 1px 4px rgba(0,0,0,.9)}
-.bg-opt.selected{border-color:#FF9900;border-width:3px}
+.bg-opt.selected{border-color:#FF9933;border-width:3px}
 #setup-preview-wrap{position:relative;width:280px;height:158px;border:1px solid #2a1200;border-radius:4px;background:#000;overflow:hidden;flex-shrink:0}
 #setup-preview{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 #setup-no-cam{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#2a1200;text-transform:uppercase;letter-spacing:2px}
@@ -5221,7 +5241,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 <div id="webcam-wrap"><video id="webcam-video" autoplay muted playsinline></video><span id="no-signal"></span></div>
 
 <div id="setup">
-  <div style="font-size:18px;font-weight:700;color:#FF9900;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px">CAPTAIN'S LOG HUD</div>
+  <div style="font-size:18px;font-weight:700;color:#FF9933;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px">CAPTAIN'S LOG HUD</div>
   <div id="setup-preview-wrap">
     <video id="setup-preview" autoplay muted playsinline></video>
     <div id="setup-no-cam">No camera</div>
@@ -5249,9 +5269,9 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
   </div>
   <div id="seg-controls" style="display:none;margin-top:6px;border-top:1px solid #2a1200;padding-top:8px">
     <div style="display:flex;justify-content:space-between;align-items:center"><div class="slbl">Cutout Sharpness</div><span class="slbl" id="thresh-val">140</span></div>
-    <input type="range" id="thresh-sl" min="30" max="220" value="140" oninput="onThreshChange(this.value)" style="width:100%;accent-color:#FF9900;margin:2px 0 6px">
+    <input type="range" id="thresh-sl" min="30" max="220" value="140" oninput="onThreshChange(this.value)" style="width:100%;accent-color:#FF9933;margin:2px 0 6px">
     <div style="display:flex;justify-content:space-between;align-items:center"><div class="slbl">Edge Softness</div><span class="slbl" id="feather-val">4px</span></div>
-    <input type="range" id="feather-sl" min="0" max="16" value="4" oninput="onFeatherChange(this.value)" style="width:100%;accent-color:#FF9900;margin:2px 0 6px">
+    <input type="range" id="feather-sl" min="0" max="16" value="4" oninput="onFeatherChange(this.value)" style="width:100%;accent-color:#FF9933;margin:2px 0 6px">
     <div class="slbl">Model</div>
     <select class="ssel" id="model-sel" onchange="onModelChange()">
       <option value="0">Portrait — close-up / head &amp; shoulders</option>
@@ -5316,7 +5336,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
     <div style="font-size:9px;color:#CC99FF;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:5px" id="h-sector-name">Sector</div>
     <div class="smap-grid" id="h-smap"></div>
     <div style="margin-top:8px;padding-top:8px;border-top:1px solid #2a1200">
-      <div id="h-smap-cur-name" style="font-size:14px;font-weight:700;color:#FF9900;text-transform:uppercase;letter-spacing:1px;line-height:1.2"></div>
+      <div id="h-smap-cur-name" style="font-size:14px;font-weight:700;color:#FF9933;text-transform:uppercase;letter-spacing:1px;line-height:1.2"></div>
       <div id="h-smap-cur-feature" style="font-size:10px;color:#FFCC99;margin-top:3px"></div>
       <div id="h-smap-cur-notes" style="font-size:10px;color:#7a4a1a;margin-top:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical"></div>
     </div>
@@ -5325,7 +5345,7 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
     <div style="font-size:9px;color:#FF9966;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:5px" id="h-interior-name">Ship Interior</div>
     <div class="imap-grid" id="h-imap"></div>
     <div style="margin-top:8px;padding-top:8px;border-top:1px solid #2a1200">
-      <div id="h-imap-ship-name" style="font-size:14px;font-weight:700;color:#FF9900;text-transform:uppercase;letter-spacing:1px;line-height:1.2"></div>
+      <div id="h-imap-ship-name" style="font-size:14px;font-weight:700;color:#FF9933;text-transform:uppercase;letter-spacing:1px;line-height:1.2"></div>
       <div id="h-imap-ship-sub" style="font-size:10px;color:#FFCC99;margin-top:3px"></div>
     </div>
   </div>
@@ -5588,7 +5608,7 @@ function applyState(d){
   var ps=d.playerStress||[false,false,false];
   var charName=(d.char&&d.char.name)||'Crew';
   var psDots=ps.map(function(s){return '<div class="sdot'+(s?' hit':'')+'"></div>';}).join('');
-  var playerRow='<div class="enc-row"><div class="enc-name" style="color:#FF9900">'+charName+'</div><div class="stress-dots">'+psDots+'</div></div>';
+  var playerRow='<div class="enc-row"><div class="enc-name" style="color:#FF9933">'+charName+'</div><div class="stress-dots">'+psDots+'</div></div>';
   var oppRows=allOpps.map(function(e){
     var stress=e.stress||[];
     var count=e.circles||stress.length||3;
