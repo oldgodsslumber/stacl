@@ -5018,7 +5018,6 @@ async function openHUD() {
   _hudWin = window.open('', 'stcl-hud', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
   if (!_hudWin) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
   const _hudHtml = buildHUDHtml();
-  console.log('=== HUD HTML ===\n' + _hudHtml);
   _hudWin.document.open();
   _hudWin.document.write(_hudHtml);
   _hudWin.document.close();
@@ -5408,7 +5407,7 @@ function applyState(d){
   show('h-log-section',showLog);
   show('h-right-smap',showSmap);
   show('h-right-imap',showImap);
-  setText('p-right-header',showSmap?'Sector Map':showImap?'Ship Interior':'Captain\'s Log');
+  setText('p-right-header',showSmap?'Sector Map':showImap?'Ship Interior':"Captain's Log");
   // Center panel: Mission, Encounter, Oracle, or Extended Tasks (exclusive)
   var showEnc=vis.encounter===true;
   var showOracle=vis.oracle===true;
@@ -5486,7 +5485,7 @@ function applyState(d){
   setText('h-ship-text',sh.name?(sh.name+(sh.className?' \u00b7 '+sh.className:'')+(sh.scale?' \u00b7 Scale '+sh.scale:'')):'No ship configured');
 
   // Ship thumbnail
-  setHTML('h-ship-thumb', sh.thumb ? '<img src="'+sh.thumb+'" style="max-width:100%;max-height:90px;object-fit:contain;filter:drop-shadow(0 0 8px #99CCFF)" onerror="this.style.display=\'none\'">' : '');
+  setHTML('h-ship-thumb', sh.thumb ? '<img src="'+sh.thumb+'" style="max-width:100%;max-height:90px;object-fit:contain;filter:drop-shadow(0 0 8px #99CCFF)" onerror="this.style.display=\\'none\\'">' : '');
 
   // Ship Stats — systems use bars (max 12), departments use pip dots (max 5)
   var SYS=[['Comms',sh.comms],['Computers',sh.computers],['Engines',sh.engines],['Sensors',sh.sensors],['Structure',sh.structure],['Weapons',sh.weapons]];
