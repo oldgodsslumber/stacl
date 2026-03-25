@@ -228,7 +228,8 @@ input,select,textarea{font-family:var(--font)}
 .modal h2{color:var(--accent);font-size:15px;letter-spacing:4px;text-transform:uppercase;margin-bottom:14px;font-weight:700}
 
 /* ── FAB ── */
-.fab{position:fixed;bottom:70px;right:16px;width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;color:#000;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:50;box-shadow:0 2px 16px rgba(255,153,0,0.5);font-weight:700;transition:all 0.15s}
+.fab{position:fixed;bottom:70px;right:16px;width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;color:transparent;font-size:0;cursor:pointer;display:inline-block;position:fixed;z-index:50;box-shadow:0 2px 16px rgba(255,153,0,0.5);transition:all 0.15s;box-sizing:border-box}
+.fab::after{content:'+';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#000;font-size:28px;font-weight:700;line-height:1;font-family:Arial,Helvetica,sans-serif}
 .fab:hover{background:var(--lcars-peach)}
 @media(min-width:768px){.fab{bottom:16px}}
 
@@ -3550,7 +3551,7 @@ function renderLogTab() {
     </div>
     <div id="log-list">${entriesHTML}</div>
   </div>
-  <button class="fab" onclick="showAddLogEntry()" title="New log entry">+</button>`;
+  <button class="fab" onclick="showAddLogEntry()" title="New log entry"></button>`;
 }
 
 // ============================================================
