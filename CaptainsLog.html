@@ -3889,6 +3889,8 @@ function oracleRoll(likelihood) {
   document.getElementById('oracle-result-text').className=`oracle-result ${cls}`;
   document.getElementById('oracle-result-text').textContent=result;
   document.getElementById('oracle-sub-text').textContent=sub;
+  window._lastOracleResult = { type: `Yes/No · ${likelihood}`, result, sub };
+  hudBroadcast();
 }
 
 function genOracle(type) {
@@ -3975,6 +3977,12 @@ function genOracle(type) {
       window._storyResults['loc_location']={name:tbl[r],desc:`Theme: ${theme} (${r+1})`};
       break;
     }
+  }
+  const _res = window._storyResults[type];
+  if (_res) {
+    const _label = type.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    window._lastOracleResult = { type: _label, result: [_res.name, _res.desc].filter(Boolean).join(' — ') };
+    hudBroadcast();
   }
   renderCurrentTab();
 }
@@ -4701,7 +4709,7 @@ function buildHudCtrlHTML() {
   // on = not explicitly false (default-on chips show as active unless turned off)
   // Determine active key per zone for chip highlighting
   const rightActive = _hudVis.sectorMap===true ? 'sectorMap' : _hudVis.interiorMap===true ? 'interiorMap' : 'log';
-  const centerActive = _hudVis.encounter===true ? 'encounter' : 'mission';
+  const centerActive = _hudVis.encounter===true ? 'encounter' : _hudVis.oracle===true ? 'oracle' : 'mission';
   const visChip  = (key, label) =>
     `<button class="hc-chip${_hudVis[key]!==false?' on':''}" onclick="toggleHudVis('${key}')">${label}</button>`;
   const leftChip = (key, label) =>
@@ -4729,6 +4737,7 @@ function buildHudCtrlHTML() {
       <div class="hc-chips">
         ${centerChip('mission','Mission')}
         ${centerChip('encounter','Encounter')}
+        ${centerChip('oracle','Oracle')}
       </div>
       <div class="hc-chips" style="margin-top:3px">${visChip('dice','Dice')}</div>
     </div>
@@ -4764,7 +4773,7 @@ function buildHudCtrlHTML() {
 
 const HUD_LEFT_KEYS   = ['stats','shipStats'];
 const HUD_RIGHT_KEYS  = ['log','sectorMap','interiorMap'];
-const HUD_CENTER_KEYS = ['mission','encounter'];
+const HUD_CENTER_KEYS = ['mission','encounter','oracle'];
 function toggleHudVis(key) {
   _hudVis[key] = !_hudVis[key];
   if (_hudVis[key]) {
@@ -4869,6 +4878,7 @@ function hudBroadcast(extra) {
     encounter: S.combatEnemies || [],
     combatOpps: window._combatOpp || [],
     playerStress: S.playerStress || [false,false,false],
+    oracle: window._lastOracleResult || null,
     dice: _lastRollData,
     log: (S.log || []).slice(-3).reverse(),
     vis: _hudVis,
@@ -5117,6 +5127,11 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
   <div id="h-enc-section" style="display:none">
     <div id="h-enc-content"><span class="sml">No active encounter</span></div>
   </div>
+  <div id="h-oracle-section" style="display:none">
+    <div class="sml" id="h-oracle-type" style="margin-bottom:6px"></div>
+    <div id="h-oracle-result" style="font-size:20px;font-weight:700;color:#CC99FF;text-transform:uppercase;letter-spacing:2px;line-height:1.2"></div>
+    <div id="h-oracle-sub" style="font-size:10px;color:#7a4a1a;margin-top:6px"></div>
+  </div>
 </div>
 
 <!-- BOTTOM CENTER: Dice -->
@@ -5191,12 +5206,20 @@ function applyState(d){
   show('h-right-smap',showSmap);
   show('h-right-imap',showImap);
   setText('p-right-header',showSmap?'Sector Map':showImap?'Ship Interior':'Captain\'s Log');
-  // Center panel: Mission or Encounter (exclusive)
+  // Center panel: Mission, Encounter, or Oracle (exclusive)
   var showEnc=vis.encounter===true;
+  var showOracle=vis.oracle===true;
   show('p-center',true);
-  show('h-mission-section',!showEnc);
+  show('h-mission-section',!showEnc&&!showOracle);
   show('h-enc-section',showEnc);
-  setText('p-center-header',showEnc?'Encounter':'Mission');
+  show('h-oracle-section',showOracle);
+  setText('p-center-header',showEnc?'Encounter':showOracle?'Oracle':'Mission');
+  if(showOracle){
+    var orc=d.oracle||null;
+    setText('h-oracle-type',(orc&&orc.type)||'No result yet');
+    setText('h-oracle-result',(orc&&orc.result)||'\u2014');
+    setText('h-oracle-sub',(orc&&orc.sub)||'');
+  }
   show('p-dice',vis.dice!==false);
   show('h-vitals-wrap',vis.vitals!==false);
   // NPC Spotlight — separate floating panel
