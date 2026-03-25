@@ -5705,7 +5705,11 @@ async function startSetupPreview(){
           var fbCon=cid?{deviceId:{ideal:cid},width:{ideal:1280},height:{ideal:720}}:{width:{ideal:1280},height:{ideal:720}};
           _previewStream=await navigator.mediaDevices.getUserMedia({video:fbCon,audio:false});
         }catch(e2){if(noSig)noSig.style.display='';return;}
-      }else{if(noSig)noSig.style.display='';return;}
+      }else{
+        // Last resort — no constraints, let browser pick any camera
+        try{_previewStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}catch(e2){}
+        if(!_previewStream){if(noSig)noSig.style.display='';return;}
+      }
     }
   }
   if(vid&&_previewStream){vid.srcObject=_previewStream;if(noSig)noSig.style.display='none';}
@@ -5786,7 +5790,7 @@ async function enumDevs(){
     if(d.kind==='videoinput'){o.textContent=d.label||'Camera '+cs.options.length;cs.appendChild(o);}
     else if(d.kind==='audioinput'){o.textContent=d.label||'Mic '+ms.options.length;ms.appendChild(o);}
   });
-  if(cs.options.length>1||getOpenerStream())startSetupPreview();
+  startSetupPreview();
 }
 
 async function startHUD(cam){
