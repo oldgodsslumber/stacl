@@ -3653,16 +3653,16 @@ function saveLogEntryEdit() {
 
 function showAddNPC() {
   const factionOpts = ['Federation','Klingon','Romulan','Cardassian','Borg','Ferengi','Civilian','Other'].map(f=>`<option>${f}</option>`).join('');
-  const attOpts = ['Hostile','Suspicious','Neutral','Friendly','Allied'].map(a=>`<option>${a}</option>`).join('');
-  const speciesOpts = Object.keys(SPECIES_NAMES).map(s=>`<option>${s}</option>`).join('');
+  const attOpts = ['Hostile','Suspicious','Neutral','Friendly','Allied'].map(a=>`<option${a==='Neutral'?' selected':''}>${a}</option>`).join('');
+  const speciesOpts = Object.keys(SPECIES_NAMES).map(s=>`<option${s==='Human'?' selected':''}>${s}</option>`).join('');
   openModal(`<h2>CREATE NPC</h2>
+  <div class="field"><label>Species</label><div style="display:flex;gap:6px"><select id="npc-species-sel" style="flex:1">${speciesOpts}</select><button class="btn btn-xs" onclick="(()=>{const ks=Object.keys(SPECIES_NAMES);document.getElementById('npc-species-sel').value=ks[Math.floor(Math.random()*ks.length)]})()" title="Random species">🎲</button></div></div>
   <div class="field"><label>Name</label><div style="display:flex;gap:6px"><input id="npc-name-in" placeholder="e.g. Commander T'Rel…" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-name-in').value=rollNPCName(document.getElementById('npc-species-sel').value)" title="Random name">🎲</button></div></div>
-  <div class="field"><label>Species</label><select id="npc-species-sel">${speciesOpts}</select></div>
   <div class="field"><label>Faction / Affiliation</label><select id="npc-faction-sel">${factionOpts}</select></div>
-  <div class="field"><label>Role / Archetype</label><input id="npc-role-in" placeholder="e.g. Science Officer, Spy…"></div>
   <div class="field"><label>Attitude</label><select id="npc-att-sel">${attOpts}</select></div>
-  <div class="field"><label>Trait / Description</label><input id="npc-trait-in" placeholder="e.g. Haunted by past…"></div>
-  <div class="field"><label>Goal</label><input id="npc-goal-in" placeholder="e.g. Seek revenge…"></div>
+  <div class="field"><label>Archetype / Role</label><div style="display:flex;gap:6px"><input id="npc-role-in" placeholder="e.g. Science Officer, Spy…" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-role-in').value=NPC_ARCHETYPES[Math.floor(Math.random()*NPC_ARCHETYPES.length)]" title="Random archetype">🎲</button></div></div>
+  <div class="field"><label>Trait</label><div style="display:flex;gap:6px"><input id="npc-trait-in" placeholder="e.g. Haunted by past…" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-trait-in').value=NPC_TRAITS[Math.floor(Math.random()*NPC_TRAITS.length)]" title="Random trait">🎲</button></div></div>
+  <div class="field"><label>Goal</label><div style="display:flex;gap:6px"><input id="npc-goal-in" placeholder="e.g. Seek revenge…" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-goal-in').value=NPC_GOALS[Math.floor(Math.random()*NPC_GOALS.length)]" title="Random goal">🎲</button></div></div>
   <div class="field"><label>Notes</label><textarea id="npc-notes-in" rows="3"></textarea></div>
   <div style="display:flex;gap:8px;margin-top:10px">
     <button class="btn btn-accent" onclick="submitNPC(-1)">Save NPC</button>
@@ -3674,13 +3674,15 @@ function editNPC(i) {
   const npc = S.npcs[i];
   const factionOpts = ['Federation','Klingon','Romulan','Cardassian','Borg','Ferengi','Civilian','Other'].map(f=>`<option${npc.faction===f?' selected':''}>${f}</option>`).join('');
   const attOpts = ['Hostile','Suspicious','Neutral','Friendly','Allied'].map(a=>`<option${npc.attitude===a?' selected':''}>${a}</option>`).join('');
+  const speciesOpts = Object.keys(SPECIES_NAMES).map(s=>`<option${s==='Human'?' selected':''}>${s}</option>`).join('');
   openModal(`<h2>EDIT NPC</h2>
-  <div class="field"><label>Name</label><input id="npc-name-in" value="${escH(npc.name)}"></div>
+  <div class="field"><label>Species</label><div style="display:flex;gap:6px"><select id="npc-species-sel" style="flex:1">${speciesOpts}</select><button class="btn btn-xs" onclick="(()=>{const ks=Object.keys(SPECIES_NAMES);document.getElementById('npc-species-sel').value=ks[Math.floor(Math.random()*ks.length)]})()" title="Random species">🎲</button></div></div>
+  <div class="field"><label>Name</label><div style="display:flex;gap:6px"><input id="npc-name-in" value="${escH(npc.name)}" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-name-in').value=rollNPCName(document.getElementById('npc-species-sel').value)" title="Random name">🎲</button></div></div>
   <div class="field"><label>Faction</label><select id="npc-faction-sel">${factionOpts}</select></div>
-  <div class="field"><label>Role</label><input id="npc-role-in" value="${escH(npc.role||'')}"></div>
   <div class="field"><label>Attitude</label><select id="npc-att-sel">${attOpts}</select></div>
-  <div class="field"><label>Trait</label><input id="npc-trait-in" value="${escH(npc.trait||'')}"></div>
-  <div class="field"><label>Goal</label><input id="npc-goal-in" value="${escH(npc.goal||'')}"></div>
+  <div class="field"><label>Archetype / Role</label><div style="display:flex;gap:6px"><input id="npc-role-in" value="${escH(npc.role||'')}" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-role-in').value=NPC_ARCHETYPES[Math.floor(Math.random()*NPC_ARCHETYPES.length)]" title="Random archetype">🎲</button></div></div>
+  <div class="field"><label>Trait</label><div style="display:flex;gap:6px"><input id="npc-trait-in" value="${escH(npc.trait||'')}" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-trait-in').value=NPC_TRAITS[Math.floor(Math.random()*NPC_TRAITS.length)]" title="Random trait">🎲</button></div></div>
+  <div class="field"><label>Goal</label><div style="display:flex;gap:6px"><input id="npc-goal-in" value="${escH(npc.goal||'')}" style="flex:1"><button class="btn btn-xs" onclick="document.getElementById('npc-goal-in').value=NPC_GOALS[Math.floor(Math.random()*NPC_GOALS.length)]" title="Random goal">🎲</button></div></div>
   <div class="field"><label>Notes</label><textarea id="npc-notes-in" rows="3">${escH(npc.notes||'')}</textarea></div>
   <div style="display:flex;gap:8px;margin-top:10px">
     <button class="btn btn-accent" onclick="submitNPC(${i})">Save</button>
