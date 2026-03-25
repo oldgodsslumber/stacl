@@ -5015,9 +5015,6 @@ async function openHUD() {
   }
   // Pre-enumerate devices in main window (where permissions are established).
   // HUD reads window.opener._hudDeviceList to avoid cross-window method call issues.
-  // Serialize to plain objects — native InputDeviceInfo objects are not accessible cross-window.
-  try { window._hudDeviceList = (await navigator.mediaDevices.enumerateDevices()).map(function(d){return {kind:d.kind,deviceId:d.deviceId,label:d.label};}); } catch(e) { window._hudDeviceList = []; }
-
   _hudWin = window.open('', 'stcl-hud', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
   if (!_hudWin) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
   _hudWin.document.open();
@@ -5354,7 +5351,6 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 </div>
 
 <script>
-window.onerror=function(msg,src,line,col,err){var el=document.getElementById('setup-no-cam');if(el){el.style.display='';el.style.color='#ff4444';el.textContent='JS ERROR: '+msg+' (line '+line+')';}return false;};
 var _rec=null,_chunks=[],_timer=null,_secs=0;
 var _stream=null,_hdStream=null,_bgEffect=null,_bgDisplayStream=null;
 var _previewStream=null,_previewEffect=null;
@@ -5695,31 +5691,31 @@ async function startSetupPreview(){
   var noSig=document.getElementById('setup-no-cam');
   var vid=document.getElementById('setup-preview');
   var opStream=getOpenerStream();
-  // Wrap in a new MediaStream so the HUD window owns it — cross-window srcObject assignment is unreliable.
-  if(opStream){try{_previewStream=new MediaStream(opStream.getTracks());}catch(e){_previewStream=opStream;}}
-  else{
-  var cid=document.getElementById('cam-sel')?document.getElementById('cam-sel').value:'';
-  var resH=_camResH||720,resW=resH===480?640:resH===1080?1920:1280;
-  var vidCon=cid?{deviceId:{ideal:cid},width:{ideal:resW},height:{ideal:resH}}:{width:{ideal:resW},height:{ideal:resH}};
-  try{
-    _previewStream=await navigator.mediaDevices.getUserMedia({video:vidCon,audio:false});
-  }catch(e){
-    // Resolution not supported — fall back to 720p
-    if(resH!==720){
-      _camResH=720;
-      var resSel=document.getElementById('res-sel');if(resSel)resSel.value='720';
-      if(noSig){noSig.style.display='';noSig.textContent=resH+'p not supported\u2014trying 720p\u2026';}
-      try{
-        var fbCon=cid?{deviceId:{ideal:cid},width:{ideal:1280},height:{ideal:720}}:{width:{ideal:1280},height:{ideal:720}};
-        _previewStream=await navigator.mediaDevices.getUserMedia({video:fbCon,audio:false});
-      }catch(e2){if(noSig)noSig.style.display='';return;}
-    }else{
-      // Last resort — no constraints, let browser pick any camera
-      try{_previewStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}catch(e2){}
-      if(!_previewStream){if(noSig)noSig.style.display='';return;}
+  if(opStream){
+    _previewStream=opStream;
+  }else{
+    var cid=document.getElementById('cam-sel')?document.getElementById('cam-sel').value:'';
+    var resH=_camResH||720,resW=resH===480?640:resH===1080?1920:1280;
+    var vidCon=cid?{deviceId:{ideal:cid},width:{ideal:resW},height:{ideal:resH}}:{width:{ideal:resW},height:{ideal:resH}};
+    try{
+      _previewStream=await navigator.mediaDevices.getUserMedia({video:vidCon,audio:false});
+    }catch(e){
+      // Resolution not supported — fall back to 720p
+      if(resH!==720){
+        _camResH=720;
+        var resSel=document.getElementById('res-sel');if(resSel)resSel.value='720';
+        if(noSig){noSig.style.display='';noSig.textContent=resH+'p not supported\u2014trying 720p\u2026';}
+        try{
+          var fbCon=cid?{deviceId:{ideal:cid},width:{ideal:1280},height:{ideal:720}}:{width:{ideal:1280},height:{ideal:720}};
+          _previewStream=await navigator.mediaDevices.getUserMedia({video:fbCon,audio:false});
+        }catch(e2){if(noSig)noSig.style.display='';return;}
+      }else{
+        // Last resort — no constraints, let browser pick any camera
+        try{_previewStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}catch(e2){}
+        if(!_previewStream){if(noSig)noSig.style.display='';return;}
+      }
     }
   }
-  }// end else (no opener stream)
   if(vid&&_previewStream){vid.srcObject=_previewStream;if(noSig)noSig.style.display='none';}
   await applyPreviewEffect();
 }
@@ -5760,21 +5756,34 @@ function onResChange(){
   var sel=document.getElementById('res-sel');
   _camResH=sel?+sel.value:720;
   if(_previewEffect){_previewEffect.stopEffect();_previewEffect=null;}
-  if(_previewStream&&_previewStream!==getOpenerStream()){_previewStream.getTracks().forEach(function(t){t.stop()});}
+  // Never stop the opener's stream — it belongs to the main app
+  if(_previewStream&&_previewStream!==getOpenerStream()){
+    _previewStream.getTracks().forEach(function(t){t.stop()});
+  }
   _previewStream=null;
-  startSetupPreview();
+  // Ask the main app to re-acquire the camera at the new resolution
+  if(window.opener&&window.opener.reacquireCamStream){
+    var noSig=document.getElementById('setup-no-cam');
+    if(noSig){noSig.style.display='';noSig.textContent='Switching resolution\u2026';}
+    window.opener.reacquireCamStream(_camResH).then(function(){
+      startSetupPreview();
+    });
+  }else{
+    startSetupPreview();
+  }
 }
 
 async function enumDevs(){
-  // DIAGNOSTIC — remove after debugging
-  var _dbg=document.getElementById('setup-no-cam');
-  if(_dbg){_dbg.style.display='';_dbg.textContent='opener='+(window.opener?'yes':'NO')+' devList='+JSON.stringify(window.opener&&window.opener._hudDeviceList);}
-  // Read the device list pre-enumerated by the main window (avoids cross-window method call issues)
-  var devs=(window.opener&&window.opener._hudDeviceList)||[];
-  // Fallback: try enumerating locally
-  if(!devs.length){
+  // Prefer enumerating from the opener window (already has permissions + labels)
+  var devs=null;
+  try{
+    if(window.opener&&window.opener.navigator&&window.opener.navigator.mediaDevices){
+      devs=await window.opener.navigator.mediaDevices.enumerateDevices();
+    }
+  }catch(e){}
+  if(!devs){
     try{
-      await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+      await navigator.mediaDevices.getUserMedia({video:true,audio:true})
         .then(function(s){s.getTracks().forEach(function(t){t.stop();});}).catch(function(){});
       devs=await navigator.mediaDevices.enumerateDevices();
     }catch(e){devs=[];}
