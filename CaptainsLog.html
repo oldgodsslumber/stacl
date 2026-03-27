@@ -1461,7 +1461,7 @@ function updateSlotLabels() {
     const btn = document.getElementById(`slot${i}`);
     const raw = localStorage.getItem(`stcl_slot_${i}`);
     let label = `MISSION ${i+1}`;
-    if(raw){try{const d=JSON.parse(raw);if(d.char?.name)label=d.char.name.toUpperCase().slice(0,10);}catch(e){}}
+    if(raw){try{const d=JSON.parse(raw);const n=(d.char?.name||'').trim();if(n){const parts=n.split(/\s+/);label=parts[parts.length-1].toUpperCase();}}catch(e){}}
     btn.textContent = label;
     btn.className = `slot-btn${i===ACTIVE_SLOT?' active':''}`;
   }
