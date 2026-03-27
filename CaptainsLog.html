@@ -2833,7 +2833,7 @@ function renderShipTab() {
     </div>
   </div>
 
-  <div class="card-row" style="align-items:flex-start">
+  <div class="card-row">
     ${interiorMapHTML}
     <div class="card">
       <div class="field"><label>Ship Notes</label>
@@ -3777,7 +3777,7 @@ function saveLogEntryEdit() {
 
 function showAddNPC() {
   const factionOpts = ['Federation','Klingon','Romulan','Cardassian','Borg','Ferengi','Civilian','Other'].map(f=>`<option>${f}</option>`).join('');
-  const attOpts = ['Hostile','Suspicious','Neutral','Friendly','Allied'].map(a=>`<option${a==='Neutral'?' selected':''}>${a}</option>`).join('');
+  const attOpts = ['Hostile','Cautious','Neutral','Allied','Crew'].map(a=>`<option${a==='Neutral'?' selected':''}>${a}</option>`).join('');
   const speciesOpts = Object.keys(SPECIES_NAMES).map(s=>`<option${s==='Human'?' selected':''}>${s}</option>`).join('');
   openModal(`<h2>CREATE NPC</h2>
   <div class="field"><label>Species</label><div style="display:flex;gap:6px"><select id="npc-species-sel" style="flex:1">${speciesOpts}</select><button class="btn btn-xs" onclick="(()=>{const ks=Object.keys(SPECIES_NAMES);document.getElementById('npc-species-sel').value=ks[Math.floor(Math.random()*ks.length)]})()" title="Random species">🎲</button></div></div>
@@ -3838,11 +3838,23 @@ function rollNPCName(species) {
   const rp = arr => arr[Math.floor(Math.random()*arr.length)];
   const keys = Object.keys(SPECIES_NAMES);
   const speciesKey = species ? (keys.find(k => species.toLowerCase().includes(k.toLowerCase())) || 'Human') : rp(keys);
+  if (speciesKey === 'Human') {
+    const nat = rp(HUMAN_NATIONALITIES);
+    const fnData = HUMAN_FIRST_NAMES[nat] || HUMAN_FIRST_NAMES['United States'];
+    const isFemale = Math.random() < 0.5;
+    const first = rp(isFemale ? fnData.female : fnData.male);
+    const last = rp(HUMAN_LAST_NAMES[nat] || HUMAN_LAST_NAMES['United States']);
+    return first + ' ' + last;
+  }
   const data = SPECIES_NAMES[speciesKey];
   if (speciesKey === 'Bajoran') {
     return rp(data.family) + ' ' + rp(data.given);
   }
-  return rp(Math.random() < 0.5 ? data.male : data.female);
+  const isFem = Math.random() < 0.5;
+  const pool = isFem ? data.female : data.male;
+  const name = rp(pool);
+  if (data.surname) return name + ' ' + rp(data.surname);
+  return name;
 }
 
 function generateNPC() {
@@ -3855,7 +3867,7 @@ function generateNPC() {
     name: rollNPCName(factionSpecies[faction]||'Human'),
     faction,
     role: pick(NPC_ARCHETYPES),
-    attitude: pick(['Hostile','Suspicious','Neutral','Neutral','Friendly']),
+    attitude: pick(['Hostile','Cautious','Neutral','Neutral','Allied']),
     trait: pick(NPC_TRAITS),
     goal: pick(NPC_GOALS),
     notes: '',
@@ -5105,7 +5117,9 @@ function hudBroadcast(extra) {
       env: c._selectedEnv || '',
       upbringing: c._selectedUpbringing || '',
       track: c._selectedTrack || '',
+      careerLength: c.careerLength || '',
       careerEvent: c.careerEvent || '',
+      careerEvent2: c.careerEvent2 || '',
       focuses: c.focuses || [],
       name: c.name || '',
       rank: c.rank || '',
@@ -5334,10 +5348,6 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
   <div id="h-vitals-wrap">
     <div class="sec-div"></div>
     <div class="sec-lbl">Vitals</div>
-    <div class="det-row">
-      <span class="sml" style="margin-right:4px;flex-shrink:0">DET</span>
-      <div id="h-det" style="display:flex;gap:4px"></div>
-    </div>
     <div class="res-mini">
       <div class="rmi"><div class="rv" id="h-momentum">0</div><div class="rl">Momentum</div></div>
       <div class="rmi"><div class="rv" id="h-threat">0</div><div class="rl">Threat</div></div>
@@ -5439,9 +5449,12 @@ function applyState(d){
     setText('cr-step','Step '+(cr.step+1)+' of '+stepCount+' — '+(CREATION_STEP_NAMES[cr.step]||''));
     var cb='';
     if(cr.species){cb+='<div class="cr-field"><div class="cr-lbl">Species</div><div class="cr-val">'+cr.species+'</div>'+(cr.era?'<div class="cr-sub">'+cr.era+'</div>':'')+'</div>';}
-    if(cr.env){cb+='<div class="cr-field"><div class="cr-lbl">Environment</div><div class="cr-val">'+cr.env+'</div>'+(cr.upbringing?'<div class="cr-sub">'+cr.upbringing+'</div>':'')+'</div>';}
+    if(cr.env){cb+='<div class="cr-field"><div class="cr-lbl">Environment</div><div class="cr-val">'+cr.env+'</div></div>';}
+    if(cr.upbringing){cb+='<div class="cr-field"><div class="cr-lbl">Upbringing</div><div class="cr-val">'+cr.upbringing+'</div></div>';}
     if(cr.track){cb+='<div class="cr-field"><div class="cr-lbl">Academy Track</div><div class="cr-val">'+cr.track+'</div></div>';}
-    if(cr.careerEvent){cb+='<div class="cr-field"><div class="cr-lbl">Career Event</div><div class="cr-val" style="font-size:11px">'+cr.careerEvent+'</div></div>';}
+    if(cr.careerLength){cb+='<div class="cr-field"><div class="cr-lbl">Career Length</div><div class="cr-val">'+cr.careerLength+'</div></div>';}
+    if(cr.careerEvent){cb+='<div class="cr-field"><div class="cr-lbl">Career Event 1</div><div class="cr-val" style="font-size:11px">'+cr.careerEvent+'</div></div>';}
+    if(cr.careerEvent2){cb+='<div class="cr-field"><div class="cr-lbl">Career Event 2</div><div class="cr-val" style="font-size:11px">'+cr.careerEvent2+'</div></div>';}
     if(cr.focuses&&cr.focuses.length){cb+='<div class="cr-field"><div class="cr-lbl">Focuses</div><div class="cr-feats">'+cr.focuses.map(function(f){return '<div class="cr-feat">'+f+'</div>';}).join('')+'</div></div>';}
     if(cr.name){cb+='<div class="cr-field"><div class="cr-lbl">Name</div><div class="cr-val">'+cr.name+'</div>'+(cr.rank?'<div class="cr-sub">'+cr.rank+'</div>':'')+'</div>';}
     setHTML('cr-body',cb||'<div class="sml">Waiting for input\u2026</div>');
