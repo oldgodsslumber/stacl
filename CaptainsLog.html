@@ -39,6 +39,7 @@ body.red-alert #nav-npcs{background:#B84545}
 body.red-alert #nav-dice{background:#D47070}
 body.red-alert #nav-oracle{background:#C85858}
 body.red-alert #nav-log{background:#D96A6A}
+body.red-alert .nav-btn.active{background:#000 !important;color:#FF9999 !important}
 .ship-detail-panel{margin-top:10px;background:var(--surface2);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:14px;animation:fadeIn 0.15s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 button{font-family:var(--font);cursor:pointer}
@@ -2128,14 +2129,14 @@ function renderCS3() {
       <div style="margin-top:8px">
         <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Attribute +1 from this event</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px">
-          ${ATTRIBUTES.map(a=>`<button class="btn btn-xs${eventAttrKey===a.key?' btn-accent':''}" onclick="setLPEventAttr(${idx},'${a.key}')">${a.label}</button>`).join('')}
+          ${ATTRIBUTES.map(a=>`<button class="btn btn-xs${eventAttrKey===a.key?' btn-accent':''}" onclick="setLPEventAttr(${idx},'${a.key}')">${a.abbr}</button>`).join('')}
         </div>
       </div>` : '';
     const discSel = selectedName ? `
       <div style="margin-top:6px">
         <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Discipline +1 from this event</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px">
-          ${DISCIPLINES.map(d=>`<button class="btn btn-xs${eventDiscKey===d.key?' btn-accent':''}" onclick="setLPEventDisc(${idx},'${d.key}')">${d.label}</button>`).join('')}
+          ${DISCIPLINES.map(d=>`<button class="btn btn-xs${eventDiscKey===d.key?' btn-accent':''}" onclick="setLPEventDisc(${idx},'${d.key}')">${d.abbr}</button>`).join('')}
         </div>
       </div>` : '';
     return `
