@@ -3993,7 +3993,7 @@ function exportLog() {
   .ep-banner-title{font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
   .log-card{border-left:4px solid var(--accent);background:var(--card-bg);border-radius:0 6px 6px 0;padding:10px 12px;margin-bottom:10px}
   .log-card.supplemental{border-color:var(--lcars-ltblue);margin-left:16px}
-  .log-card.alert{border-color:#FF2200;background:rgba(255,34,0,0.04)}
+  .log-card.alert{border-color:#FF2200;background:#0d0000}
   .log-card.base{border-color:var(--card-border);margin-left:32px}
   .log-card-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}
   .log-card-title{font-size:13px;font-weight:700;color:var(--accent)}
@@ -4017,16 +4017,16 @@ function exportLog() {
   .dc-wrap .dropped-card{border-radius:0 0 6px 6px;margin-bottom:0}
   .notes-ta{width:100%;background:transparent;border:1px solid var(--accent-dim);color:var(--text);font-family:inherit;font-size:11px;padding:8px;border-radius:4px;resize:vertical;min-height:80px;margin-top:6px}
   @media print {
+    html,body{background:#000 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;overflow:visible;height:auto}
     #topbar{display:none}
     .lcars-strip{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     #src-panel{display:none}
     .lcars-divider{display:none}
-    #doc-area{grid-template-columns:38% 1fr}
-    #doc-left{border-right:1px solid #ccc}
+    #doc-area{grid-template-columns:38% 1fr;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #doc-left{border-right:1px solid var(--accent-dim)}
     #drop-zone{display:none}
     #doc-left,#doc-right{overflow:visible;height:auto}
-    .log-card,.dropped-card,.ep-banner{page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    body{overflow:visible;height:auto}
+    .log-card,.dropped-card,.ep-banner,.col-hdr{page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .dc-handle{display:none}
     .dc-wrap .dropped-card{border-radius:6px}
     .rm-btn{display:none}
