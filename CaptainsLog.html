@@ -3885,7 +3885,7 @@ function exportLog() {
         ${n.goal?`<div style="font-size:10px;margin-top:3px"><span style="color:var(--muted)">GOAL:</span> ${esc(n.goal)}</div>`:''}
         ${n.notes?`<div style="font-size:10px;margin-top:3px;color:var(--sub)">${esc(n.notes)}</div>`:''}
       </div>`).join('')
-    : '<div style="font-size:11px;color:var(--muted);padding:10px">No crew logged.</div>';
+    : '<div style="font-size:11px;color:var(--muted);padding:10px">No NPCs logged.</div>';
 
   // --- MAP GRIDS HTML (source panel) ---
   const secGridHTML = `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-sector',0)">
@@ -3899,12 +3899,12 @@ function exportLog() {
   </div>`;
 
   const hasInterior = intCells.some(c => c.name || c.icon);
-  const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px">
+  const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px;overflow:hidden">
     <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:6px;font-weight:700">${esc(S.ship.name||'Ship Interior')}</div>
-    <div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px">
-      ${intCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;border-radius:2px;min-width:0;min-height:0;overflow:hidden">
-        <span style="font-size:9px;line-height:1">${esc(c.icon||'')}</span>
-        ${c.name?`<span style="font-size:5px;text-align:center;line-height:1.2;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
+    <div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:1px;width:100%;overflow:hidden">
+      ${intCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;border-radius:1px;min-width:0;min-height:0;overflow:hidden">
+        <span style="font-size:8px;line-height:1">${esc(c.icon||'')}</span>
+        ${c.name?`<span style="font-size:4px;text-align:center;line-height:1.1;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('')}
     </div>
   </div>` : '<div style="font-size:11px;color:var(--muted);padding:10px">No interior mapped.</div>';
@@ -3915,7 +3915,7 @@ function exportLog() {
 
   // --- FULL HTML ---
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<title>Captain's Log — ${charName}</title>
+<title>After Action Report — ${charName}</title>
 <style>
   :root {
     --bg:#000;--text:#FFCC99;--muted:#7a4a1a;--sub:#9a6a3a;
@@ -3996,6 +3996,12 @@ function exportLog() {
   .stat-row{display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px}
   .stat-lbl{color:var(--muted)}.stat-val{font-weight:700;color:var(--accent)}
   .stat-sec{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:8px 0 4px;border-bottom:1px solid var(--accent-dim);padding-bottom:3px}
+  .dc-wrap{margin-bottom:10px;border-radius:6px;transition:outline 0.1s}
+  .dc-wrap.drag-over-top{border-top:2px solid var(--accent)}
+  .dc-handle{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:grab;padding:4px 10px;background:var(--accent-dim);border-radius:4px 4px 0 0;user-select:none;margin-bottom:-4px}
+  .dc-handle:hover{color:var(--accent)}
+  .dc-wrap .dropped-card{border-radius:0 0 6px 6px;margin-bottom:0}
+  .notes-ta{width:100%;background:transparent;border:1px solid var(--accent-dim);color:var(--text);font-family:inherit;font-size:11px;padding:8px;border-radius:4px;resize:vertical;min-height:80px;margin-top:6px}
   @media print {
     #topbar{display:none}
     .lcars-strip{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -4013,7 +4019,7 @@ function exportLog() {
 <body>
 
 <div id="topbar">
-  <div id="tb-title">CAPTAIN'S LOG // ${charName}</div>
+  <div id="tb-title">AFTER ACTION REPORT // ${charName}</div>
   <div id="ep-selector">${epChecks}</div>
   <button class="tb-btn" id="theme-btn" onclick="toggleTheme()">◑ PRINT MODE</button>
   <button class="tb-btn" onclick="window.print()">🖨 PRINT</button>
@@ -4024,7 +4030,7 @@ function exportLog() {
 <div id="main">
   <div id="src-panel">
     <div id="src-tabs">
-      <button class="stab active" id="stab-crew" onclick="showSTab('crew')">CREW</button>
+      <button class="stab active" id="stab-crew" onclick="showSTab('crew')">NPCs</button>
       <button class="stab" id="stab-maps" onclick="showSTab('maps')">MAPS</button>
       <button class="stab" id="stab-stats" onclick="showSTab('stats')">STATS</button>
     </div>
@@ -4038,6 +4044,14 @@ function exportLog() {
       <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'ship-stats',0)">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-ltblue);margin-bottom:4px">SHIP PROFILE</div>
         <div style="font-size:10px;color:var(--muted)">${shipName}</div>
+      </div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'ship-pic',0)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-ltblue);margin-bottom:4px">SHIP PICTURE</div>
+        <div style="font-size:10px;color:var(--muted)">${shipName} — image &amp; blurb</div>
+      </div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'notes',0)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-gold);margin-bottom:4px">NOTES BLOCK</div>
+        <div style="font-size:10px;color:var(--muted)">Freeform editable text</div>
       </div>
     </div>
   </div>
@@ -4061,14 +4075,16 @@ function exportLog() {
 var EPISODES = ${J(episodes)};
 var DROPPED = [];
 var SRC_NPCS = ${J(S.npcs || [])};
-var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:S.char.attributes||{},disciplines:S.char.disciplines||{},focuses:S.char.focuses||[],traits:S.char.traits||''})};
-var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,systems:S.ship.systems||{},departments:S.ship.departments||{},traits:S.ship.traits||''})};
+var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:S.char.attributes||{},disciplines:S.char.disciplines||{},focuses:S.char.focuses||[],traits:S.char.traits||'',talents:S.char.talents||[]})};
+var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,registry:S.ship.registry||'',thumb:S.ship.thumb||'',trait:S.ship.trait||'',systems:S.ship.systems||{},departments:S.ship.departments||{},traits:S.ship.traits||'',talents:S.ship.talents||[]})};
+var SRC_SHIP_THUMB = ${J(S.ship.thumb||'')};
 var SEC_CELLS = ${J(secCells)};
 var INT_CELLS = ${J(intCells)};
 var SEC_NAME = ${J(sec.name||'Sector Map')};
 var SHIP_NAME = ${J(S.ship.name||'Ship Interior')};
 
 var _srcDragItem = null;
+var _reorderIdx = null;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var ATT_COLOR={Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
@@ -4113,7 +4129,7 @@ function renderDroppedCard(item, idx) {
       +'</div>';
   }
   if (item.kind === 'map-sector') {
-    var grid = '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:8px">'
+    var grid = '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:8px;overflow:hidden">'
       + SEC_CELLS.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px;min-width:0;min-height:0">'
         +'<span style="font-size:14px;line-height:1">'+esc(c.icon||'')+'</span>'
         +(c.name?'<span style="font-size:6px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
@@ -4121,10 +4137,10 @@ function renderDroppedCard(item, idx) {
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SEC_NAME)+'</div>'+grid+'</div>';
   }
   if (item.kind === 'map-interior') {
-    var grid2 = '<div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px;margin-top:8px">'
-      + INT_CELLS.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;border-radius:2px;min-width:0;min-height:0;overflow:hidden">'
-        +'<span style="font-size:9px;line-height:1">'+esc(c.icon||'')+'</span>'
-        +(c.name?'<span style="font-size:5px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
+    var grid2 = '<div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:1px;margin-top:8px;width:100%;overflow:hidden">'
+      + INT_CELLS.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;border-radius:1px;min-width:0;min-height:0;overflow:hidden">'
+        +'<span style="font-size:8px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +(c.name?'<span style="font-size:4px;text-align:center;line-height:1.1;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
         +'</div>';}).join('')+'</div>';
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+grid2+'</div>';
   }
@@ -4138,6 +4154,7 @@ function renderDroppedCard(item, idx) {
     h += '<div class="stat-sec">Disciplines</div>';
     ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h += statRow(d, disc[d]); });
     if (ch.focuses && ch.focuses.length) { h += '<div class="stat-sec">Focuses</div><div style="font-size:10px;color:var(--text)">'+ch.focuses.map(function(f){return esc(f);}).join(', ')+'</div>'; }
+    if (ch.talents && ch.talents.length) { h += '<div class="stat-sec">Talents</div>'+ch.talents.map(function(t){ return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--accent);font-weight:700">'+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
     if (ch.traits) { h += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(ch.traits)+'</div>'; }
     return h+'</div>';
   }
@@ -4145,20 +4162,65 @@ function renderDroppedCard(item, idx) {
     var sh = SRC_SHIP; var sys = sh.systems||{}; var dep = sh.departments||{};
     var h2 = '<div class="dropped-card" style="border-color:var(--lcars-ltblue)">'+rm;
     h2 += '<div style="font-size:14px;font-weight:700;color:var(--lcars-ltblue);margin-bottom:2px">'+esc(sh.name||'Vessel')+'</div>';
-    h2 += '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">'+esc(sh.className||'')+(sh.scale?' · Scale '+sh.scale:'')+'</div>';
+    h2 += '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">'+esc(sh.className||'')+(sh.registry?' '+esc(sh.registry):'')+(sh.scale?' · Scale '+sh.scale:'')+'</div>';
     h2 += '<div class="stat-sec">Systems</div>';
     ['Comms','Engines','Structure','Computers','Sensors','Weapons'].forEach(function(s){ h2 += statRow(s, sys[s]); });
     h2 += '<div class="stat-sec">Departments</div>';
     ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h2 += statRow(d, dep[d]); });
+    if (sh.talents && sh.talents.length) { h2 += '<div class="stat-sec">Talents</div>'+sh.talents.map(function(t){ return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--lcars-ltblue);font-weight:700">'+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
     if (sh.traits) { h2 += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(sh.traits)+'</div>'; }
     return h2+'</div>';
+  }
+  if (item.kind === 'ship-pic') {
+    var sp = SRC_SHIP;
+    var h3 = '<div class="dropped-card" style="border-color:var(--lcars-ltblue);text-align:center">'+rm;
+    if (sp.thumb) { h3 += '<img src="'+esc(sp.thumb)+'" style="max-width:100%;max-height:180px;object-fit:contain;margin-bottom:8px" alt="'+esc(sp.name||'Ship')+'">'; }
+    h3 += '<div style="font-size:16px;font-weight:700;color:var(--lcars-ltblue);letter-spacing:2px">'+esc(sp.name||'Vessel')+'</div>';
+    if (sp.registry) { h3 += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px">'+esc(sp.registry)+'</div>'; }
+    h3 += '<div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-align:left">'+esc(sp.className||'')+(sp.scale?' · Scale '+sp.scale:'')+'</div>';
+    if (sp.trait) { h3 += '<div style="font-size:10px;color:var(--sub);font-style:italic;text-align:left;line-height:1.5">'+esc(sp.trait)+'</div>'; }
+    return h3+'</div>';
+  }
+  if (item.kind === 'notes') {
+    return '<div class="dropped-card" style="border-color:var(--lcars-gold)">'+rm
+      +'<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-gold);margin-bottom:4px">NOTES</div>'
+      +'<textarea class="notes-ta" oninput="DROPPED['+idx+'].notes=this.value" placeholder="Enter notes…">'+esc(item.notes||'')+'</textarea>'
+      +'</div>';
   }
   return '';
 }
 
 function renderDroppedItems() {
-  document.getElementById('dropped-items').innerHTML = DROPPED.map(function(item,i){ return renderDroppedCard(item,i); }).join('');
+  document.getElementById('dropped-items').innerHTML = DROPPED.map(function(item, i) {
+    return '<div class="dc-wrap" draggable="true" ondragstart="cdStart(event,'+i+')" ondragover="cdOver(event,'+i+')" ondrop="cdDrop(event,'+i+')" ondragend="cdEnd()">'
+      +'<div class="dc-handle">⠿ &nbsp;DRAG TO REORDER</div>'
+      +renderDroppedCard(item, i)
+      +'</div>';
+  }).join('');
 }
+
+function cdStart(e, idx) {
+  _reorderIdx = idx;
+  _srcDragItem = null;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', 'reorder');
+  e.stopPropagation();
+}
+function cdOver(e, idx) {
+  if (_reorderIdx === null || _reorderIdx === idx) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over-top');
+}
+function cdDrop(e, idx) {
+  e.preventDefault(); e.stopPropagation();
+  if (_reorderIdx === null || _reorderIdx === idx) { _reorderIdx = null; return; }
+  var item = DROPPED.splice(_reorderIdx, 1)[0];
+  var target = _reorderIdx < idx ? idx - 1 : idx;
+  DROPPED.splice(target, 0, item);
+  _reorderIdx = null;
+  renderDroppedItems();
+}
+function cdEnd() { _reorderIdx = null; document.querySelectorAll('.dc-wrap').forEach(function(el){ el.classList.remove('drag-over-top'); }); }
 
 function renderLogOutput() {
   var selectedIdxs = [];
@@ -4184,12 +4246,14 @@ function renderLogOutput() {
 }
 
 function srcDragStart(e, kind, idx) {
-  _srcDragItem = {kind:kind, data:(kind==='npc' ? SRC_NPCS[idx] : null)};
+  _srcDragItem = {kind:kind, data:(kind==='npc' ? SRC_NPCS[idx] : null), notes:''};
+  _reorderIdx = null;
   e.dataTransfer.effectAllowed = 'copy';
   e.dataTransfer.setData('text/plain', kind);
 }
 
 function dzOver(e) {
+  if (_reorderIdx !== null) return;
   e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
   document.getElementById('drop-zone').classList.add('drag-over');
 }
