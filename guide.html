@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Captain's Log — User Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&display=swap');
+:root {
+  --bg:#000;--text:#FFCC99;--muted:#7a4a1a;--sub:#9a6a3a;
+  --accent:#FF9933;--accent-dim:#3a1a00;
+  --lavender:#CC99FF;--ltblue:#99CCFF;--gold:#FFCC99;--blue:#9999FF;--peach:#FF9966;
+  --card:#0a0400;--border:#2a1200;
+  --font:'Antonio','Arial Narrow',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
+
+/* ── LAYOUT ── */
+#shell{display:flex;flex-direction:column;height:100%}
+#topbar{background:#000;border-bottom:3px solid var(--accent);padding:10px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;flex-wrap:wrap}
+#tb-title{font-size:18px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
+#tb-sub{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.tb-btn{background:#000;border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:11px;letter-spacing:1px;padding:5px 14px;cursor:pointer;border-radius:50vh;text-transform:uppercase}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent)}
+#tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+#progress-text{font-size:10px;letter-spacing:1px;color:var(--muted)}
+.lcars-strip{height:6px;background:linear-gradient(90deg,var(--accent) 55%,var(--lavender) 55%,var(--lavender) 70%,var(--ltblue) 70%,var(--ltblue) 83%,var(--gold) 83%);flex-shrink:0}
+
+/* ── SLIDE AREA ── */
+#slides-wrap{flex:1;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;opacity:0;pointer-events:none;transition:opacity 0.35s,transform 0.35s;transform:translateX(60px)}
+.slide.active{opacity:1;pointer-events:auto;transform:translateX(0)}
+.slide.exit-left{opacity:0;transform:translateX(-60px)}
+
+/* ── SLIDE CONTENT ── */
+.slide-inner{width:100%;max-width:760px;text-align:center}
+.slide-icon{font-size:52px;margin-bottom:18px;line-height:1}
+.slide-tag{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.slide-title{font-size:32px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;line-height:1.1}
+.slide-title.lavender{color:var(--lavender)}
+.slide-title.ltblue{color:var(--ltblue)}
+.slide-title.gold{color:var(--gold)}
+.slide-title.peach{color:var(--peach)}
+.slide-title.blue{color:var(--blue)}
+.slide-body{font-size:14px;color:var(--text);line-height:1.7;max-width:600px;margin:0 auto 24px}
+.slide-body b{color:var(--accent)}
+.slide-body.lavender b{color:var(--lavender)}
+.slide-body.ltblue b{color:var(--ltblue)}
+.slide-body.gold b{color:var(--gold)}
+.slide-body.peach b{color:var(--peach)}
+.slide-body.blue b{color:var(--blue)}
+
+/* ── FEATURE CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:8px}
+.chip{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:50vh;border:1px solid;font-weight:700}
+.chip-accent{border-color:var(--accent);color:var(--accent)}
+.chip-lavender{border-color:var(--lavender);color:var(--lavender)}
+.chip-ltblue{border-color:var(--ltblue);color:var(--ltblue)}
+.chip-gold{border-color:var(--gold);color:var(--gold)}
+.chip-peach{border-color:var(--peach);color:var(--peach)}
+.chip-blue{border-color:var(--blue);color:var(--blue)}
+
+/* ── LCARS PANEL ── */
+.lcars-panel{background:var(--card);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 18px;text-align:left;margin:16px auto 0;max-width:600px}
+.lcars-panel.lavender{border-color:var(--lavender)}
+.lcars-panel.ltblue{border-color:var(--ltblue)}
+.lcars-panel.gold{border-color:var(--gold)}
+.lcars-panel.peach{border-color:var(--peach)}
+.lcars-panel.blue{border-color:var(--blue)}
+.lcars-panel p{font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:6px}
+.lcars-panel p:last-child{margin-bottom:0}
+.lcars-panel p b{color:var(--text)}
+
+/* ── BOTTOM NAV ── */
+#botnav{background:#000;border-top:2px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}
+.nav-arrow{background:var(--card);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;letter-spacing:1px;padding:8px 22px;cursor:pointer;border-radius:50vh;text-transform:uppercase;transition:all 0.15s}
+.nav-arrow:hover{border-color:var(--accent);color:var(--accent)}
+.nav-arrow:disabled{opacity:0.3;cursor:default}
+.nav-arrow.primary{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+.nav-arrow.primary:hover{filter:brightness(1.15)}
+
+/* ── PROGRESS DOTS ── */
+#dots{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.2s;flex-shrink:0}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.dot.visited{background:var(--muted)}
+
+/* ── SECTION HEADER SLIDE ── */
+.section-badge{display:inline-block;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:4px 16px;border-radius:50vh;margin-bottom:14px;font-weight:700}
+.section-badge.accent{background:var(--accent);color:#000}
+.section-badge.lavender{background:var(--lavender);color:#000}
+.section-badge.ltblue{background:var(--ltblue);color:#000}
+.section-badge.gold{background:var(--gold);color:#000}
+.section-badge.peach{background:var(--peach);color:#000}
+.section-badge.blue{background:var(--blue);color:#000}
+
+/* ── KEYBOARD HINT ── */
+#key-hint{font-size:9px;letter-spacing:1px;color:var(--muted);text-align:center;padding:4px 0 0}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .slide-title{font-size:22px}
+  .slide-body{font-size:12px}
+  .slide-icon{font-size:38px}
+  #topbar{padding:8px 12px}
+  #tb-title{font-size:14px}
+  .slide{padding:20px 14px}
+  .nav-arrow{padding:7px 14px;font-size:11px}
+  .lcars-panel{padding:10px 12px}
+  .lcars-panel p{font-size:11px}
+  #key-hint{display:none}
+}
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <div id="topbar">
+    <div>
+      <div id="tb-title">CAPTAIN'S LOG</div>
+      <div id="tb-sub">USER GUIDE // STARFLEET OPERATIONS</div>
+    </div>
+    <div id="tb-right">
+      <span id="progress-text"></span>
+      <button class="tb-btn" onclick="window.close()">✕ CLOSE</button>
+    </div>
+  </div>
+  <div class="lcars-strip"></div>
+
+  <div id="slides-wrap">
+
+    <!-- 0: WELCOME -->
+    <div class="slide active" data-idx="0">
+      <div class="slide-inner">
+        <div class="slide-icon">🖖</div>
+        <div class="slide-tag">Welcome Aboard</div>
+        <div class="slide-title">CAPTAIN'S LOG</div>
+        <div class="slide-body">
+          A Star Trek Adventures companion for the table. Track your officer, chart the sector, manage NPCs,
+          roll dice, consult the oracle, and keep a mission log — all from one screen.
+          <br><br>
+          This guide walks through every tab and feature. Use the arrows below or your <b>keyboard</b> to navigate.
+        </div>
+        <div class="chips">
+          <span class="chip chip-accent">OFFICER</span>
+          <span class="chip chip-peach">MAP</span>
+          <span class="chip chip-lavender">NPCs</span>
+          <span class="chip chip-blue">DICE</span>
+          <span class="chip chip-ltblue">ORACLE</span>
+          <span class="chip chip-gold">LOG</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1: MISSIONS / SLOTS -->
+    <div class="slide" data-idx="1">
+      <div class="slide-inner">
+        <div class="slide-icon">💾</div>
+        <div class="slide-tag">Getting Started</div>
+        <div class="slide-title">MISSION SLOTS</div>
+        <div class="slide-body">
+          Captain's Log stores up to <b>three separate missions</b> in your browser. Switch between them
+          with the <b>MISSION 1 / 2 / 3</b> buttons at the top of the screen.
+          <br><br>
+          Use <b>SAVE FILE</b> to export all missions as a single JSON backup, and <b>LOAD FILE</b> to restore from one.
+          This is the safest way to preserve your campaigns long-term.
+        </div>
+        <div class="lcars-panel">
+          <p><b>⚙ Settings button</b> — rename your missions, reset a slot, or delete all data for it.</p>
+          <p><b>NIGHT MODE</b> — switches to a red-tinted LCARS theme. Ideal for low-light play.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2: OFFICER SECTION HEADER -->
+    <div class="slide" data-idx="2">
+      <div class="slide-inner">
+        <div class="section-badge accent">TAB 1</div>
+        <div class="slide-icon">👨‍✈️</div>
+        <div class="slide-title">OFFICER</div>
+        <div class="slide-body">
+          Build and track your player character — from species and attributes through disciplines,
+          focuses, values, talents, and stress. Your ship lives here too.
+        </div>
+        <div class="chips">
+          <span class="chip chip-accent">Character Creation</span>
+          <span class="chip chip-accent">Ship Stats</span>
+          <span class="chip chip-accent">Interior Map</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: CHARACTER CREATION -->
+    <div class="slide" data-idx="3">
+      <div class="slide-inner">
+        <div class="slide-icon">🧬</div>
+        <div class="slide-tag">Officer Tab</div>
+        <div class="slide-title">CHARACTER CREATION</div>
+        <div class="slide-body">
+          Step through creation in order: <b>Species → Era → Environment → Upbringing → Track → Career</b>.
+          Each choice adds attribute and discipline bonuses automatically.
+          Once you click <b>Complete Creation</b>, the full officer sheet is revealed.
+        </div>
+        <div class="lcars-panel">
+          <p><b>Attributes</b> (Control, Daring, Fitness, Insight, Presence, Reason) start at 7 and are raised via species, environment, and upbringing choices.</p>
+          <p><b>Disciplines</b> (Command, Conn, Security, Engineering, Science, Medicine) represent trained skills and are raised by track and career choices.</p>
+          <p><b>Focuses</b> are narrow specialisations. <b>Values</b> are character-defining beliefs that can be challenged or invoked.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4: SHIP & INTERIOR -->
+    <div class="slide" data-idx="4">
+      <div class="slide-inner">
+        <div class="slide-icon">🚀</div>
+        <div class="slide-tag">Officer Tab</div>
+        <div class="slide-title">SHIP & INTERIOR MAP</div>
+        <div class="slide-body">
+          Select a <b>ship class</b> to auto-fill systems and departments. Give your ship a name, registry,
+          and scale. The <b>vessel profile</b> card shows the class art and trait text.
+        </div>
+        <div class="lcars-panel">
+          <p><b>Ship Interior Map</b> — a 5×10 deck grid. Click any cell to label it, place an emoji icon, or add notes. Void cells (dashed) are outside the hull — click to toggle them into active rooms.</p>
+          <p><b>Reset Layout</b> restores the default hull shape for the selected class scale.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5: MAP SECTION HEADER -->
+    <div class="slide" data-idx="5">
+      <div class="slide-inner">
+        <div class="section-badge peach">TAB 2</div>
+        <div class="slide-icon">🗺️</div>
+        <div class="slide-title" style="color:var(--peach)">MAP</div>
+        <div class="slide-body">
+          Chart the sector, drill down into sub-zones, and track your ship's current position.
+          Every sector is a 5×5 grid of named, iconified cells.
+        </div>
+        <div class="chips">
+          <span class="chip chip-peach">Sector Grid</span>
+          <span class="chip chip-peach">Sub-Zones</span>
+          <span class="chip chip-peach">Cell Details</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6: SECTOR MAP -->
+    <div class="slide" data-idx="6">
+      <div class="slide-inner">
+        <div class="slide-icon">📡</div>
+        <div class="slide-tag">Map Tab</div>
+        <div class="slide-title" style="color:var(--peach)">SECTOR MAP</div>
+        <div class="slide-body">
+          The main map is a <b>5×5 sector grid</b>. Click any cell to name it, add an emoji icon,
+          note features, and write observation notes. Your ship's current location is highlighted.
+        </div>
+        <div class="lcars-panel peach">
+          <p><b>Warp Here</b> — moves your ship to the selected cell and logs it.</p>
+          <p><b>Enter Zone</b> — drills down into a sub-zone for that cell (system, station, nebula, etc). Sub-zones are their own 5×5 grids.</p>
+          <p><b>Add Sector</b> — create additional sectors for a wider campaign map. Switch between them from the sector list.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7: SUB-ZONES -->
+    <div class="slide" data-idx="7">
+      <div class="slide-inner">
+        <div class="slide-icon">🔭</div>
+        <div class="slide-tag">Map Tab</div>
+        <div class="slide-title" style="color:var(--peach)">SUB-ZONES</div>
+        <div class="slide-body">
+          Any sector cell can contain a <b>sub-zone</b> — a zoomed-in 5×5 map for a star system, space station,
+          asteroid field, or any local area of interest.
+        </div>
+        <div class="lcars-panel peach">
+          <p>Select a sector cell → click <b>Enter Zone</b> → choose a type. You'll drop into the sub-zone view with its own grid.</p>
+          <p>Name each cell, add icons, and track the current location within the zone. Click <b>Exit Zone</b> to return to the sector.</p>
+          <p>Sub-zones appear in the <b>Export Log</b> MAPS panel for inclusion in your After Action Report.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8: NPCS SECTION HEADER -->
+    <div class="slide" data-idx="8">
+      <div class="slide-inner">
+        <div class="section-badge lavender">TAB 3</div>
+        <div class="slide-icon">👥</div>
+        <div class="slide-title lavender">NPCs</div>
+        <div class="slide-body">
+          Track every notable character the crew encounters — allies, adversaries,
+          contacts, and unknowns. Each NPC has a full profile and a relationship attitude.
+        </div>
+        <div class="chips">
+          <span class="chip chip-lavender">Attitude Tracking</span>
+          <span class="chip chip-lavender">Faction & Role</span>
+          <span class="chip chip-lavender">Goals & Traits</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9: NPC DETAILS -->
+    <div class="slide" data-idx="9">
+      <div class="slide-inner">
+        <div class="slide-icon">🎭</div>
+        <div class="slide-tag">NPCs Tab</div>
+        <div class="slide-title lavender">NPC PROFILES</div>
+        <div class="slide-body">
+          Each NPC card stores: <b>name, faction, role, attitude, trait, goal,</b> and free <b>notes</b>.
+          Attitude ranges from Hostile → Cautious → Neutral → Allied → Crew, colour-coded for quick reference.
+        </div>
+        <div class="lcars-panel lavender">
+          <p><b>Add NPC</b> opens a quick-entry form. Fill in as much or as little as you know.</p>
+          <p>NPCs can be <b>spotlit on the HUD</b> — their name and notes appear live on the stream overlay for players watching remotely.</p>
+          <p>NPCs appear as draggable cards in the <b>Export Log</b> for inclusion in your After Action Report.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10: DICE SECTION HEADER -->
+    <div class="slide" data-idx="10">
+      <div class="slide-inner">
+        <div class="section-badge blue">TAB 4</div>
+        <div class="slide-icon">🎲</div>
+        <div class="slide-title blue">DICE</div>
+        <div class="slide-body">
+          Roll challenge dice using your character's attributes and disciplines.
+          Track momentum, threat, and complications in real time.
+        </div>
+        <div class="chips">
+          <span class="chip chip-blue">Challenge Dice</span>
+          <span class="chip chip-blue">Momentum</span>
+          <span class="chip chip-blue">Threat Pool</span>
+          <span class="chip chip-blue">Task Tracks</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11: DICE DETAILS -->
+    <div class="slide" data-idx="11">
+      <div class="slide-inner">
+        <div class="slide-icon">🎯</div>
+        <div class="slide-tag">Dice Tab</div>
+        <div class="slide-title blue">ROLLING & TRACKING</div>
+        <div class="slide-body">
+          Select an <b>Attribute</b> and a <b>Discipline</b> to set your Target Number.
+          Add a focus for a bonus, then roll. Results are colour-coded:
+          <b>Critical</b> (1), <b>Success</b>, <b>Failure</b>, and <b>Complication</b> (20).
+        </div>
+        <div class="lcars-panel blue">
+          <p><b>Momentum</b> and <b>Threat</b> are tracked at the top — tap +/- to adjust mid-scene.</p>
+          <p><b>Extended Tasks</b> — add a task track with custom progress circles. Each filled circle advances the work.</p>
+          <p><b>Combat</b> — add opposition or player stress to track a scene's damage state.</p>
+          <p>All roll results are broadcast live to the <b>HUD stream overlay</b>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12: ORACLE SECTION HEADER -->
+    <div class="slide" data-idx="12">
+      <div class="slide-inner">
+        <div class="section-badge ltblue">TAB 5</div>
+        <div class="slide-icon">🔮</div>
+        <div class="slide-title ltblue">ORACLE</div>
+        <div class="slide-body">
+          Solo and GM tools. Generate random scenes, complications, threats, and story beats
+          drawn from Star Trek-flavoured word and event tables.
+        </div>
+        <div class="chips">
+          <span class="chip chip-ltblue">Scene Prompts</span>
+          <span class="chip chip-ltblue">Word Tables</span>
+          <span class="chip chip-ltblue">Mission Generator</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13: ORACLE DETAILS -->
+    <div class="slide" data-idx="13">
+      <div class="slide-inner">
+        <div class="slide-icon">📖</div>
+        <div class="slide-tag">Oracle Tab</div>
+        <div class="slide-title ltblue">ORACLE TABLES</div>
+        <div class="slide-body">
+          Choose a table type and roll for a <b>random prompt</b> — complications, motivations, locations,
+          alien threats, and more. Use the results to spark improvisation at the table.
+        </div>
+        <div class="lcars-panel ltblue">
+          <p><b>Mission Generator</b> — combine a mission type, complication, and objective for a ready-to-run scenario seed.</p>
+          <p><b>Word tables</b> — single evocative words drawn from Trek-flavoured categories to unstick a stuck scene.</p>
+          <p>Oracle results are pushed live to the <b>HUD stream overlay</b> ticker.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14: LOG SECTION HEADER -->
+    <div class="slide" data-idx="14">
+      <div class="slide-inner">
+        <div class="section-badge gold">TAB 6</div>
+        <div class="slide-icon">📋</div>
+        <div class="slide-title gold">CAPTAIN'S LOG</div>
+        <div class="slide-body">
+          Write, organise, and review your mission log. Every session leaves a paper trail.
+        </div>
+        <div class="chips">
+          <span class="chip chip-gold">Log Entries</span>
+          <span class="chip chip-gold">Episode Breaks</span>
+          <span class="chip chip-gold">Entry Types</span>
+          <span class="chip chip-gold">Export</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15: LOG DETAILS -->
+    <div class="slide" data-idx="15">
+      <div class="slide-inner">
+        <div class="slide-icon">✍️</div>
+        <div class="slide-tag">Log Tab</div>
+        <div class="slide-title gold">WRITING THE LOG</div>
+        <div class="slide-body">
+          Tap <b>+ NEW ENTRY</b> to open the entry form. Choose a type, give it a title, and write.
+          Entries stack newest-first. Scroll to review earlier entries.
+        </div>
+        <div class="lcars-panel gold">
+          <p><b>Standard</b> — regular captain's log entries.</p>
+          <p><b>Supplemental</b> — follow-up entries, indented and coloured differently.</p>
+          <p><b>Red Alert</b> — combat or crisis entries, highlighted in warning red.</p>
+          <p><b>▶ EPISODE START</b> — inserts an episode break banner then immediately opens a new entry. Use at the start of each session to divide your log into episodes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 16: HUD SECTION HEADER -->
+    <div class="slide" data-idx="16">
+      <div class="slide-inner">
+        <div class="section-badge accent">STREAMING</div>
+        <div class="slide-icon">📺</div>
+        <div class="slide-title">HUD STREAM OVERLAY</div>
+        <div class="slide-body">
+          Broadcast a live LCARS overlay to your stream or video call.
+          The HUD window updates in real time as you play — no refresh needed.
+        </div>
+        <div class="chips">
+          <span class="chip chip-accent">Live Stats</span>
+          <span class="chip chip-accent">Dice Results</span>
+          <span class="chip chip-accent">Maps</span>
+          <span class="chip chip-accent">NPC Spotlight</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 17: HUD DETAILS -->
+    <div class="slide" data-idx="17">
+      <div class="slide-inner">
+        <div class="slide-icon">🖥️</div>
+        <div class="slide-tag">Streaming</div>
+        <div class="slide-title">USING THE HUD</div>
+        <div class="slide-body">
+          Click <b>HUD</b> in the top bar (desktop only — requires a wide screen) to open the stream panel.
+          Then click <b>OPEN HUD WINDOW</b> to launch the overlay in a separate window.
+        </div>
+        <div class="lcars-panel">
+          <p><b>Capture the HUD window</b> in OBS, Streamlabs, or your video call screen-share tool. Size it as needed.</p>
+          <p>Use the <b>HUD Controls</b> panel to toggle which panels are visible: character, ship, sector map, interior map, dice, oracle, mission, log, NPC spotlight, and camera feed.</p>
+          <p><b>NPC Spotlight</b> — select an NPC to display their name and notes in a floating panel on the overlay.</p>
+          <p><b>Bridge backgrounds</b> — choose a themed bridge image behind the HUD panels.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18: EXPORT LOG SECTION HEADER -->
+    <div class="slide" data-idx="18">
+      <div class="slide-inner">
+        <div class="section-badge gold">EXPORT</div>
+        <div class="slide-icon">📄</div>
+        <div class="slide-title gold">LOG EXPORT</div>
+        <div class="slide-body">
+          Generate a printable <b>After Action Report</b> — a fully formatted LCARS document
+          combining your mission log with maps, NPC profiles, and stats.
+        </div>
+        <div class="chips">
+          <span class="chip chip-gold">Episode Filter</span>
+          <span class="chip chip-gold">Drag & Drop</span>
+          <span class="chip chip-gold">Reorder</span>
+          <span class="chip chip-gold">Save to PDF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 19: EXPORT DETAILS -->
+    <div class="slide" data-idx="19">
+      <div class="slide-inner">
+        <div class="slide-icon">↗️</div>
+        <div class="slide-tag">Log Tab → Export</div>
+        <div class="slide-title gold">BUILDING YOUR REPORT</div>
+        <div class="slide-body">
+          Click <b>↗ EXPORT</b> in the log tab header to open the After Action Report in a new tab.
+          The page has three areas:
+        </div>
+        <div class="lcars-panel gold">
+          <p><b>Source panel (left)</b> — draggable NPCs, maps, and stat cards organised under NPCS / MAPS / STATS tabs.</p>
+          <p><b>ANNEXES column</b> — drop source items here to include them alongside the log. Drag the handles to reorder. Click ✕ to remove.</p>
+          <p><b>MISSION LOG column</b> — your filtered log entries, rendered automatically. Use the episode checkboxes in the top bar to show/hide specific episodes.</p>
+          <p><b>Notes blocks</b> are renameable — click the gold title to edit it.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 20: EXPORT PRINT -->
+    <div class="slide" data-idx="20">
+      <div class="slide-inner">
+        <div class="slide-icon">🖨️</div>
+        <div class="slide-tag">Log Export</div>
+        <div class="slide-title gold">PRINTING & SAVING</div>
+        <div class="slide-body">
+          The export page has two display modes. Toggle between them with the button in the top bar,
+          then use your browser's <b>Print → Save as PDF</b> to archive the report.
+        </div>
+        <div class="lcars-panel gold">
+          <p><b>Dark mode (default)</b> — full LCARS black background with colour accents. Prints as-is when "Background graphics" is enabled in your browser's print dialogue.</p>
+          <p><b>◑ Print Mode</b> — switches to a light grey/white theme optimised for ink saving. Source panel and drag controls are hidden automatically when printing.</p>
+          <p>In Chrome: File → Print → More settings → enable <b>Background graphics</b> for dark mode output.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 21: TIPS -->
+    <div class="slide" data-idx="21">
+      <div class="slide-inner">
+        <div class="slide-icon">⚡</div>
+        <div class="slide-tag">Quick Reference</div>
+        <div class="slide-title">TIPS & SHORTCUTS</div>
+        <div class="slide-body">
+          A few things worth knowing before you head to the bridge.
+        </div>
+        <div class="lcars-panel">
+          <p><b>All data is local</b> — nothing is sent to a server. Use SAVE FILE regularly to back up your missions.</p>
+          <p><b>Mobile</b> — the full app works on phones. The bottom nav bar replaces the side nav. HUD streaming is desktop-only.</p>
+          <p><b>Episode Start</b> — use ▶ EPISODE START instead of the plain episode break. It inserts the banner and opens the entry form in one step.</p>
+          <p><b>Night Mode</b> — the red-alert theme is great for late-night play. It persists between sessions.</p>
+          <p><b>Export early, export often</b> — build your report after each session while it's fresh.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 22: END -->
+    <div class="slide" data-idx="22">
+      <div class="slide-inner">
+        <div class="slide-icon">🖖</div>
+        <div class="slide-tag">End of Briefing</div>
+        <div class="slide-title">READY FOR DEPARTURE</div>
+        <div class="slide-body">
+          You're cleared for warp. Good luck out there, Captain.
+          <br><br>
+          Close this window to return to the app, or jump back to any section using the dots below.
+        </div>
+        <div class="chips">
+          <span class="chip chip-accent">OFFICER</span>
+          <span class="chip chip-peach">MAP</span>
+          <span class="chip chip-lavender">NPCs</span>
+          <span class="chip chip-blue">DICE</span>
+          <span class="chip chip-ltblue">ORACLE</span>
+          <span class="chip chip-gold">LOG</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /slides-wrap -->
+
+  <div id="botnav">
+    <button class="nav-arrow" id="btn-prev" onclick="go(-1)" disabled>◀ PREV</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div id="dots"></div>
+      <div id="key-hint">← → arrow keys to navigate</div>
+    </div>
+    <button class="nav-arrow primary" id="btn-next" onclick="go(1)">NEXT ▶</button>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+var TOTAL = document.querySelectorAll('.slide').length;
+var cur = 0;
+var visited = [true];
+
+function buildDots() {
+  var d = document.getElementById('dots');
+  d.innerHTML = '';
+  for (var i = 0; i < TOTAL; i++) {
+    var el = document.createElement('div');
+    el.className = 'dot' + (i === cur ? ' active' : (visited[i] ? ' visited' : ''));
+    el.setAttribute('data-i', i);
+    el.onclick = (function(idx){ return function(){ goTo(idx); }; })(i);
+    d.appendChild(el);
+  }
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= TOTAL || idx === cur) return;
+  var slides = document.querySelectorAll('.slide');
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('exit-left');
+  setTimeout((function(prev){ return function(){ slides[prev].classList.remove('exit-left'); }; })(cur), 360);
+  cur = idx;
+  visited[cur] = true;
+  slides[cur].classList.add('active');
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').textContent = cur === TOTAL - 1 ? '✕ CLOSE' : 'NEXT ▶';
+  document.getElementById('btn-next').onclick = cur === TOTAL - 1 ? function(){ window.close(); } : function(){ go(1); };
+  document.getElementById('progress-text').textContent = (cur + 1) + ' / ' + TOTAL;
+  buildDots();
+}
+
+function go(dir) { goTo(cur + dir); }
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+});
+
+// Swipe support
+var _tx = null;
+document.getElementById('slides-wrap').addEventListener('touchstart', function(e){ _tx = e.touches[0].clientX; }, {passive:true});
+document.getElementById('slides-wrap').addEventListener('touchend', function(e){
+  if (_tx === null) return;
+  var dx = e.changedTouches[0].clientX - _tx;
+  if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+  _tx = null;
+}, {passive:true});
+
+// Init
+document.getElementById('progress-text').textContent = '1 / ' + TOTAL;
+buildDots();
+</script>
+</body>
+</html>
