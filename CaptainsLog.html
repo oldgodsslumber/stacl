@@ -5188,7 +5188,7 @@ function rollDirective() {
 // SHIP FUNCTIONS
 // ============================================================
 
-function saveShipField(key,val) { S.ship[key]=val; saveSlot(); }
+function saveShipField(key,val) { S.ship[key]=val; if(key==='name'||key==='registry') { S.char.assignment=(S.ship.name||'')+(S.ship.registry?' '+S.ship.registry:''); } saveSlot(); }
 function adjShipSys(key,d) { S.ship[key]=Math.max(5,Math.min(15,(S.ship[key]||7)+d)); saveSlot(); renderCurrentTab(); }
 function setShipDept(key,v) { S.ship[key]=v; saveSlot(); renderCurrentTab(); }
 function toggleShipStress(i) {
