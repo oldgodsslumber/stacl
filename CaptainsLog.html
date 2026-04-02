@@ -3915,10 +3915,11 @@ function exportLog() {
         const c = intCells[ci] || {};
         const bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
         const bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
-        rows += `<td style="padding:0;overflow:hidden;border:1px solid ${bd};background:${bg};text-align:center;vertical-align:middle;line-height:1">`
+        rows += `<td style="padding:0;overflow:hidden;border:1px solid ${bd}">`
+          + `<div style="width:100%;aspect-ratio:1;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box">`
           + `<span style="font-size:8px;line-height:1;display:block">${esc(c.icon||'')}</span>`
           + (c.name ? `<span style="font-size:4px;display:block;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>` : '')
-          + '</td>';
+          + '</div></td>';
       }
       rows += '</tr>';
     }
@@ -4169,10 +4170,11 @@ function renderDroppedCard(item, idx) {
         var c = INT_CELLS[ci] || {};
         var bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
         var bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
-        trows += '<td style="padding:0;overflow:hidden;border:1px solid '+bd+';background:'+bg+';text-align:center;vertical-align:middle;line-height:1">'
+        trows += '<td style="padding:0;overflow:hidden;border:1px solid '+bd+'">'
+          +'<div style="width:100%;aspect-ratio:1;background:'+bg+';display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box">'
           +'<span style="font-size:9px;line-height:1;display:block">'+esc(c.icon||'')+'</span>'
           +(c.name?'<span style="font-size:5px;display:block;overflow:hidden;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
-          +'</td>';
+          +'</div></td>';
       }
       trows += '</tr>';
     }
