@@ -3906,28 +3906,19 @@ function exportLog() {
   </div>`).join('');
 
   const hasInterior = intCells.some(c => c.name || c.icon);
-  // Build interior map rows: row-by-row flex with padding-top:10% for square cells (no aspect-ratio, no table)
-  const intRowsHTML = (() => {
-    let rows = '';
-    for (let r = 0; r < 50; r += 10) {
-      rows += '<div style="display:flex;flex-wrap:nowrap;width:100%">';
-      for (let ci = r; ci < r + 10; ci++) {
-        const c = intCells[ci] || {};
-        const bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
-        const bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
-        rows += `<div style="flex:0 0 10%;max-width:10%;padding-top:10%;position:relative;box-sizing:border-box;overflow:hidden;border:1px solid ${bd};background:${bg}">`
-          + `<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden">`
-          + `<span style="font-size:8px;line-height:1">${esc(c.icon||'')}</span>`
-          + (c.name ? `<span style="font-size:4px;overflow:hidden;color:var(--cell-text);text-align:center">${esc(c.name)}</span>` : '')
-          + '</div></div>';
-      }
-      rows += '</div>';
-    }
-    return rows;
-  })();
+  // Build interior map: ratio-wrapper (padding-top:50% = 10×5 aspect ratio) + absolute inner + CSS grid
+  // This is mathematically guaranteed: container height = 50% of width, grid-template-rows:repeat(5,1fr) → 10×5 square cells
+  const intCellsHTML = intCells.map(c => {
+    const bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
+    const bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
+    return `<div style="background:${bg};border:1px solid ${bd};overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center">`
+      + `<span style="font-size:8px;line-height:1">${esc(c.icon||'')}</span>`
+      + (c.name ? `<span style="font-size:4px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">${esc(c.name)}</span>` : '')
+      + '</div>';
+  }).join('');
   const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px">
     <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:6px;font-weight:700">${esc(S.ship.name||'Ship Interior')}</div>
-    <div style="width:100%">${intRowsHTML}</div>
+    <div style="width:100%;height:0;padding-top:50%;position:relative"><div style="position:absolute;top:0;left:0;right:0;bottom:0"><div style="display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(5,1fr);width:100%;height:100%;gap:1px">${intCellsHTML}</div></div></div>
   </div>` : '<div style="font-size:11px;color:var(--muted);padding:10px">No interior mapped.</div>';
 
   // --- EPISODE CHECKBOXES ---
@@ -4163,22 +4154,18 @@ function renderDroppedCard(item, idx) {
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(sd.name)+'</div>'+grid+'</div>';
   }
   if (item.kind === 'map-interior') {
-    var irows = '';
-    for (var r = 0; r < INT_CELLS.length; r += 10) {
-      irows += '<div style="display:flex;flex-wrap:nowrap;width:100%">';
-      for (var ci = r; ci < r + 10; ci++) {
-        var c = INT_CELLS[ci] || {};
-        var bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
-        var bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
-        irows += '<div style="flex:0 0 10%;max-width:10%;padding-top:10%;position:relative;box-sizing:border-box;overflow:hidden;border:1px solid '+bd+';background:'+bg+'">'
-          +'<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden">'
-          +'<span style="font-size:9px;line-height:1">'+esc(c.icon||'')+'</span>'
-          +(c.name?'<span style="font-size:5px;overflow:hidden;color:var(--cell-text);text-align:center">'+esc(c.name)+'</span>':'')
-          +'</div></div>';
-      }
-      irows += '</div>';
-    }
-    var igrid = '<div style="width:100%;margin-top:8px">'+irows+'</div>';
+    var icells = INT_CELLS.map(function(c) {
+      var bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
+      var bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
+      return '<div style="background:'+bg+';border:1px solid '+bd+';overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center">'
+        +'<span style="font-size:9px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +(c.name?'<span style="font-size:5px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">'+esc(c.name)+'</span>':'')
+        +'</div>';
+    }).join('');
+    var igrid = '<div style="width:100%;height:0;padding-top:50%;position:relative;margin-top:8px">'
+      +'<div style="position:absolute;top:0;left:0;right:0;bottom:0">'
+      +'<div style="display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(5,1fr);width:100%;height:100%;gap:1px">'
+      +icells+'</div></div></div>';
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+igrid+'</div>';
   }
   if (item.kind === 'char-stats') {
