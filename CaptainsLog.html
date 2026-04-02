@@ -3955,8 +3955,9 @@ function exportLog() {
     --src-card-bg:#fff;--src-card-border:#ddd;
     --drop-hint:#eee;--drop-hint-text:#aaa;
   }
+  html{height:100%}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+  body{height:100%;background:var(--bg);color:var(--text);display:flex;flex-direction:column;overflow:hidden}
   #topbar{background:var(--card-bg);border-bottom:3px solid var(--accent);padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0}
   #tb-title{font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);flex-shrink:0}
   #ep-selector{display:flex;gap:8px;flex-wrap:wrap;flex:1;font-size:11px;align-items:center;color:var(--text)}
@@ -3964,9 +3965,9 @@ function exportLog() {
   .tb-btn{background:var(--src-card-bg);border:1px solid var(--card-border);color:var(--text);font-family:inherit;font-size:11px;letter-spacing:1px;padding:5px 12px;cursor:pointer;border-radius:50vh;text-transform:uppercase}
   .tb-btn:hover{border-color:var(--accent);color:var(--accent)}
   .lcars-strip{height:6px;background:linear-gradient(90deg,var(--accent) 60%,var(--lcars-lavender) 60%,var(--lcars-lavender) 75%,var(--lcars-ltblue) 75%,var(--lcars-ltblue) 87%,var(--lcars-gold) 87%);flex-shrink:0}
-  #main{display:flex;flex:1;min-height:0;overflow:hidden}
-  #left-panel{width:300px;flex-shrink:0;background:var(--left-bg);overflow-y:auto;display:flex;flex-direction:column}
-  #left-tabs{display:flex;border-bottom:2px solid var(--accent-dim)}
+  #main{display:flex;flex:1;min-height:0}
+  #left-panel{width:300px;flex-shrink:0;background:var(--left-bg);overflow-y:auto;display:flex;flex-direction:column;border-right:1px solid var(--accent-dim)}
+  #left-tabs{display:flex;border-bottom:2px solid var(--accent-dim);flex-shrink:0}
   .ltab{flex:1;padding:8px;background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:11px;letter-spacing:2px;cursor:pointer;text-transform:uppercase}
   .ltab.active{color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px}
   #tab-crew,#tab-maps{padding:10px;overflow-y:auto;flex:1}
@@ -4044,11 +4045,11 @@ function exportLog() {
 </div>
 
 <script>
-var EPISODES = ${JSON.stringify(episodes)};
-var DROPPED = []; // {kind:'npc'|'map-sector'|'map-interior', data:{...}, afterLogIdx:-1}
-var SRC_NPCS = ${JSON.stringify(data.npcs)};
-var SEC_CELLS = ${JSON.stringify(secCells)};
-var INT_CELLS = ${JSON.stringify(intCells)};
+var EPISODES = ${JSON.stringify(episodes).replace(/<\//g,'<\\/')};
+var DROPPED = [];
+var SRC_NPCS = ${JSON.stringify(data.npcs).replace(/<\//g,'<\\/')};
+var SEC_CELLS = ${JSON.stringify(secCells).replace(/<\//g,'<\\/')};
+var INT_CELLS = ${JSON.stringify(intCells).replace(/<\//g,'<\\/')};
 var SEC_NAME = ${JSON.stringify(sec.name||'Sector Map')};
 var SHIP_NAME = ${JSON.stringify(data.shipName2||'Ship Interior')};
 
