@@ -4060,6 +4060,7 @@ function exportLog() {
     .dc-wrap .dropped-card{border-radius:6px}
     .rm-btn{display:none}
     .notes-ta{border:none;resize:none;padding:0;min-height:unset}
+    .notes-label-input{border:none !important;padding-bottom:0 !important}
   }
 </style>
 </head>
@@ -4252,8 +4253,9 @@ function renderDroppedCard(item, idx) {
     return h3+'</div>';
   }
   if (item.kind === 'notes') {
+    var nlabel = esc(item.label || 'NOTES');
     return '<div class="dropped-card" style="border-color:var(--lcars-gold)">'+rm
-      +'<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-gold);margin-bottom:4px">NOTES</div>'
+      +'<input type="text" value="'+nlabel+'" oninput="DROPPED['+idx+'].label=this.value" class="notes-label-input" style="background:transparent;border:none;border-bottom:1px solid var(--lcars-gold);color:var(--lcars-gold);font-family:inherit;font-size:9px;letter-spacing:2px;text-transform:uppercase;width:100%;margin-bottom:6px;outline:none;padding-bottom:2px">'
       +'<textarea class="notes-ta" oninput="DROPPED['+idx+'].notes=this.value" placeholder="Enter notes…">'+esc(item.notes||'')+'</textarea>'
       +'</div>';
   }
@@ -4285,7 +4287,7 @@ function cdDrop(e, idx) {
   e.preventDefault(); e.stopPropagation();
   if (_reorderIdx === null || _reorderIdx === idx) { _reorderIdx = null; return; }
   var item = DROPPED.splice(_reorderIdx, 1)[0];
-  var target = _reorderIdx < idx ? idx - 1 : idx;
+  var target = idx;
   DROPPED.splice(target, 0, item);
   _reorderIdx = null;
   renderDroppedItems();
