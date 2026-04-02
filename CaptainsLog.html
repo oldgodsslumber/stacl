@@ -3918,7 +3918,7 @@ function exportLog() {
   }).join('');
   const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px">
     <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:6px;font-weight:700">${esc(S.ship.name||'Ship Interior')}</div>
-    <div style="width:100%;height:0;padding-top:50%;position:relative"><div style="position:absolute;top:0;left:0;right:0;bottom:0"><div style="display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(5,1fr);width:100%;height:100%;gap:1px">${intCellsHTML}</div></div></div>
+    <div style="width:100%;height:0;padding-top:200%;position:relative"><div style="position:absolute;top:0;left:0;right:0;bottom:0"><div style="display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(10,1fr);width:100%;height:100%;gap:1px">${intCellsHTML}</div></div></div>
   </div>` : '<div style="font-size:11px;color:var(--muted);padding:10px">No interior mapped.</div>';
 
   // --- EPISODE CHECKBOXES ---
@@ -4162,9 +4162,9 @@ function renderDroppedCard(item, idx) {
         +(c.name?'<span style="font-size:5px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">'+esc(c.name)+'</span>':'')
         +'</div>';
     }).join('');
-    var igrid = '<div style="width:100%;height:0;padding-top:50%;position:relative;margin-top:8px">'
+    var igrid = '<div style="width:100%;height:0;padding-top:200%;position:relative;margin-top:8px">'
       +'<div style="position:absolute;top:0;left:0;right:0;bottom:0">'
-      +'<div style="display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(5,1fr);width:100%;height:100%;gap:1px">'
+      +'<div style="display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(10,1fr);width:100%;height:100%;gap:1px">'
       +icells+'</div></div></div>';
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+igrid+'</div>';
   }
