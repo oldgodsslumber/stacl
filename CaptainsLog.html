@@ -3869,6 +3869,7 @@ function exportLog() {
 
   const charName = esc(S.char.name || 'Unknown Officer');
   const shipName = esc(S.ship.name || '');
+  const thumbAbs = S.ship.thumb ? new URL(S.ship.thumb, location.href).href : '';
 
   // --- ATTITUDE COLORS ---
   const attColor = {Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
@@ -3901,9 +3902,9 @@ function exportLog() {
   const hasInterior = intCells.some(c => c.name || c.icon);
   const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px;overflow:hidden">
     <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:6px;font-weight:700">${esc(S.ship.name||'Ship Interior')}</div>
-    <div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:1px;width:100%;overflow:hidden">
-      ${intCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;border-radius:1px;min-width:0;min-height:0;overflow:hidden">
-        <span style="font-size:8px;line-height:1">${esc(c.icon||'')}</span>
+    <div style="display:flex;flex-wrap:wrap;width:100%;overflow:hidden">
+      ${intCells.map(c => `<div style="width:10%;aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:7px;line-height:1">${esc(c.icon||'')}</span>
         ${c.name?`<span style="font-size:4px;text-align:center;line-height:1.1;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('')}
     </div>
@@ -4076,8 +4077,8 @@ var EPISODES = ${J(episodes)};
 var DROPPED = [];
 var SRC_NPCS = ${J(S.npcs || [])};
 var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:S.char.attributes||{},disciplines:S.char.disciplines||{},focuses:S.char.focuses||[],traits:S.char.traits||'',talents:S.char.talents||[]})};
-var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,registry:S.ship.registry||'',thumb:S.ship.thumb||'',trait:S.ship.trait||'',systems:S.ship.systems||{},departments:S.ship.departments||{},traits:S.ship.traits||'',talents:S.ship.talents||[]})};
-var SRC_SHIP_THUMB = ${J(S.ship.thumb||'')};
+var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,registry:S.ship.registry||'',thumb:thumbAbs,trait:S.ship.trait||'',systems:S.ship.systems||{},departments:S.ship.departments||{},traits:S.ship.traits||'',talents:S.ship.talents||[]})};
+var SRC_SHIP_THUMB = ${J(thumbAbs)};
 var SEC_CELLS = ${J(secCells)};
 var INT_CELLS = ${J(intCells)};
 var SEC_NAME = ${J(sec.name||'Sector Map')};
@@ -4137,10 +4138,10 @@ function renderDroppedCard(item, idx) {
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SEC_NAME)+'</div>'+grid+'</div>';
   }
   if (item.kind === 'map-interior') {
-    var grid2 = '<div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:1px;margin-top:8px;width:100%;overflow:hidden">'
-      + INT_CELLS.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;border-radius:1px;min-width:0;min-height:0;overflow:hidden">'
-        +'<span style="font-size:8px;line-height:1">'+esc(c.icon||'')+'</span>'
-        +(c.name?'<span style="font-size:4px;text-align:center;line-height:1.1;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
+    var grid2 = '<div style="display:flex;flex-wrap:wrap;width:100%;overflow:hidden;margin-top:8px">'
+      + INT_CELLS.map(function(c){ return '<div style="width:10%;aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;overflow:hidden">'
+        +'<span style="font-size:9px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +(c.name?'<span style="font-size:5px;text-align:center;line-height:1.1;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
         +'</div>';}).join('')+'</div>';
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+grid2+'</div>';
   }
