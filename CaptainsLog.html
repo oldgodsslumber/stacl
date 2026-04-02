@@ -3849,39 +3849,33 @@ function parseEpisodes(log) {
   const groups = [];
   let cur = {label:'Campaign Log', entries:[]};
   log.forEach(e => {
-    if (e.type === 'episode') {
-      groups.push(cur);
-      cur = {label: e.title || 'Episode', entries:[]};
-    } else {
-      cur.entries.push(e);
-    }
+    if (e.type === 'episode') { groups.push(cur); cur = {label:e.title||'Episode', entries:[]}; }
+    else { cur.entries.push(e); }
   });
   groups.push(cur);
-  return groups.filter(g => g.label === 'Campaign Log' ? g.entries.length > 0 : true);
+  return groups.filter(g => g.label==='Campaign Log' ? g.entries.length>0 : true);
 }
 
 function exportLog() {
   const episodes = parseEpisodes(S.log);
-  const data = {
-    charName: S.char.name || 'Unknown Officer',
-    shipName: S.ship.name || '',
-    episodes,
-    npcs: S.npcs || [],
-    sectors: S.sectors || [],
-    activeSector: S.activeSector || 0,
-    interiorCells: S.ship.interiorCells || [],
-    shipName2: S.ship.name || '',
-    shipClass: S.ship.className || ''
-  };
-
   const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const J = x => JSON.stringify(x).replace(/<\//g,'<\\/');
+
+  const sec = (S.sectors || [])[S.activeSector || 0] || {name:'Sector', cells:[]};
+  const secCells = (sec.cells || []).slice(0,25);
+  while (secCells.length < 25) secCells.push({});
+  const intCells = (S.ship.interiorCells || []).slice(0,50);
+  while (intCells.length < 50) intCells.push({});
+
+  const charName = esc(S.char.name || 'Unknown Officer');
+  const shipName = esc(S.ship.name || '');
 
   // --- ATTITUDE COLORS ---
   const attColor = {Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
 
   // --- NPC CARDS HTML (left panel) ---
-  const npcCardsHTML = data.npcs.length
-    ? data.npcs.map((n,i) => `<div class="src-card" draggable="true" ondragstart="srcDragStart(event,'npc',${i})">
+  const npcCardsHTML = (S.npcs || []).length
+    ? (S.npcs || []).map((n,i) => `<div class="src-card" draggable="true" ondragstart="srcDragStart(event,'npc',${i})">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
           <span style="font-size:13px;font-weight:700;letter-spacing:1px">${esc(n.name)}</span>
           <span style="font-size:9px;padding:2px 6px;border-radius:50vh;background:${attColor[n.attitude]||'#555'};color:#000;font-weight:700;flex-shrink:0">${esc(n.attitude||'')}</span>
@@ -3893,13 +3887,10 @@ function exportLog() {
       </div>`).join('')
     : '<div style="font-size:11px;color:var(--muted);padding:10px">No crew logged.</div>';
 
-  // --- MAP GRIDS HTML ---
-  const sec = data.sectors[data.activeSector] || {name:'Sector', cells:[]};
-  const secCells = (sec.cells || []).slice(0,25);
-  while (secCells.length < 25) secCells.push({});
+  // --- MAP GRIDS HTML (source panel) ---
   const secGridHTML = `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-sector',0)">
     <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:700">${esc(sec.name||'Sector Map')}</div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px">
+    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px">
       ${secCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">
         <span style="font-size:14px;line-height:1">${esc(c.icon||'')}</span>
         ${c.name?`<span style="font-size:6px;text-align:center;line-height:1.2;overflow:hidden;max-height:14px;color:var(--cell-text)">${esc(c.name)}</span>`:''}
@@ -3907,15 +3898,13 @@ function exportLog() {
     </div>
   </div>`;
 
-  const intCells = (data.interiorCells || []).slice(0,50);
-  while (intCells.length < 50) intCells.push({});
   const hasInterior = intCells.some(c => c.name || c.icon);
   const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px">
-    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:6px;font-weight:700">${esc(data.shipName2||'Ship Interior')}</div>
-    <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:2px">
-      ${intCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;border-radius:2px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:6px;font-weight:700">${esc(S.ship.name||'Ship Interior')}</div>
+    <div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px">
+      ${intCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;border-radius:2px;min-width:0;min-height:0;overflow:hidden">
         <span style="font-size:9px;line-height:1">${esc(c.icon||'')}</span>
-        ${c.name?`<span style="font-size:5px;text-align:center;line-height:1.2;overflow:hidden;max-height:10px;color:var(--cell-text)">${esc(c.name)}</span>`:''}
+        ${c.name?`<span style="font-size:5px;text-align:center;line-height:1.2;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('')}
     </div>
   </div>` : '<div style="font-size:11px;color:var(--muted);padding:10px">No interior mapped.</div>';
@@ -3926,7 +3915,7 @@ function exportLog() {
 
   // --- FULL HTML ---
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<title>Captain's Log — ${esc(data.charName)}</title>
+<title>Captain's Log — ${charName}</title>
 <style>
   :root {
     --bg:#000;--text:#FFCC99;--muted:#7a4a1a;--sub:#9a6a3a;
@@ -3966,11 +3955,11 @@ function exportLog() {
   .tb-btn:hover{border-color:var(--accent);color:var(--accent)}
   .lcars-strip{height:6px;background:linear-gradient(90deg,var(--accent) 60%,var(--lcars-lavender) 60%,var(--lcars-lavender) 75%,var(--lcars-ltblue) 75%,var(--lcars-ltblue) 87%,var(--lcars-gold) 87%);flex-shrink:0}
   #main{display:flex;flex:1;min-height:0}
-  #left-panel{width:300px;flex-shrink:0;background:var(--left-bg);overflow-y:auto;display:flex;flex-direction:column;border-right:1px solid var(--accent-dim)}
-  #left-tabs{display:flex;border-bottom:2px solid var(--accent-dim);flex-shrink:0}
-  .ltab{flex:1;padding:8px;background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:11px;letter-spacing:2px;cursor:pointer;text-transform:uppercase}
-  .ltab.active{color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px}
-  #tab-crew,#tab-maps{padding:10px;overflow-y:auto;flex:1}
+  #src-panel{width:260px;flex-shrink:0;background:var(--left-bg);overflow-y:auto;display:flex;flex-direction:column;border-right:1px solid var(--accent-dim)}
+  #src-tabs{display:flex;border-bottom:2px solid var(--accent-dim);flex-shrink:0}
+  .stab{flex:1;padding:7px 4px;background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+  .stab.active{color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px}
+  #tab-crew,#tab-maps,#tab-stats{padding:10px;overflow-y:auto;flex:1}
   .src-card{background:var(--src-card-bg);border:1px solid var(--src-card-border);border-radius:4px;padding:10px;margin-bottom:8px;cursor:grab;transition:border-color 0.15s}
   .src-card:hover{border-color:var(--accent)}
   .src-card:active{cursor:grabbing;opacity:0.7}
@@ -3979,11 +3968,13 @@ function exportLog() {
   .lcars-divider{width:8px;background:var(--divider);flex-shrink:0;position:relative}
   .lcars-divider::before{content:'';position:absolute;top:20px;left:0;width:100%;height:40px;background:var(--lcars-lavender)}
   .lcars-divider::after{content:'';position:absolute;top:80px;left:0;width:100%;height:20px;background:var(--lcars-ltblue)}
-  #right-panel{flex:1;overflow-y:auto;padding:16px;min-width:0}
-  #drop-hint{border:2px dashed var(--drop-hint);border-radius:6px;padding:12px;text-align:center;font-size:11px;letter-spacing:2px;color:var(--drop-hint-text);margin-bottom:16px;text-transform:uppercase}
-  #drop-hint.drag-over{border-color:var(--accent);color:var(--accent)}
-  #log-output{}
-  .ep-banner{background:var(--ep-banner-bg);color:var(--ep-banner-text);padding:10px 16px;border-radius:4px;margin:20px 0 10px;display:flex;align-items:center;gap:12px}
+  #doc-area{flex:1;display:grid;grid-template-columns:38% 1fr;min-width:0;min-height:0;overflow:hidden}
+  #doc-left{overflow-y:auto;padding:16px;border-right:2px solid var(--accent-dim);min-width:0;min-height:0}
+  #doc-left-hdr{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--accent-dim)}
+  #drop-zone{border:2px dashed var(--drop-hint);border-radius:6px;padding:12px;text-align:center;font-size:10px;letter-spacing:2px;color:var(--drop-hint-text);margin-bottom:12px;text-transform:uppercase;transition:border-color 0.15s,color 0.15s}
+  #drop-zone.drag-over{border-color:var(--accent);color:var(--accent)}
+  #doc-right{overflow-y:auto;padding:16px;min-width:0;min-height:0}
+  .ep-banner{background:var(--ep-banner-bg);color:var(--ep-banner-text);padding:10px 16px;border-radius:4px;margin:16px 0 10px;display:flex;align-items:center;gap:12px}
   .ep-banner-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.7}
   .ep-banner-title{font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
   .log-card{border-left:4px solid var(--accent);background:var(--card-bg);border-radius:0 6px 6px 0;padding:10px 12px;margin-bottom:10px}
@@ -4002,22 +3993,27 @@ function exportLog() {
   .dropped-card .rm-btn:hover{color:#FF2200}
   .dropped-npc-name{font-size:14px;font-weight:700;letter-spacing:1px;color:var(--lcars-lavender)}
   .dropped-map-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:8px}
+  .stat-row{display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px}
+  .stat-lbl{color:var(--muted)}.stat-val{font-weight:700;color:var(--accent)}
+  .stat-sec{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:8px 0 4px;border-bottom:1px solid var(--accent-dim);padding-bottom:3px}
   @media print {
     #topbar{display:none}
     .lcars-strip{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    #left-panel{display:none}
+    #src-panel{display:none}
     .lcars-divider{display:none}
-    #right-panel{width:100%;overflow:visible}
-    #drop-hint{display:none}
+    #doc-area{grid-template-columns:38% 1fr}
+    #doc-left{border-right:1px solid #ccc}
+    #drop-zone{display:none}
+    #doc-left,#doc-right{overflow:visible;height:auto}
     .log-card,.dropped-card,.ep-banner{page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    body{background:white;color:#222}
+    body{overflow:visible;height:auto}
   }
 </style>
 </head>
 <body>
 
 <div id="topbar">
-  <div id="tb-title">CAPTAIN'S LOG // ${esc(data.charName)}</div>
+  <div id="tb-title">CAPTAIN'S LOG // ${charName}</div>
   <div id="ep-selector">${epChecks}</div>
   <button class="tb-btn" id="theme-btn" onclick="toggleTheme()">◑ PRINT MODE</button>
   <button class="tb-btn" onclick="window.print()">🖨 PRINT</button>
@@ -4026,40 +4022,62 @@ function exportLog() {
 <div class="lcars-strip"></div>
 
 <div id="main">
-  <div id="left-panel">
-    <div id="left-tabs">
-      <button class="ltab active" id="ltab-crew" onclick="showLTab('crew')">CREW</button>
-      <button class="ltab" id="ltab-maps" onclick="showLTab('maps')">MAPS</button>
+  <div id="src-panel">
+    <div id="src-tabs">
+      <button class="stab active" id="stab-crew" onclick="showSTab('crew')">CREW</button>
+      <button class="stab" id="stab-maps" onclick="showSTab('maps')">MAPS</button>
+      <button class="stab" id="stab-stats" onclick="showSTab('stats')">STATS</button>
     </div>
     <div id="tab-crew">${npcCardsHTML}</div>
     <div id="tab-maps" style="display:none">${secGridHTML}${intGridHTML}</div>
+    <div id="tab-stats" style="display:none">
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'char-stats',0)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-lavender);margin-bottom:4px">OFFICER PROFILE</div>
+        <div style="font-size:10px;color:var(--muted)">${charName}</div>
+      </div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'ship-stats',0)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-ltblue);margin-bottom:4px">SHIP PROFILE</div>
+        <div style="font-size:10px;color:var(--muted)">${shipName}</div>
+      </div>
+    </div>
   </div>
   <div class="lcars-divider"></div>
-  <div id="right-panel"
-       ondragover="rpDragOver(event)"
-       ondragleave="rpDragLeave(event)"
-       ondrop="rpDrop(event)">
-    <div id="drop-hint">← DRAG CREW OR MAPS TO INSERT AT END</div>
-    <div id="log-output"></div>
+  <div id="doc-area">
+    <div id="doc-left"
+         ondragover="dzOver(event)"
+         ondragleave="dzLeave(event)"
+         ondrop="dzDrop(event)">
+      <div id="doc-left-hdr">◀ LEFT COLUMN</div>
+      <div id="drop-zone">DRAG ITEMS HERE</div>
+      <div id="dropped-items"></div>
+    </div>
+    <div id="doc-right">
+      <div id="log-output"></div>
+    </div>
   </div>
 </div>
 
 <script>
-var EPISODES = ${JSON.stringify(episodes).replace(/<\//g,'<\\/')};
+var EPISODES = ${J(episodes)};
 var DROPPED = [];
-var SRC_NPCS = ${JSON.stringify(data.npcs).replace(/<\//g,'<\\/')};
-var SEC_CELLS = ${JSON.stringify(secCells).replace(/<\//g,'<\\/')};
-var INT_CELLS = ${JSON.stringify(intCells).replace(/<\//g,'<\\/')};
-var SEC_NAME = ${JSON.stringify(sec.name||'Sector Map')};
-var SHIP_NAME = ${JSON.stringify(data.shipName2||'Ship Interior')};
+var SRC_NPCS = ${J(S.npcs || [])};
+var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:S.char.attributes||{},disciplines:S.char.disciplines||{},focuses:S.char.focuses||[],traits:S.char.traits||''})};
+var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,systems:S.ship.systems||{},departments:S.ship.departments||{},traits:S.ship.traits||''})};
+var SEC_CELLS = ${J(secCells)};
+var INT_CELLS = ${J(intCells)};
+var SEC_NAME = ${J(sec.name||'Sector Map')};
+var SHIP_NAME = ${J(S.ship.name||'Ship Interior')};
 
 var _srcDragItem = null;
 
-function showLTab(t) {
-  document.getElementById('tab-crew').style.display = t==='crew'?'':'none';
-  document.getElementById('tab-maps').style.display = t==='maps'?'':'none';
-  document.getElementById('ltab-crew').className = 'ltab'+(t==='crew'?' active':'');
-  document.getElementById('ltab-maps').className = 'ltab'+(t==='maps'?' active':'');
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var ATT_COLOR={Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
+
+function showSTab(t) {
+  ['crew','maps','stats'].forEach(function(n) {
+    document.getElementById('tab-'+n).style.display = n===t ? '' : 'none';
+    document.getElementById('stab-'+n).className = 'stab' + (n===t ? ' active' : '');
+  });
 }
 
 function toggleTheme() {
@@ -4069,125 +4087,131 @@ function toggleTheme() {
 }
 
 function epAllChanged(cb) {
-  var all = cb.checked;
-  document.querySelectorAll('.ep-chk').forEach(c => c.checked = all);
+  document.querySelectorAll('.ep-chk').forEach(function(c){ c.checked = cb.checked; });
   renderLogOutput();
 }
 function epChkChanged() {
-  var all = document.querySelectorAll('.ep-chk');
-  var anyUnchecked = Array.from(all).some(c=>!c.checked);
-  document.getElementById('ep-all').checked = !anyUnchecked;
+  document.getElementById('ep-all').checked = !Array.from(document.querySelectorAll('.ep-chk')).some(function(c){ return !c.checked; });
   renderLogOutput();
 }
 
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function statRow(lbl, val) {
+  return '<div class="stat-row"><span class="stat-lbl">'+esc(lbl)+'</span><span class="stat-val">'+esc(String(val||0))+'</span></div>';
 }
 
-var ATT_COLOR = {Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
-
 function renderDroppedCard(item, idx) {
+  var rm = '<button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>';
   if (item.kind === 'npc') {
     var n = item.data;
-    return '<div class="dropped-card"><button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>'
+    return '<div class="dropped-card">'+rm
       +'<div class="dropped-npc-name">'+esc(n.name)+'</div>'
       +'<div style="font-size:10px;color:#7a7a7a;margin-top:2px">'+esc(n.faction)+' · '+esc(n.role)+'</div>'
+      +(n.attitude?'<span style="font-size:9px;padding:2px 6px;border-radius:50vh;background:'+(ATT_COLOR[n.attitude]||'#555')+';color:#000;font-weight:700;display:inline-block;margin-top:4px">'+esc(n.attitude)+'</span>':'')
       +(n.trait?'<div style="font-size:10px;font-style:italic;margin-top:4px;color:#9a6a3a">'+esc(n.trait)+'</div>':'')
       +(n.goal?'<div style="font-size:10px;margin-top:4px"><span style="color:#7a7a7a">GOAL:</span> '+esc(n.goal)+'</div>':'')
       +(n.notes?'<div style="font-size:10px;margin-top:4px;color:#9a6a3a">'+esc(n.notes)+'</div>':'')
       +'</div>';
   }
   if (item.kind === 'map-sector') {
-    var cells = SEC_CELLS;
-    var grid = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:8px">'
-      + cells.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">'
+    var grid = '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:8px">'
+      + SEC_CELLS.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px;min-width:0;min-height:0">'
         +'<span style="font-size:14px;line-height:1">'+esc(c.icon||'')+'</span>'
         +(c.name?'<span style="font-size:6px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
-        +'</div>';}).join('')
-      +'</div>';
-    return '<div class="dropped-card"><button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>'
-      +'<div class="dropped-map-title">'+esc(SEC_NAME)+'</div>'+grid+'</div>';
+        +'</div>';}).join('')+'</div>';
+    return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SEC_NAME)+'</div>'+grid+'</div>';
   }
   if (item.kind === 'map-interior') {
-    var cells2 = INT_CELLS;
-    var grid2 = '<div style="display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-top:8px">'
-      + cells2.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;border-radius:2px">'
+    var grid2 = '<div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px;margin-top:8px">'
+      + INT_CELLS.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;border-radius:2px;min-width:0;min-height:0;overflow:hidden">'
         +'<span style="font-size:9px;line-height:1">'+esc(c.icon||'')+'</span>'
         +(c.name?'<span style="font-size:5px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
-        +'</div>';}).join('')
-      +'</div>';
-    return '<div class="dropped-card"><button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>'
-      +'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+grid2+'</div>';
+        +'</div>';}).join('')+'</div>';
+    return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+grid2+'</div>';
+  }
+  if (item.kind === 'char-stats') {
+    var ch = SRC_CHAR; var att = ch.attributes||{}; var disc = ch.disciplines||{};
+    var h = '<div class="dropped-card" style="border-color:var(--lcars-lavender)">'+rm;
+    h += '<div style="font-size:14px;font-weight:700;color:var(--lcars-lavender);margin-bottom:2px">'+esc(ch.name||'Officer')+'</div>';
+    h += '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">'+esc(ch.rank||'')+(ch.species?' · '+esc(ch.species):'')+'</div>';
+    h += '<div class="stat-sec">Attributes</div>';
+    ['Control','Fitness','Presence','Daring','Insight','Reason'].forEach(function(a){ h += statRow(a, att[a]); });
+    h += '<div class="stat-sec">Disciplines</div>';
+    ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h += statRow(d, disc[d]); });
+    if (ch.focuses && ch.focuses.length) { h += '<div class="stat-sec">Focuses</div><div style="font-size:10px;color:var(--text)">'+ch.focuses.map(function(f){return esc(f);}).join(', ')+'</div>'; }
+    if (ch.traits) { h += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(ch.traits)+'</div>'; }
+    return h+'</div>';
+  }
+  if (item.kind === 'ship-stats') {
+    var sh = SRC_SHIP; var sys = sh.systems||{}; var dep = sh.departments||{};
+    var h2 = '<div class="dropped-card" style="border-color:var(--lcars-ltblue)">'+rm;
+    h2 += '<div style="font-size:14px;font-weight:700;color:var(--lcars-ltblue);margin-bottom:2px">'+esc(sh.name||'Vessel')+'</div>';
+    h2 += '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">'+esc(sh.className||'')+(sh.scale?' · Scale '+sh.scale:'')+'</div>';
+    h2 += '<div class="stat-sec">Systems</div>';
+    ['Comms','Engines','Structure','Computers','Sensors','Weapons'].forEach(function(s){ h2 += statRow(s, sys[s]); });
+    h2 += '<div class="stat-sec">Departments</div>';
+    ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h2 += statRow(d, dep[d]); });
+    if (sh.traits) { h2 += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(sh.traits)+'</div>'; }
+    return h2+'</div>';
   }
   return '';
+}
+
+function renderDroppedItems() {
+  document.getElementById('dropped-items').innerHTML = DROPPED.map(function(item,i){ return renderDroppedCard(item,i); }).join('');
 }
 
 function renderLogOutput() {
   var selectedIdxs = [];
   document.querySelectorAll('.ep-chk').forEach(function(c,i){ if(c.checked) selectedIdxs.push(i); });
-
   var html = '';
   selectedIdxs.forEach(function(epIdx) {
-    var ep = EPISODES[epIdx];
-    if (!ep) return;
+    var ep = EPISODES[epIdx]; if (!ep) return;
     html += '<div class="ep-banner"><div><div class="ep-banner-label">Episode</div><div class="ep-banner-title">'+esc(ep.label)+'</div></div></div>';
     ep.entries.forEach(function(e) {
-      var isMajor = e.type==='log';
-      var isAlert = e.type==='alert';
-      var isSupp = e.type==='supplemental';
-      var cls = isMajor?'log-card':isAlert?'log-card alert':isSupp?'log-card supplemental':'log-card base';
-      var titleColor = isMajor?'var(--accent)':isAlert?'#FF2200':isSupp?'var(--lcars-ltblue)':'var(--text)';
+      var isMajor = e.type==='log'; var isAlert = e.type==='alert'; var isSupp = e.type==='supplemental';
+      var cls = isAlert?'log-card alert':isSupp?'log-card supplemental':isMajor?'log-card':'log-card base';
       html += '<div class="'+cls+'">'
         +'<div class="log-card-header">'
         +'<span style="font-size:'+(isMajor?'20':'16')+'px">'+esc(e.emoji||'📋')+'</span>'
-        +'<div><div class="log-card-title" style="color:'+titleColor+'">'+esc(e.title||e.type||'Log')+'</div>'
+        +'<div><div class="log-card-title">'+esc(e.title||e.type||'Log')+'</div>'
         +'<div class="log-card-meta">'+esc(e.date||'')+'</div></div>'
         +'</div>'
         +(e.body?'<div class="log-card-body">'+esc(e.body)+'</div>':'')
         +'</div>';
     });
   });
-
-  // Append dropped items at the end
-  DROPPED.forEach(function(item, idx) {
-    html += renderDroppedCard(item, idx);
-  });
-
   document.getElementById('log-output').innerHTML = html || '<div style="font-size:12px;color:var(--muted);padding:20px">No episodes selected.</div>';
 }
 
 function srcDragStart(e, kind, idx) {
-  var data = kind==='npc' ? SRC_NPCS[idx] : null;
-  _srcDragItem = {kind:kind, data:data};
+  _srcDragItem = {kind:kind, data:(kind==='npc' ? SRC_NPCS[idx] : null)};
   e.dataTransfer.effectAllowed = 'copy';
   e.dataTransfer.setData('text/plain', kind);
 }
 
-function rpDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'copy';
-  document.getElementById('drop-hint').classList.add('drag-over');
+function dzOver(e) {
+  e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+  document.getElementById('drop-zone').classList.add('drag-over');
 }
-function rpDragLeave(e) {
-  if (!document.getElementById('right-panel').contains(e.relatedTarget)) {
-    document.getElementById('drop-hint').classList.remove('drag-over');
+function dzLeave(e) {
+  if (!document.getElementById('doc-left').contains(e.relatedTarget)) {
+    document.getElementById('drop-zone').classList.remove('drag-over');
   }
 }
-function rpDrop(e) {
+function dzDrop(e) {
   e.preventDefault();
-  document.getElementById('drop-hint').classList.remove('drag-over');
+  document.getElementById('drop-zone').classList.remove('drag-over');
   if (!_srcDragItem) return;
   DROPPED.push(_srcDragItem);
   _srcDragItem = null;
-  renderLogOutput();
+  renderDroppedItems();
 }
 
 function removeDropped(idx) {
   DROPPED.splice(idx, 1);
-  renderLogOutput();
+  renderDroppedItems();
 }
 
-// Initial render
 window.addEventListener('DOMContentLoaded', renderLogOutput);
 ${'<'+'/script>'}
 </body></html>`;
