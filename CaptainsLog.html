@@ -4188,15 +4188,15 @@ function removeDropped(idx) {
 }
 
 // Initial render
-renderLogOutput();
+window.addEventListener('DOMContentLoaded', renderLogOutput);
 </script>
 </body></html>`;
 
-  const w = window.open('', '_blank');
-  if (!w) { alert('Pop-up blocked. Please allow pop-ups for this page.'); return; }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank');
+  if (!w) { URL.revokeObjectURL(url); alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 // ============================================================
