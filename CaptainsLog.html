@@ -4221,9 +4221,9 @@ function renderDroppedCard(item, idx) {
     h += '<div style="font-size:14px;font-weight:700;color:var(--lcars-lavender);margin-bottom:2px">'+esc(ch.name||'Officer')+'</div>';
     h += '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">'+esc(ch.rank||'')+(ch.species?' · '+esc(ch.species):'')+'</div>';
     h += '<div class="stat-sec">Attributes</div>';
-    ['Control','Fitness','Presence','Daring','Insight','Reason'].forEach(function(a){ h += statRow(a, att[a]); });
+    ['Control','Fitness','Presence','Daring','Insight','Reason'].forEach(function(a){ h += statRow(a, att[a.toLowerCase()]); });
     h += '<div class="stat-sec">Disciplines</div>';
-    ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h += statRow(d, disc[d]); });
+    ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h += statRow(d, disc[d.toLowerCase()]); });
     if (ch.focuses && ch.focuses.length) { h += '<div class="stat-sec">Focuses</div><div style="font-size:10px;color:var(--text)">'+ch.focuses.map(function(f){return esc(f);}).join(', ')+'</div>'; }
     if (ch.talents && ch.talents.length) { h += '<div class="stat-sec">Talents</div>'+ch.talents.map(function(t){ return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--accent);font-weight:700">'+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
     if (ch.traits) { h += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(ch.traits)+'</div>'; }
@@ -4235,9 +4235,9 @@ function renderDroppedCard(item, idx) {
     h2 += '<div style="font-size:14px;font-weight:700;color:var(--lcars-ltblue);margin-bottom:2px">'+esc(sh.name||'Vessel')+'</div>';
     h2 += '<div style="font-size:10px;color:var(--muted);margin-bottom:8px">'+esc(sh.className||'')+(sh.registry?' '+esc(sh.registry):'')+(sh.scale?' · Scale '+sh.scale:'')+'</div>';
     h2 += '<div class="stat-sec">Systems</div>';
-    ['Comms','Engines','Structure','Computers','Sensors','Weapons'].forEach(function(s){ h2 += statRow(s, sys[s]); });
+    ['Comms','Engines','Structure','Computers','Sensors','Weapons'].forEach(function(s){ h2 += statRow(s, sys[s.toLowerCase()]); });
     h2 += '<div class="stat-sec">Departments</div>';
-    ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h2 += statRow(d, dep[d]); });
+    ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h2 += statRow(d, dep[d.toLowerCase()]); });
     if (sh.talents && sh.talents.length) { h2 += '<div class="stat-sec">Talents</div>'+sh.talents.map(function(t){ return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--lcars-ltblue);font-weight:700">'+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
     if (sh.traits) { h2 += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(sh.traits)+'</div>'; }
     return h2+'</div>';
