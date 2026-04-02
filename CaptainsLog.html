@@ -3861,9 +3861,15 @@ function exportLog() {
   const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const J = x => JSON.stringify(x).replace(/<\//g,'<\\/');
 
-  const sec = (S.sectors || [])[S.activeSector || 0] || {name:'Sector', cells:[]};
-  const secCells = (sec.cells || []).slice(0,25);
-  while (secCells.length < 25) secCells.push({});
+  const allSectors = (S.sectors || []).map(s => {
+    const cells = (s.cells || []).slice(0,25);
+    while (cells.length < 25) cells.push({});
+    return {name: s.name || 'Sector', cells};
+  }).filter((s,i) => s.name !== 'Sector' || i === (S.activeSector || 0));
+  // keep at least one sector
+  if (!allSectors.length) allSectors.push({name:'Sector Map', cells: Array(25).fill({})});
+  const sec = allSectors[S.activeSector || 0] || allSectors[0];
+  const secCells = sec.cells;
   const intCells = (S.ship.interiorCells || []).slice(0,50);
   while (intCells.length < 50) intCells.push({});
 
@@ -3888,16 +3894,16 @@ function exportLog() {
       </div>`).join('')
     : '<div style="font-size:11px;color:var(--muted);padding:10px">No NPCs logged.</div>';
 
-  // --- MAP GRIDS HTML (source panel) ---
-  const secGridHTML = `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-sector',0)">
-    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:700">${esc(sec.name||'Sector Map')}</div>
+  // --- MAP GRIDS HTML (source panel) — one block per sector ---
+  const secGridHTML = allSectors.map((s, si) => `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-sector',${si})" style="margin-bottom:10px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:700">${esc(s.name)}</div>
     <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px">
-      ${secCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">
+      ${s.cells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">
         <span style="font-size:14px;line-height:1">${esc(c.icon||'')}</span>
         ${c.name?`<span style="font-size:6px;text-align:center;line-height:1.2;overflow:hidden;max-height:14px;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('')}
     </div>
-  </div>`;
+  </div>`).join('');
 
   const hasInterior = intCells.some(c => c.name || c.icon);
   // Build table rows: table-layout:fixed with 10 explicit <col> elements guarantees 10 columns
@@ -4027,6 +4033,10 @@ function exportLog() {
     #doc-left,#doc-right{overflow:visible;height:auto}
     .log-card,.dropped-card,.ep-banner{page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     body{overflow:visible;height:auto}
+    .dc-handle{display:none}
+    .dc-wrap .dropped-card{border-radius:6px}
+    .rm-btn{display:none}
+    .notes-ta{border:none;resize:none;padding:0;min-height:unset}
   }
 </style>
 </head>
@@ -4092,9 +4102,8 @@ var SRC_NPCS = ${J(S.npcs || [])};
 var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:S.char.attributes||{},disciplines:S.char.disciplines||{},focuses:S.char.focuses||[],traits:S.char.traits||'',talents:S.char.talents||[]})};
 var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,registry:S.ship.registry||'',thumb:thumbAbs,trait:S.ship.trait||'',systems:S.ship.systems||{},departments:S.ship.departments||{},traits:S.ship.traits||'',talents:S.ship.talents||[]})};
 var SRC_SHIP_THUMB = ${J(thumbAbs)};
-var SEC_CELLS = ${J(secCells)};
+var ALL_SECTORS = ${J(allSectors)};
 var INT_CELLS = ${J(intCells)};
-var SEC_NAME = ${J(sec.name||'Sector Map')};
 var SHIP_NAME = ${J(S.ship.name||'Ship Interior')};
 
 var _srcDragItem = null;
@@ -4143,12 +4152,14 @@ function renderDroppedCard(item, idx) {
       +'</div>';
   }
   if (item.kind === 'map-sector') {
+    var sd = item.data || ALL_SECTORS[0] || {name:'Sector',cells:[]};
+    var scells = sd.cells || [];
     var grid = '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:8px;overflow:hidden">'
-      + SEC_CELLS.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px;min-width:0;min-height:0">'
+      + scells.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px;min-width:0;min-height:0">'
         +'<span style="font-size:14px;line-height:1">'+esc(c.icon||'')+'</span>'
         +(c.name?'<span style="font-size:6px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
         +'</div>';}).join('')+'</div>';
-    return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SEC_NAME)+'</div>'+grid+'</div>';
+    return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(sd.name)+'</div>'+grid+'</div>';
   }
   if (item.kind === 'map-interior') {
     var trows = '';
@@ -4270,7 +4281,8 @@ function renderLogOutput() {
 }
 
 function srcDragStart(e, kind, idx) {
-  _srcDragItem = {kind:kind, data:(kind==='npc' ? SRC_NPCS[idx] : null), notes:''};
+  var data = kind==='npc' ? SRC_NPCS[idx] : kind==='map-sector' ? ALL_SECTORS[idx] : null;
+  _srcDragItem = {kind:kind, data:data, notes:''};
   _reorderIdx = null;
   e.dataTransfer.effectAllowed = 'copy';
   e.dataTransfer.setData('text/plain', kind);
