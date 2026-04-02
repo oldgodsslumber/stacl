@@ -209,6 +209,12 @@ input,select,textarea{font-family:var(--font)}
 .log-entry-supplemental{background:#000;border-left:4px solid var(--lcars-ltblue);border-radius:0 6px 6px 0;padding:10px 12px 10px 14px;margin-bottom:8px;margin-left:12px}
 .log-entry-alert{background:rgba(255,34,0,0.05);border-left:4px solid var(--danger);border-radius:0 6px 6px 0;padding:10px 12px 10px 14px;margin-bottom:8px;margin-left:12px}
 .log-entry-base{background:#000;border-left:3px solid var(--border);border-radius:0 4px 4px 0;padding:8px 10px 8px 12px;margin-bottom:6px;margin-left:24px}
+.log-episode-break{display:flex;align-items:center;gap:8px;margin:18px 0 14px}
+.log-episode-break::before,.log-episode-break::after{content:'';flex:1;height:1px;background:var(--accent-dim)}
+.log-episode-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+.log-grip{font-size:18px;color:var(--muted);cursor:grab;user-select:none;flex-shrink:0;line-height:1}
+.log-grip:active{cursor:grabbing}
+.log-drag-over{outline:2px solid var(--accent);outline-offset:2px}
 
 /* ── Roll table ── */
 .roll-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px}
@@ -3534,14 +3540,27 @@ function renderOracleTab() {
 function renderLogTab() {
   if(window._logNewestFirst===undefined) window._logNewestFirst=true;
   const nf = window._logNewestFirst;
+  const reorder = !!window._logReorderMode;
   const entries = S.log;
   let entriesHTML = '';
 
   if(!entries.length) {
     entriesHTML = '<p style="color:var(--muted);font-size:11px">No log entries yet.</p>';
   } else {
-    const ordered = nf ? [...entries].map((n,i)=>({n,i})).reverse() : entries.map((n,i)=>({n,i}));
+    const ordered = (nf && !reorder) ? [...entries].map((n,i)=>({n,i})).reverse() : entries.map((n,i)=>({n,i}));
     ordered.forEach(({n:entry, i})=>{
+      const dragAttrs = reorder ? ` draggable="true" ondragstart="logDragStart(event,${i})" ondragover="logDragOver(event)" ondragleave="logDragLeave(event)" ondrop="logDrop(event,${i})"` : '';
+
+      if(entry.type==='episode') {
+        entriesHTML += `<div class="log-episode-break"${dragAttrs}>
+          ${reorder ? `<span class="log-grip">⠿</span>` : ''}
+          <div class="log-episode-label">${escH(entry.title||'Episode')}</div>
+          ${!reorder ? `<button class="btn btn-xs" onclick="editEpisodeBreak(${i})" style="flex-shrink:0">✎</button>
+          <button class="btn btn-xs btn-danger" onclick="deleteLogEntry(${i})" style="flex-shrink:0">✕</button>` : ''}
+        </div>`;
+        return;
+      }
+
       const typeInfo = LOG_TYPES.find(t=>t.key===entry.type)||LOG_TYPES[0];
       const emoji = entry.emoji||typeInfo.emoji;
       const label = typeInfo.label;
@@ -3554,15 +3573,16 @@ function renderLogTab() {
       else if(isAlert) cls='log-entry-alert';
       else if(isSupp) cls='log-entry-supplemental';
 
-      entriesHTML += `<div class="${cls}">
+      entriesHTML += `<div class="${cls}"${dragAttrs}${reorder?' style="cursor:grab"':''}>
         <div style="display:flex;align-items:flex-start;gap:8px">
+          ${reorder ? `<span class="log-grip" style="margin-top:2px">⠿</span>` : ''}
           <span style="font-size:${isMajor?'22':'18'}px">${emoji}</span>
           <div style="flex:1;min-width:0">
             <div style="font-size:${isMajor?'14':'12'}px;font-weight:bold;color:${isMajor?'var(--accent)':isAlert?'var(--danger)':isSupp?'var(--info)':'var(--text)'}">${escH(entry.title||label)}</div>
             <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:1px">${label} · ${entry.date||''}</div>
           </div>
-          <button class="btn btn-xs" onclick="editLogEntry(${i})" style="margin-right:2px">✎</button>
-          <button class="btn btn-xs btn-danger" onclick="deleteLogEntry(${i})">✕</button>
+          ${!reorder ? `<button class="btn btn-xs" onclick="editLogEntry(${i})" style="margin-right:2px">✎</button>
+          <button class="btn btn-xs btn-danger" onclick="deleteLogEntry(${i})">✕</button>` : ''}
         </div>
         ${entry.body?`<div style="font-size:${isMajor?'12':'11'}px;color:var(--text);line-height:1.6;margin-top:6px;white-space:pre-wrap">${escH(entry.body)}</div>`:''}
       </div>`;
@@ -3573,13 +3593,19 @@ function renderLogTab() {
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
       <div class="card-title" style="margin:0">CAPTAIN'S LOG</div>
-      <button onclick="window._logNewestFirst=!window._logNewestFirst;renderCurrentTab()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:11px">
-        ${nf?'↓ Newest':'↑ Oldest'}
-      </button>
+      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+        ${!reorder ? `<button onclick="addEpisodeBreak()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px">// EP BREAK</button>` : ''}
+        ${!reorder ? `<button onclick="window._logNewestFirst=!window._logNewestFirst;renderCurrentTab()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:11px">
+          ${nf?'↓ Newest':'↑ Oldest'}
+        </button>` : ''}
+        <button onclick="window._logReorderMode=!window._logReorderMode;renderCurrentTab()" style="background:${reorder?'var(--accent)':'var(--surface2)'};border:1px solid ${reorder?'var(--accent)':'var(--border)'};border-radius:4px;padding:4px 10px;cursor:pointer;color:${reorder?'#000':'var(--muted)'};font-family:var(--font);font-size:11px">
+          ${reorder ? '✓ DONE' : '⠿ REORDER'}
+        </button>
+      </div>
     </div>
     <div id="log-list">${entriesHTML}</div>
   </div>
-  <button class="fab" onclick="showAddLogEntry()" title="New log entry"></button>`;
+  ${!reorder ? `<button class="fab" onclick="showAddLogEntry()" title="New log entry"></button>` : ''}`;
 }
 
 // ============================================================
@@ -3769,6 +3795,48 @@ function saveLogEntryEdit() {
   entry.title = document.getElementById('log-title-in').value.trim();
   entry.body  = document.getElementById('log-body-in').value.trim();
   saveSlot(); closeModal(); renderCurrentTab();
+}
+
+function addEpisodeBreak() {
+  const n = S.log.filter(e=>e.type==='episode').length + 1;
+  showPrompt('Episode label:', 'Episode ' + n, val => {
+    if (!val.trim()) return;
+    S.log.push({type:'episode', title:val.trim()});
+    saveSlot(); renderCurrentTab();
+  });
+}
+
+function editEpisodeBreak(i) {
+  const entry = S.log[i]; if (!entry) return;
+  showPrompt('Episode label:', entry.title || 'Episode', val => {
+    if (!val.trim()) return;
+    entry.title = val.trim();
+    saveSlot(); renderCurrentTab();
+  });
+}
+
+function logDragStart(e, i) {
+  window._logDragSrc = i;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.style.opacity = '0.4';
+}
+function logDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('log-drag-over');
+}
+function logDragLeave(e) {
+  e.currentTarget.classList.remove('log-drag-over');
+}
+function logDrop(e, t) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('log-drag-over');
+  const s = window._logDragSrc;
+  if (s == null || s === t) { window._logDragSrc = null; return; }
+  const item = S.log.splice(s, 1)[0];
+  S.log.splice(s < t ? t - 1 : t, 0, item);
+  window._logDragSrc = null;
+  saveSlot(); renderCurrentTab();
 }
 
 // ============================================================
@@ -5630,6 +5698,7 @@ function applyState(d){
   // Log
   var log=d.log||[];
   setHTML('h-log-content',log.length?log.map(function(e){
+    if(e.type==='episode') return '<div style="display:flex;align-items:center;gap:6px;margin:10px 0 6px"><div style="flex:1;height:1px;background:#3a2000"></div><div style="font-size:9px;color:#FF9933;letter-spacing:2px;text-transform:uppercase;white-space:nowrap">'+escH(e.title||'Episode')+'</div><div style="flex:1;height:1px;background:#3a2000"></div></div>';
     return '<div class="log-entry"><div class="log-title">'+(e.title||e.type||'Log')+'</div><div class="log-date">'+(e.date||'')+'</div>'+(e.body?'<div class="log-body">'+e.body.slice(0,140)+'</div>':'')+'</div>';
   }).join(''):'<span class="sml">No entries</span>');
 
