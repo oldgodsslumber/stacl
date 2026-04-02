@@ -4046,7 +4046,9 @@ function exportLog() {
   .dc-wrap .dropped-card{border-radius:0 0 6px 6px;margin-bottom:0}
   .notes-ta{width:100%;background:transparent;border:1px solid var(--accent-dim);color:var(--text);font-family:inherit;font-size:11px;padding:8px;border-radius:4px;resize:vertical;min-height:80px;margin-top:6px}
   @media print {
-    html,body{background:#000 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;overflow:visible;height:auto}
+    html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;overflow:visible;height:auto}
+    body:not(.print-mode){background:#000 !important}
+    body.print-mode{background:#fff !important;color:#222 !important}
     #topbar{display:none}
     .lcars-strip{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     #src-panel{display:none}
