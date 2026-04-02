@@ -3913,8 +3913,8 @@ function exportLog() {
     <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:700">${esc(s.name)}</div>
     <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px">
       ${s.cells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">
-        <span style="font-size:14px;line-height:1">${esc(c.icon||'')}</span>
-        ${c.name?`<span style="font-size:6px;text-align:center;line-height:1.2;overflow:hidden;max-height:14px;color:var(--cell-text)">${esc(c.name)}</span>`:''}
+        <span style="font-size:18px;line-height:1">${esc(c.icon||'')}</span>
+        ${c.name?`<span style="font-size:8px;text-align:center;line-height:1.2;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('')}
     </div>
   </div>`).join('');
@@ -3926,8 +3926,8 @@ function exportLog() {
     const bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
     const bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
     return `<div style="background:${bg};border:1px solid ${bd};overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center">`
-      + `<span style="font-size:8px;line-height:1">${esc(c.icon||'')}</span>`
-      + (c.name ? `<span style="font-size:4px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">${esc(c.name)}</span>` : '')
+      + `<span style="font-size:14px;line-height:1">${esc(c.icon||'')}</span>`
+      + (c.name ? `<span style="font-size:7px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">${esc(c.name)}</span>` : '')
       + '</div>';
   }).join('');
   const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px">
@@ -3940,8 +3940,8 @@ function exportLog() {
     const szcells = (sz.subZone.cells || []).slice(0, 25);
     while (szcells.length < 25) szcells.push({});
     const cellsHTML = szcells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">
-        <span style="font-size:12px;line-height:1">${esc(c.icon||'')}</span>
-        ${c.name?`<span style="font-size:5px;text-align:center;line-height:1.2;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
+        <span style="font-size:18px;line-height:1">${esc(c.icon||'')}</span>
+        ${c.name?`<span style="font-size:8px;text-align:center;line-height:1.2;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('');
     return `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-subzone',${i})" style="margin-top:10px;border-color:var(--lcars-ltblue)">
       <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:2px;font-weight:700">${esc(sz.subZone.name||sz.cellName)}</div>
@@ -4124,8 +4124,8 @@ function exportLog() {
 var EPISODES = ${J(episodes)};
 var DROPPED = [];
 var SRC_NPCS = ${J(S.npcs || [])};
-var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:S.char.attributes||{},disciplines:S.char.disciplines||{},focuses:S.char.focuses||[],traits:S.char.traits||'',talents:S.char.talents||[]})};
-var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,registry:S.ship.registry||'',thumb:thumbAbs,trait:S.ship.trait||'',systems:S.ship.systems||{},departments:S.ship.departments||{},traits:S.ship.traits||'',talents:S.ship.talents||[]})};
+var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:{control:S.char.control,fitness:S.char.fitness,presence:S.char.presence,daring:S.char.daring,insight:S.char.insight,reason:S.char.reason},disciplines:{command:S.char.command,conn:S.char.conn,security:S.char.security,engineering:S.char.engineering,science:S.char.science,medicine:S.char.medicine},focuses:S.char.focuses||[],traits:(S.char.traits||[]).join?.(', ')||S.char.traits||'',talents:S.char.talents||[]})};
+var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,registry:S.ship.registry||'',thumb:thumbAbs,trait:S.ship.trait||'',systems:{comms:S.ship.comms,computers:S.ship.computers,engines:S.ship.engines,sensors:S.ship.sensors,structure:S.ship.structure,weapons:S.ship.weapons},departments:{command:S.ship.command,conn:S.ship.conn,security:S.ship.security,engineering:S.ship.engineering,science:S.ship.science,medicine:S.ship.medicine},traits:(S.ship.traits||[]).join?.(', ')||S.ship.traits||'',talents:S.ship.talents||[]})};
 var SRC_SHIP_THUMB = ${J(thumbAbs)};
 var ALL_SECTORS = ${J(allSectors)};
 var ALL_SUBZONES = ${J(allSubZones)};
@@ -4182,8 +4182,8 @@ function renderDroppedCard(item, idx) {
     var scells = sd.cells || [];
     var grid = '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:8px;overflow:hidden">'
       + scells.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px;min-width:0;min-height:0">'
-        +'<span style="font-size:14px;line-height:1">'+esc(c.icon||'')+'</span>'
-        +(c.name?'<span style="font-size:6px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
+        +'<span style="font-size:22px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +(c.name?'<span style="font-size:10px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
         +'</div>';}).join('')+'</div>';
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(sd.name)+'</div>'+grid+'</div>';
   }
@@ -4193,8 +4193,8 @@ function renderDroppedCard(item, idx) {
     while (szcells.length < 25) szcells.push({});
     var szgrid = '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:8px;overflow:hidden">'
       + szcells.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px;min-width:0">'
-        +'<span style="font-size:14px;line-height:1">'+esc(c.icon||'')+'</span>'
-        +(c.name?'<span style="font-size:6px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
+        +'<span style="font-size:22px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +(c.name?'<span style="font-size:10px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
         +'</div>';}).join('')+'</div>';
     var sztitle = esc((szd.subZone && szd.subZone.name) || szd.cellName || 'Sub-Zone');
     var szsubtitle = szd.sectorName ? '<div style="font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">'+esc(szd.sectorName)+'</div>' : '';
@@ -4205,8 +4205,8 @@ function renderDroppedCard(item, idx) {
       var bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
       var bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
       return '<div style="background:'+bg+';border:1px solid '+bd+';overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center">'
-        +'<span style="font-size:9px;line-height:1">'+esc(c.icon||'')+'</span>'
-        +(c.name?'<span style="font-size:5px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">'+esc(c.name)+'</span>':'')
+        +'<span style="font-size:16px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +(c.name?'<span style="font-size:8px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">'+esc(c.name)+'</span>':'')
         +'</div>';
     }).join('');
     var igrid = '<div style="width:100%;height:0;padding-top:200%;position:relative;margin-top:8px">'
