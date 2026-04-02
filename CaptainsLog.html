@@ -3906,28 +3906,28 @@ function exportLog() {
   </div>`).join('');
 
   const hasInterior = intCells.some(c => c.name || c.icon);
-  // Build table rows: table-layout:fixed with 10 explicit <col> elements guarantees 10 columns
-  const intTableRows = (() => {
+  // Build interior map rows: row-by-row flex with padding-top:10% for square cells (no aspect-ratio, no table)
+  const intRowsHTML = (() => {
     let rows = '';
     for (let r = 0; r < 50; r += 10) {
-      rows += '<tr>';
+      rows += '<div style="display:flex;flex-wrap:nowrap;width:100%">';
       for (let ci = r; ci < r + 10; ci++) {
         const c = intCells[ci] || {};
         const bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
         const bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
-        rows += `<td style="padding:0;overflow:hidden;border:1px solid ${bd}">`
-          + `<div style="width:100%;aspect-ratio:1;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box">`
-          + `<span style="font-size:8px;line-height:1;display:block">${esc(c.icon||'')}</span>`
-          + (c.name ? `<span style="font-size:4px;display:block;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>` : '')
-          + '</div></td>';
+        rows += `<div style="flex:0 0 10%;max-width:10%;padding-top:10%;position:relative;box-sizing:border-box;overflow:hidden;border:1px solid ${bd};background:${bg}">`
+          + `<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden">`
+          + `<span style="font-size:8px;line-height:1">${esc(c.icon||'')}</span>`
+          + (c.name ? `<span style="font-size:4px;overflow:hidden;color:var(--cell-text);text-align:center">${esc(c.name)}</span>` : '')
+          + '</div></div>';
       }
-      rows += '</tr>';
+      rows += '</div>';
     }
     return rows;
   })();
   const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px">
     <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:6px;font-weight:700">${esc(S.ship.name||'Ship Interior')}</div>
-    <table style="width:100%;table-layout:fixed;border-collapse:collapse"><colgroup>${'<col>'.repeat(10)}</colgroup><tbody>${intTableRows}</tbody></table>
+    <div style="width:100%">${intRowsHTML}</div>
   </div>` : '<div style="font-size:11px;color:var(--muted);padding:10px">No interior mapped.</div>';
 
   // --- EPISODE CHECKBOXES ---
@@ -4163,23 +4163,23 @@ function renderDroppedCard(item, idx) {
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(sd.name)+'</div>'+grid+'</div>';
   }
   if (item.kind === 'map-interior') {
-    var trows = '';
+    var irows = '';
     for (var r = 0; r < INT_CELLS.length; r += 10) {
-      trows += '<tr>';
+      irows += '<div style="display:flex;flex-wrap:nowrap;width:100%">';
       for (var ci = r; ci < r + 10; ci++) {
         var c = INT_CELLS[ci] || {};
         var bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
         var bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
-        trows += '<td style="padding:0;overflow:hidden;border:1px solid '+bd+'">'
-          +'<div style="width:100%;aspect-ratio:1;background:'+bg+';display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box">'
-          +'<span style="font-size:9px;line-height:1;display:block">'+esc(c.icon||'')+'</span>'
-          +(c.name?'<span style="font-size:5px;display:block;overflow:hidden;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
-          +'</div></td>';
+        irows += '<div style="flex:0 0 10%;max-width:10%;padding-top:10%;position:relative;box-sizing:border-box;overflow:hidden;border:1px solid '+bd+';background:'+bg+'">'
+          +'<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden">'
+          +'<span style="font-size:9px;line-height:1">'+esc(c.icon||'')+'</span>'
+          +(c.name?'<span style="font-size:5px;overflow:hidden;color:var(--cell-text);text-align:center">'+esc(c.name)+'</span>':'')
+          +'</div></div>';
       }
-      trows += '</tr>';
+      irows += '</div>';
     }
-    var tbl = '<table style="width:100%;table-layout:fixed;border-collapse:collapse;margin-top:8px"><colgroup><col><col><col><col><col><col><col><col><col><col></colgroup><tbody>'+trows+'</tbody></table>';
-    return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+tbl+'</div>';
+    var igrid = '<div style="width:100%;margin-top:8px">'+irows+'</div>';
+    return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+igrid+'</div>';
   }
   if (item.kind === 'char-stats') {
     var ch = SRC_CHAR; var att = ch.attributes||{}; var disc = ch.disciplines||{};
