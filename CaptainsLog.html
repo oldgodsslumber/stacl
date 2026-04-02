@@ -125,7 +125,7 @@ input,select,textarea{font-family:var(--font)}
 .disc-name{flex:1;min-width:0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-row{display:flex;gap:12px;align-items:flex-start}
 .card-row>.card{flex:1;min-width:0}
-@media(max-width:767px){.card-row{flex-direction:column;align-items:stretch}}
+@media(max-width:767px){.card-row{flex-direction:column;align-items:stretch}.export-log-btn{display:none}}
 .disc-dots{display:flex;gap:3px}
 .dot{width:14px;height:14px;border-radius:50%;background:#000;border:2px solid var(--muted);cursor:pointer;transition:all 0.2s}
 .dot.filled{background:var(--accent);border-color:var(--accent)}
@@ -3594,7 +3594,8 @@ function renderLogTab() {
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
       <div class="card-title" style="margin:0">CAPTAIN'S LOG</div>
       <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
-        ${!reorder ? `<button onclick="addEpisodeBreak()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px">// EP BREAK</button>` : ''}
+        ${!reorder ? `<button onclick="addEpisodeBreak()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px">▶ EPISODE START</button>` : ''}
+        ${!reorder ? `<button class="export-log-btn" onclick="exportLog()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:11px;letter-spacing:1px">↗ EXPORT</button>` : ''}
         ${!reorder ? `<button onclick="window._logNewestFirst=!window._logNewestFirst;renderCurrentTab()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:11px">
           ${nf?'↓ Newest':'↑ Oldest'}
         </button>` : ''}
@@ -3803,6 +3804,7 @@ function addEpisodeBreak() {
     if (!val.trim()) return;
     S.log.push({type:'episode', title:val.trim()});
     saveSlot(); renderCurrentTab();
+    showAddLogEntry();
   });
 }
 
@@ -3837,6 +3839,363 @@ function logDrop(e, t) {
   S.log.splice(s < t ? t - 1 : t, 0, item);
   window._logDragSrc = null;
   saveSlot(); renderCurrentTab();
+}
+
+// ============================================================
+// LOG EXPORT
+// ============================================================
+
+function parseEpisodes(log) {
+  const groups = [];
+  let cur = {label:'Campaign Log', entries:[]};
+  log.forEach(e => {
+    if (e.type === 'episode') {
+      groups.push(cur);
+      cur = {label: e.title || 'Episode', entries:[]};
+    } else {
+      cur.entries.push(e);
+    }
+  });
+  groups.push(cur);
+  return groups.filter(g => g.label === 'Campaign Log' ? g.entries.length > 0 : true);
+}
+
+function exportLog() {
+  const episodes = parseEpisodes(S.log);
+  const data = {
+    charName: S.char.name || 'Unknown Officer',
+    shipName: S.ship.name || '',
+    episodes,
+    npcs: S.npcs || [],
+    sectors: S.sectors || [],
+    activeSector: S.activeSector || 0,
+    interiorCells: S.ship.interiorCells || [],
+    shipName2: S.ship.name || '',
+    shipClass: S.ship.className || ''
+  };
+
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  // --- ATTITUDE COLORS ---
+  const attColor = {Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
+
+  // --- NPC CARDS HTML (left panel) ---
+  const npcCardsHTML = data.npcs.length
+    ? data.npcs.map((n,i) => `<div class="src-card" draggable="true" ondragstart="srcDragStart(event,'npc',${i})">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:700;letter-spacing:1px">${esc(n.name)}</span>
+          <span style="font-size:9px;padding:2px 6px;border-radius:50vh;background:${attColor[n.attitude]||'#555'};color:#000;font-weight:700;flex-shrink:0">${esc(n.attitude||'')}</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">${esc(n.faction)} · ${esc(n.role)}</div>
+        ${n.trait?`<div style="font-size:10px;font-style:italic;margin-top:3px;color:var(--sub)">${esc(n.trait)}</div>`:''}
+        ${n.goal?`<div style="font-size:10px;margin-top:3px"><span style="color:var(--muted)">GOAL:</span> ${esc(n.goal)}</div>`:''}
+        ${n.notes?`<div style="font-size:10px;margin-top:3px;color:var(--sub)">${esc(n.notes)}</div>`:''}
+      </div>`).join('')
+    : '<div style="font-size:11px;color:var(--muted);padding:10px">No crew logged.</div>';
+
+  // --- MAP GRIDS HTML ---
+  const sec = data.sectors[data.activeSector] || {name:'Sector', cells:[]};
+  const secCells = (sec.cells || []).slice(0,25);
+  while (secCells.length < 25) secCells.push({});
+  const secGridHTML = `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-sector',0)">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:700">${esc(sec.name||'Sector Map')}</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px">
+      ${secCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">
+        <span style="font-size:14px;line-height:1">${esc(c.icon||'')}</span>
+        ${c.name?`<span style="font-size:6px;text-align:center;line-height:1.2;overflow:hidden;max-height:14px;color:var(--cell-text)">${esc(c.name)}</span>`:''}
+      </div>`).join('')}
+    </div>
+  </div>`;
+
+  const intCells = (data.interiorCells || []).slice(0,50);
+  while (intCells.length < 50) intCells.push({});
+  const hasInterior = intCells.some(c => c.name || c.icon);
+  const intGridHTML = hasInterior ? `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-interior',0)" style="margin-top:12px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:6px;font-weight:700">${esc(data.shipName2||'Ship Interior')}</div>
+    <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:2px">
+      ${intCells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;border-radius:2px">
+        <span style="font-size:9px;line-height:1">${esc(c.icon||'')}</span>
+        ${c.name?`<span style="font-size:5px;text-align:center;line-height:1.2;overflow:hidden;max-height:10px;color:var(--cell-text)">${esc(c.name)}</span>`:''}
+      </div>`).join('')}
+    </div>
+  </div>` : '<div style="font-size:11px;color:var(--muted);padding:10px">No interior mapped.</div>';
+
+  // --- EPISODE CHECKBOXES ---
+  const epChecks = `<label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="ep-all" onchange="epAllChanged(this)" checked> ALL</label>`
+    + episodes.map((ep,i) => `<label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="ep-chk" data-ep="${i}" onchange="epChkChanged()" checked> ${esc(ep.label)}</label>`).join('');
+
+  // --- FULL HTML ---
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Captain's Log — ${esc(data.charName)}</title>
+<style>
+  :root {
+    --bg:#000;--text:#FFCC99;--muted:#7a4a1a;--sub:#9a6a3a;
+    --accent:#FF9933;--accent-dim:#7a3f00;
+    --lcars-lavender:#CC99FF;--lcars-ltblue:#99CCFF;--lcars-gold:#FFCC99;
+    --lcars-blue:#9999FF;--lcars-peach:#FF9966;
+    --card-bg:#0d0500;--card-border:#3a1a00;
+    --ep-banner-bg:#FF9933;--ep-banner-text:#000;
+    --strip-bg:#FF9933;
+    --empty-cell:#0a0300;--cell-border:#2a1200;--cell-text:#9a6a3a;
+    --left-bg:#0d0500;--divider:#FF9933;
+    --src-card-bg:#150800;--src-card-border:#2a1200;
+    --drop-hint:#2a1200;--drop-hint-text:#7a4a1a;
+    font-family:'Antonio','Arial Narrow',Arial,sans-serif;
+  }
+  body.print-mode {
+    --bg:#fff;--text:#222;--muted:#888;--sub:#555;
+    --accent:#555;--accent-dim:#ccc;
+    --lcars-lavender:#888;--lcars-ltblue:#666;--lcars-gold:#777;
+    --lcars-blue:#666;--lcars-peach:#777;
+    --card-bg:#f8f8f8;--card-border:#ccc;
+    --ep-banner-bg:#ddd;--ep-banner-text:#222;
+    --strip-bg:#999;
+    --empty-cell:#f0f0f0;--cell-border:#ccc;--cell-text:#666;
+    --left-bg:#f5f5f5;--divider:#bbb;
+    --src-card-bg:#fff;--src-card-border:#ddd;
+    --drop-hint:#eee;--drop-hint-text:#aaa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+  #topbar{background:var(--card-bg);border-bottom:3px solid var(--accent);padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0}
+  #tb-title{font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);flex-shrink:0}
+  #ep-selector{display:flex;gap:8px;flex-wrap:wrap;flex:1;font-size:11px;align-items:center;color:var(--text)}
+  #ep-selector input{accent-color:var(--accent)}
+  .tb-btn{background:var(--src-card-bg);border:1px solid var(--card-border);color:var(--text);font-family:inherit;font-size:11px;letter-spacing:1px;padding:5px 12px;cursor:pointer;border-radius:50vh;text-transform:uppercase}
+  .tb-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .lcars-strip{height:6px;background:linear-gradient(90deg,var(--accent) 60%,var(--lcars-lavender) 60%,var(--lcars-lavender) 75%,var(--lcars-ltblue) 75%,var(--lcars-ltblue) 87%,var(--lcars-gold) 87%);flex-shrink:0}
+  #main{display:flex;flex:1;min-height:0;overflow:hidden}
+  #left-panel{width:300px;flex-shrink:0;background:var(--left-bg);overflow-y:auto;display:flex;flex-direction:column}
+  #left-tabs{display:flex;border-bottom:2px solid var(--accent-dim)}
+  .ltab{flex:1;padding:8px;background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:11px;letter-spacing:2px;cursor:pointer;text-transform:uppercase}
+  .ltab.active{color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px}
+  #tab-crew,#tab-maps{padding:10px;overflow-y:auto;flex:1}
+  .src-card{background:var(--src-card-bg);border:1px solid var(--src-card-border);border-radius:4px;padding:10px;margin-bottom:8px;cursor:grab;transition:border-color 0.15s}
+  .src-card:hover{border-color:var(--accent)}
+  .src-card:active{cursor:grabbing;opacity:0.7}
+  .map-block{cursor:grab;border:1px solid var(--src-card-border);border-radius:4px;padding:10px;background:var(--src-card-bg)}
+  .map-block:hover{border-color:var(--accent)}
+  .lcars-divider{width:8px;background:var(--divider);flex-shrink:0;position:relative}
+  .lcars-divider::before{content:'';position:absolute;top:20px;left:0;width:100%;height:40px;background:var(--lcars-lavender)}
+  .lcars-divider::after{content:'';position:absolute;top:80px;left:0;width:100%;height:20px;background:var(--lcars-ltblue)}
+  #right-panel{flex:1;overflow-y:auto;padding:16px;min-width:0}
+  #drop-hint{border:2px dashed var(--drop-hint);border-radius:6px;padding:12px;text-align:center;font-size:11px;letter-spacing:2px;color:var(--drop-hint-text);margin-bottom:16px;text-transform:uppercase}
+  #drop-hint.drag-over{border-color:var(--accent);color:var(--accent)}
+  #log-output{}
+  .ep-banner{background:var(--ep-banner-bg);color:var(--ep-banner-text);padding:10px 16px;border-radius:4px;margin:20px 0 10px;display:flex;align-items:center;gap:12px}
+  .ep-banner-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.7}
+  .ep-banner-title{font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  .log-card{border-left:4px solid var(--accent);background:var(--card-bg);border-radius:0 6px 6px 0;padding:10px 12px;margin-bottom:10px}
+  .log-card.supplemental{border-color:var(--lcars-ltblue);margin-left:16px}
+  .log-card.alert{border-color:#FF2200;background:rgba(255,34,0,0.04)}
+  .log-card.base{border-color:var(--card-border);margin-left:32px}
+  .log-card-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .log-card-title{font-size:13px;font-weight:700;color:var(--accent)}
+  .log-card.supplemental .log-card-title{color:var(--lcars-ltblue)}
+  .log-card.alert .log-card-title{color:#FF2200}
+  .log-card.base .log-card-title{color:var(--text)}
+  .log-card-meta{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+  .log-card-body{font-size:11px;color:var(--text);line-height:1.6;white-space:pre-wrap;margin-top:6px}
+  .dropped-card{border:1px solid var(--lcars-lavender);border-radius:6px;padding:10px 12px;margin-bottom:10px;background:var(--card-bg);position:relative}
+  .dropped-card .rm-btn{position:absolute;top:6px;right:6px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12px;line-height:1}
+  .dropped-card .rm-btn:hover{color:#FF2200}
+  .dropped-npc-name{font-size:14px;font-weight:700;letter-spacing:1px;color:var(--lcars-lavender)}
+  .dropped-map-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lcars-ltblue);margin-bottom:8px}
+  @media print {
+    #topbar{display:none}
+    .lcars-strip{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #left-panel{display:none}
+    .lcars-divider{display:none}
+    #right-panel{width:100%;overflow:visible}
+    #drop-hint{display:none}
+    .log-card,.dropped-card,.ep-banner{page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{background:white;color:#222}
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div id="tb-title">CAPTAIN'S LOG // ${esc(data.charName)}</div>
+  <div id="ep-selector">${epChecks}</div>
+  <button class="tb-btn" id="theme-btn" onclick="toggleTheme()">◑ PRINT MODE</button>
+  <button class="tb-btn" onclick="window.print()">🖨 PRINT</button>
+</div>
+
+<div class="lcars-strip"></div>
+
+<div id="main">
+  <div id="left-panel">
+    <div id="left-tabs">
+      <button class="ltab active" id="ltab-crew" onclick="showLTab('crew')">CREW</button>
+      <button class="ltab" id="ltab-maps" onclick="showLTab('maps')">MAPS</button>
+    </div>
+    <div id="tab-crew">${npcCardsHTML}</div>
+    <div id="tab-maps" style="display:none">${secGridHTML}${intGridHTML}</div>
+  </div>
+  <div class="lcars-divider"></div>
+  <div id="right-panel"
+       ondragover="rpDragOver(event)"
+       ondragleave="rpDragLeave(event)"
+       ondrop="rpDrop(event)">
+    <div id="drop-hint">← DRAG CREW OR MAPS TO INSERT AT END</div>
+    <div id="log-output"></div>
+  </div>
+</div>
+
+<script>
+var EPISODES = ${JSON.stringify(episodes)};
+var DROPPED = []; // {kind:'npc'|'map-sector'|'map-interior', data:{...}, afterLogIdx:-1}
+var SRC_NPCS = ${JSON.stringify(data.npcs)};
+var SEC_CELLS = ${JSON.stringify(secCells)};
+var INT_CELLS = ${JSON.stringify(intCells)};
+var SEC_NAME = ${JSON.stringify(sec.name||'Sector Map')};
+var SHIP_NAME = ${JSON.stringify(data.shipName2||'Ship Interior')};
+
+var _srcDragItem = null;
+
+function showLTab(t) {
+  document.getElementById('tab-crew').style.display = t==='crew'?'':'none';
+  document.getElementById('tab-maps').style.display = t==='maps'?'':'none';
+  document.getElementById('ltab-crew').className = 'ltab'+(t==='crew'?' active':'');
+  document.getElementById('ltab-maps').className = 'ltab'+(t==='maps'?' active':'');
+}
+
+function toggleTheme() {
+  var b = document.body;
+  b.classList.toggle('print-mode');
+  document.getElementById('theme-btn').textContent = b.classList.contains('print-mode') ? '◐ DARK MODE' : '◑ PRINT MODE';
+}
+
+function epAllChanged(cb) {
+  var all = cb.checked;
+  document.querySelectorAll('.ep-chk').forEach(c => c.checked = all);
+  renderLogOutput();
+}
+function epChkChanged() {
+  var all = document.querySelectorAll('.ep-chk');
+  var anyUnchecked = Array.from(all).some(c=>!c.checked);
+  document.getElementById('ep-all').checked = !anyUnchecked;
+  renderLogOutput();
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+var ATT_COLOR = {Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
+
+function renderDroppedCard(item, idx) {
+  if (item.kind === 'npc') {
+    var n = item.data;
+    return '<div class="dropped-card"><button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>'
+      +'<div class="dropped-npc-name">'+esc(n.name)+'</div>'
+      +'<div style="font-size:10px;color:#7a7a7a;margin-top:2px">'+esc(n.faction)+' · '+esc(n.role)+'</div>'
+      +(n.trait?'<div style="font-size:10px;font-style:italic;margin-top:4px;color:#9a6a3a">'+esc(n.trait)+'</div>':'')
+      +(n.goal?'<div style="font-size:10px;margin-top:4px"><span style="color:#7a7a7a">GOAL:</span> '+esc(n.goal)+'</div>':'')
+      +(n.notes?'<div style="font-size:10px;margin-top:4px;color:#9a6a3a">'+esc(n.notes)+'</div>':'')
+      +'</div>';
+  }
+  if (item.kind === 'map-sector') {
+    var cells = SEC_CELLS;
+    var grid = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:8px">'
+      + cells.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">'
+        +'<span style="font-size:14px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +(c.name?'<span style="font-size:6px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
+        +'</div>';}).join('')
+      +'</div>';
+    return '<div class="dropped-card"><button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>'
+      +'<div class="dropped-map-title">'+esc(SEC_NAME)+'</div>'+grid+'</div>';
+  }
+  if (item.kind === 'map-interior') {
+    var cells2 = INT_CELLS;
+    var grid2 = '<div style="display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-top:8px">'
+      + cells2.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px;border-radius:2px">'
+        +'<span style="font-size:9px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +(c.name?'<span style="font-size:5px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
+        +'</div>';}).join('')
+      +'</div>';
+    return '<div class="dropped-card"><button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>'
+      +'<div class="dropped-map-title">'+esc(SHIP_NAME)+' — Interior</div>'+grid2+'</div>';
+  }
+  return '';
+}
+
+function renderLogOutput() {
+  var selectedIdxs = [];
+  document.querySelectorAll('.ep-chk').forEach(function(c,i){ if(c.checked) selectedIdxs.push(i); });
+
+  var html = '';
+  selectedIdxs.forEach(function(epIdx) {
+    var ep = EPISODES[epIdx];
+    if (!ep) return;
+    html += '<div class="ep-banner"><div><div class="ep-banner-label">Episode</div><div class="ep-banner-title">'+esc(ep.label)+'</div></div></div>';
+    ep.entries.forEach(function(e) {
+      var isMajor = e.type==='log';
+      var isAlert = e.type==='alert';
+      var isSupp = e.type==='supplemental';
+      var cls = isMajor?'log-card':isAlert?'log-card alert':isSupp?'log-card supplemental':'log-card base';
+      var titleColor = isMajor?'var(--accent)':isAlert?'#FF2200':isSupp?'var(--lcars-ltblue)':'var(--text)';
+      html += '<div class="'+cls+'">'
+        +'<div class="log-card-header">'
+        +'<span style="font-size:'+(isMajor?'20':'16')+'px">'+esc(e.emoji||'📋')+'</span>'
+        +'<div><div class="log-card-title" style="color:'+titleColor+'">'+esc(e.title||e.type||'Log')+'</div>'
+        +'<div class="log-card-meta">'+esc(e.date||'')+'</div></div>'
+        +'</div>'
+        +(e.body?'<div class="log-card-body">'+esc(e.body)+'</div>':'')
+        +'</div>';
+    });
+  });
+
+  // Append dropped items at the end
+  DROPPED.forEach(function(item, idx) {
+    html += renderDroppedCard(item, idx);
+  });
+
+  document.getElementById('log-output').innerHTML = html || '<div style="font-size:12px;color:var(--muted);padding:20px">No episodes selected.</div>';
+}
+
+function srcDragStart(e, kind, idx) {
+  var data = kind==='npc' ? SRC_NPCS[idx] : null;
+  _srcDragItem = {kind:kind, data:data};
+  e.dataTransfer.effectAllowed = 'copy';
+  e.dataTransfer.setData('text/plain', kind);
+}
+
+function rpDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  document.getElementById('drop-hint').classList.add('drag-over');
+}
+function rpDragLeave(e) {
+  if (!document.getElementById('right-panel').contains(e.relatedTarget)) {
+    document.getElementById('drop-hint').classList.remove('drag-over');
+  }
+}
+function rpDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-hint').classList.remove('drag-over');
+  if (!_srcDragItem) return;
+  DROPPED.push(_srcDragItem);
+  _srcDragItem = null;
+  renderLogOutput();
+}
+
+function removeDropped(idx) {
+  DROPPED.splice(idx, 1);
+  renderLogOutput();
+}
+
+// Initial render
+renderLogOutput();
+</script>
+</body></html>`;
+
+  const w = window.open('', '_blank');
+  if (!w) { alert('Pop-up blocked. Please allow pop-ups for this page.'); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 
 // ============================================================
