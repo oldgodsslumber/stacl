@@ -184,10 +184,11 @@ input,select,textarea{font-family:var(--font)}
 .npc-body.open{display:block}
 .attitude-badge{display:inline-block;padding:2px 10px;border-radius:50vh;font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
 .att-hostile{background:var(--danger);color:#fff}
-.att-suspicious{background:var(--warning);color:#000}
+.att-suspicious,.att-cautious{background:var(--warning);color:#000}
 .att-neutral{background:var(--muted);color:#fff}
 .att-friendly{background:var(--success);color:#000}
 .att-allied{background:var(--accent);color:#000}
+.att-crew{background:var(--success);color:#000}
 
 /* ── Oracle ── */
 .oracle-card{background:#000;border:2px solid var(--accent);border-radius:0 8px 8px 0;border-left:6px solid var(--accent);padding:16px;text-align:center;margin-bottom:12px}
@@ -223,6 +224,16 @@ input,select,textarea{font-family:var(--font)}
 .roll-table tr:hover td{background:var(--surface)}
 .roll-table tr.selected td{background:rgba(255,153,51,0.1);border-color:var(--accent-dim)}
 
+/* ── Ship talent icons (game-icons.net via Iconify, drawn as masks so they take theme colour) ── */
+.tal-icon{display:inline-block;flex:none;background:currentColor;vertical-align:-3px;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
+/* Map-cell icons follow .cell-icon's responsive font-size; 2em so the mask
+   icons read at the same visual weight as the old 45px emoji art */
+.cell-icon .tal-icon{width:2em;height:2em;vertical-align:middle}
+.tal-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:50vh;padding:3px 10px;font-size:11px;cursor:pointer;color:var(--text);line-height:1.3}
+.tal-chip.sel{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+.tal-ico-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:4px;max-height:200px;overflow-y:auto;margin-top:10px}
+.tal-ico-opt{background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:6px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center}
+.tal-ico-opt:hover,.tal-ico-opt.sel{border-color:var(--accent);color:var(--accent)}
 /* ── Wizard ── */
 .wizard-progress{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
 .wizard-step{flex:1;height:6px;background:var(--surface3);border-radius:50vh;min-width:16px}
@@ -351,6 +362,17 @@ const DISCIPLINES = [
 
 const SYS_KEYS = ['comms','computers','engines','sensors','structure','weapons'];
 const SYS_FULL = ['Communications','Computers','Engines','Sensors','Structure','Weapons'];
+
+// Single source of truth for NPC attitudes. Older saves used Suspicious/Friendly;
+// migrateState() rewrites them via NPC_ATTITUDE_ALIASES on load.
+const NPC_ATTITUDES = ['Hostile','Cautious','Neutral','Allied','Crew'];
+const NPC_ATTITUDE_ALIASES = {Suspicious:'Cautious', Friendly:'Allied'};
+const NPC_ATTITUDE_CLASS = {Hostile:'att-hostile', Cautious:'att-cautious', Neutral:'att-neutral', Allied:'att-allied', Crew:'att-crew'};
+const NPC_ATTITUDE_COLOR = {Hostile:'var(--danger)', Cautious:'var(--warning)', Neutral:'var(--muted)', Allied:'var(--accent)', Crew:'var(--success)'};
+
+// Single source of truth for officer ranks. 'Lieutenant JG' was an older spelling.
+const RANKS = ['Cadet','Ensign','Lieutenant Junior Grade','Lieutenant','Lieutenant Commander','Commander','Captain','Fleet Captain','Commodore','Rear Admiral','Admiral'];
+const RANK_ALIASES = {'Lieutenant JG':'Lieutenant Junior Grade', 'Lt. JG':'Lieutenant Junior Grade'};
 
 const SPECIES_LIST = [
   {name:'Human',          attrBonus:'Any two Attributes +1',                       disBonus:'Any two Disciplines +1',
@@ -628,6 +650,185 @@ const SHIP_SUGGESTED_TALENTS = {
   "Angelou": ["Artificial Biome", "Programmable Matter Systems", "Advanced Transporters", "Ablative Generator"],
   "Courage": ["Tactical Mode", "Programmable Matter Systems", "Advanced Transporters", "High-Res Sensors"],
 };
+
+// ============================================================
+// SHIP TALENT CATALOG
+// The 49 talents from STA Solo RPG v1.3 pp.170-173. A ship takes a number of
+// talents equal to its Scale, chosen freely (or rolled) from this list.
+// Icons are game-icons.net slugs served through the Iconify API and drawn as
+// CSS masks (.tal-icon) so they inherit the theme colour — same pattern as
+// the sibling apps. `req` notes an era/polity restriction from the book.
+// ============================================================
+const SHIP_TALENTS = [
+  {name:"Ablative Armor", icon:"layered-armor", desc:"The hull has an additional ablative layer that disintegrates slowly under extreme temperatures such as energy weapons and torpedo blasts, dissipating the energy and protecting the ship. Replaced periodically."},
+  {name:"Ablative Field Projector", icon:"shield-reflect", req:"25th Century or later", desc:"The shield emitters can share their graviton field with another target in close range. Complications could mean shield failure or power loss to key systems."},
+  {name:"Adaptable Energy Weapons", icon:"laser-blast", req:"24th Century or later", desc:"Multiparticle emitters allow the ship's energy weapon capabilities to be modified when fired, creating distinct advantages during a battle."},
+  {name:"Advanced Emergency Crew Holograms", icon:"ghost-ally", req:"2380 onward", desc:"The entire interior and some critical exterior areas are outfitted with holoemitters, letting the computer project simulated personnel during emergencies. They cannot operate away from the ship."},
+  {name:"Advanced Medical Ward/Sickbay", icon:"medical-pack", desc:"The ship's medical ward or sickbay is well equipped, and larger than normal for a ship of this size."},
+  {name:"Advanced Research Facilities", icon:"microscope", desc:"Additional laboratories and long-term research facilities allow the crew to study phenomena over a protracted period, generating a wealth of useful information."},
+  {name:"Advanced Sensor Suites", icon:"radar-sweep", desc:"The vessel's sensors are among the most sophisticated and advanced available in the fleet."},
+  {name:"Advanced Shields", icon:"shield", desc:"State-of-the-art shields using developments other cultures have not yet learned to overcome, or which provide greater protection for the same power expenditure."},
+  {name:"Advanced Transporters", icon:"teleport", req:"24th Century or later", desc:"Dozens of transporter emitter array pads allow targeting scanners to lock on to their targets and destination more easily."},
+  {name:"Automated Defenses", icon:"defense-satellite", req:"23rd Century or later", desc:"The weapons systems can automatically lock on to a target and fire even if the crew is incapacitated or unavailable."},
+  {name:"Backup EPS Conduits", icon:"circuitry", desc:"The power conduits have additional redundancies that can reroute power more easily in an emergency, keeping it from being lost when the ship is damaged."},
+  {name:"Captain's Yacht", icon:"speed-boat", desc:"A single additional support craft, larger than most shuttles, normally mounted under the saucer section — often used for diplomatic missions and special excursions by the commanding officer."},
+  {name:"Cloaked Mines", icon:"land-mine", req:"Non-Federation vessels", desc:"The ship's mines are equipped with state-of-the-art cloaking technology, making them almost impossible to detect."},
+  {name:"Cloaking Device", icon:"invisible", req:"Non-Federation vessels", desc:"The vessel can vanish from sensors. While cloaked it cannot attack or be targeted unless the attacker finds a way to detect it, and its shields are down."},
+  {name:"Command Ship", icon:"flying-flag", desc:"Command and control systems allow the ship to coordinate easily with allies during a crisis."},
+  {name:"Dedicated Subspace Transceiver Array", icon:"radio-tower", desc:"A section of hull slides away to deploy a long, tether-like subspace transceiver array that enhances communication range and clarity, even at warp."},
+  {name:"Deluxe Galley", icon:"chef-toque", desc:"The mess hall is equipped with top-of-the-line food preparation systems as well as vast stores of non-replicated food."},
+  {name:"Diplomatic Suites", icon:"shaking-hands", desc:"High-quality staterooms for VIPs, plus briefing rooms and facilities that let the ship serve as neutral ground for diplomatic summits, trade negotiations, and similar functions."},
+  {name:"Dual Environment", icon:"yin-yang", req:"24th Century or later", desc:"Redundant system rooms and parallel passages can be filled with gases or liquids, allowing crew members requiring different atmospheric conditions to live and work alongside the rest of the crew."},
+  {name:"Electronic Warfare Systems", icon:"cpu-shot", desc:"The communications systems have been specially designed to intercept and disrupt enemy communications in battle."},
+  {name:"Emergency Medical Hologram", icon:"caduceus", req:"2370 or later", desc:"Sickbay is equipped with holoemitters and a state-of-the-art holographic doctor able to assist medical personnel during emergencies. It cannot go anywhere without holoemitters."},
+  {name:"Extensive Shuttlebays", icon:"space-shuttle", desc:"The shuttlebays are large, well-supplied, and able to support a larger number of active shuttle missions simultaneously."},
+  {name:"Fast Targeting Systems", icon:"targeting", desc:"The targeting systems lock weapons on target much faster and more accurately than other ships of its class, giving it an edge in battle."},
+  {name:"High-Power Tractor Beam", icon:"magnet-blast", desc:"The tractor beam systems channel far greater quantities of power and exert much more force on the target."},
+  {name:"High-Resolution Sensors", icon:"satellite-communication", desc:"The sensors can gain large amounts of accurate data, though they are extremely sensitive."},
+  {name:"Improved Damage Control", icon:"auto-repair", desc:"More efficient damage reporting systems and better-trained technician teams let the crew respond more quickly to damage during a crisis."},
+  {name:"Improved Hull Integrity", icon:"metal-plate", desc:"The hull has been reinforced to hold together better under stress and damage."},
+  {name:"Improved Impulse Drive", icon:"rocket-thruster", desc:"The impulse drives are more powerful than on most ships, allowing much quicker acceleration."},
+  {name:"Improved Power Systems", icon:"power-generator", desc:"Extremely efficient power systems allow power to be redirected and rerouted between systems very quickly."},
+  {name:"Improved Reaction Control System", icon:"move", desc:"The maneuvering thrusters operate with greater precision, allowing the ship to adjust its course more carefully."},
+  {name:"Improved Shield Recharge", icon:"shield-echoes", desc:"Redundant capacitors and emitter arrays allow the deflector shields to be recharged and replenished much more efficiently."},
+  {name:"Improved Warp Drive", icon:"vortex", desc:"A more efficient warp drive — improved field dynamics, better antimatter flow control, or another advancement — lets the ship expend less energy at warp."},
+  {name:"Independent Phaser Supply", icon:"ray-gun", desc:"The phasers use an independent power supply rather than drawing directly from the ship's other power sources."},
+  {name:"Modular Laboratories", icon:"test-tubes", desc:"Considerable numbers of empty multi-purpose compartments can be converted to laboratories as and when required."},
+  {name:"Multi-Vector Assault Mode", icon:"split-arrows", desc:"The vessel can split into three distinct sections, each with the same systems and departments as the integrated ship but less power. Use in narration to create interesting advantages or complications."},
+  {name:"Point Defense System", icon:"machine-gun", desc:"Small independent energy weapon emitters fire toward incoming torpedoes, potentially destroying them before impact. Only works at subwarp speeds."},
+  {name:"Quantum Torpedoes", icon:"torpedo", desc:"The vessel carries the latest in ship-to-ship munitions: quantum torpedoes, in addition to any other form of torpedo it carries."},
+  {name:"Rapid-Fire Torpedo Launcher", icon:"missile-swarm", desc:"Redesigned torpedo launchers allow the ship to fire multiple torpedoes much more quickly and accurately."},
+  {name:"Regenerative Hull", icon:"regeneration", req:"25th Century or later", desc:"The hull is infused with reverse-engineered Borg nanite technology that seeks out and repairs damage immediately, often preventing a breach before it can happen."},
+  {name:"Rugged Design", icon:"anvil", desc:"Designed with the frontier in mind: durable construction and easy access to critical systems allow repairs to be made easily."},
+  {name:"Saucer Separation", icon:"ufo", desc:"The saucer section can separate from the engineering section to operate as two distinct ships with the same systems, departments, and weapons. The saucer section cannot go to warp."},
+  {name:"Secondary Reactors", icon:"nuclear-plant", desc:"Additional impulse and fusion reactors allow the ship to generate far greater quantities of energy."},
+  {name:"Self-Replicating Mines", icon:"minefield", req:"2371 or later", desc:"The ship carries mines capable of replicating themselves over time for a more thorough spread. Starfleet does not normally utilize mines."},
+  {name:"Siphoning Shields", icon:"water-recycling", desc:"The shield emitters are connected to particle siphons that capture some of the energy released when hit by an energy weapon, channeling it back into the shields."},
+  {name:"Slim Sensor Silhouette", icon:"hood", desc:"Advanced hull plating, jamming, and passive subspace baffles present a minimal sensor return to a searching ship's sensors."},
+  {name:"Tachyon Detection Field", icon:"beams-aura", req:"25th Century or later", desc:"A field generator projects a cloud of tachyons around the ship. While active, the ship is notified of any cloaked vessels within or passing into close range."},
+  {name:"Variable Geometry Warp Field", icon:"moebius-triangle", desc:"The ship can adjust its subspace field in highly turbulent spacetime and continue to provide propulsive force even then."},
+  {name:"Versatile Tractor Beam", icon:"magnet", req:"25th Century or later", desc:"Exotic particle emitters integrated with the tractor beam make it even more useful against trapped ships — it can even deplete energy from a vessel caught in its field."},
+  {name:"Wormhole Relay System", icon:"portal", req:"2371 or later", desc:"High-energy transceivers, verteron sensors, and neutrino sensors combined with field-generation devices allow the ship to send and receive data streams through wormholes."},
+];
+
+// Class-specific technology named in the ship class library that isn't in the
+// core talent list — kept here so those suggestions resolve with a description
+// and an icon instead of arriving blank.
+const SHIP_TALENTS_EXTRA = [
+  {name:"Ablative Generator", icon:"bubble-field", desc:"Programmable-matter generators project fresh ablative armor over the hull on demand, replacing plating as fast as it burns away."},
+  {name:"Absorbative Hull Plating", icon:"shield-impact", desc:"The hull plating absorbs and dissipates weapon energy, reducing the impact of incoming fire."},
+  {name:"Additional Craft (Aquarius)", icon:"spaceship", desc:"The ship carries the Aquarius-class light escort as a detachable, independently operating support vessel."},
+  {name:"Advanced Molecular Reconstruction", icon:"atom", desc:"Refined 29th-century molecular reconstruction systems reassemble matter almost instantly for repairs and fabrication."},
+  {name:"AeroShuttle", icon:"plane-wing", desc:"A dedicated atmospheric support craft is docked into the underside of the primary hull."},
+  {name:"Artificial Biome", icon:"habitat-dome", desc:"An enclosed onboard biosphere can reproduce planetary conditions found across the worlds of the Federation."},
+  {name:"Battle Cloak", icon:"cloak-dagger", desc:"The cloaking systems are engineered for combat, letting the ship maneuver into or out of engagements while concealed."},
+  {name:"Bioneural Computer Processing", icon:"brain", desc:"Bio-neural gel packs speed the ship's computer response time by organizing information organically."},
+  {name:"Chroniton Weaponry", icon:"stopwatch", desc:"Temporally phased munitions that can bypass conventional shielding."},
+  {name:"Command Platform", icon:"rank-3", desc:"Flagship-grade command and control facilities for coordinating fleets and large-scale operations."},
+  {name:"Construction Facilities", icon:"crane", desc:"Onboard fabrication yards capable of large-scale construction and assembly work."},
+  {name:"Dark Mode", icon:"night-sky", desc:"The ship can run silent, cutting emissions and signatures to a minimum to avoid detection."},
+  {name:"Distress Beacon", icon:"lighthouse", desc:"A powerful dedicated emergency beacon greatly extends the range at which the ship can call for help."},
+  {name:"Drone Hangar", icon:"delivery-drone", desc:"The ship carries and maintains a complement of remotely operated drones for reconnaissance and support."},
+  {name:"Engineering Labs", icon:"gears", desc:"Dedicated engineering research spaces for prototyping, testing, and refit work."},
+  {name:"Extensive Cargo Holds", icon:"wooden-crate", desc:"Vast cargo capacity lets the ship haul supplies, equipment, and relief materiel in bulk."},
+  {name:"Extensive Ship Connections", icon:"stairs", desc:"An expanded turbolift and corridor network links the ship's sections, letting crew and materiel move quickly."},
+  {name:"Grappler", icon:"grapple", desc:"A magnetic grappler serves in place of a tractor beam, physically latching onto objects and vessels."},
+  {name:"Great Material Continuum", icon:"cargo-crate", desc:"An exceptional logistics network keeps any needed part or supply flowing to where it is needed."},
+  {name:"Holographic Engineering Teams", icon:"gear-hammer", desc:"Holographic engineers can be projected throughout the ship to assist with repairs and maintenance."},
+  {name:"Industrial Replicators", icon:"factory-arm", desc:"Heavy-duty replication systems can produce large components and equipment on demand."},
+  {name:"Intel Drone Platform", icon:"cctv-camera", desc:"The ship deploys and controls intelligence-gathering drones for covert surveillance."},
+  {name:"Ion Storm Generator", icon:"ion-cannon-blast", desc:"The ship can generate localized ionic disturbances to blind sensors and cover operations."},
+  {name:"Landing and Ramp Systems", icon:"lunar-module", desc:"The ship can land planetside, with ramp systems for moving vehicles, cargo, and personnel."},
+  {name:"Micro-Warp", icon:"supersonic-arrow", desc:"Short-range micro warp jumps allow sudden repositioning in combat or tight quarters."},
+  {name:"Modular Mission Pod", icon:"apollo-capsule", desc:"A swappable mission pod lets the ship be rapidly reconfigured for different mission profiles."},
+  {name:"Modular Rooms", icon:"cube", desc:"Reconfigurable interior spaces can be converted to whatever purpose the current mission requires."},
+  {name:"Molecular Reconstruction", icon:"molecule", desc:"Matter-level reconstruction systems reassemble components and materials for repairs and fabrication."},
+  {name:"Multispectral Emitters", icon:"prism", desc:"Hull emitters mimic other sensor profiles, letting the ship masquerade as a different vessel."},
+  {name:"Obfuscation Screen", icon:"smoke-bomb", desc:"A sensor-scattering screen conceals the ship's position and signature from pursuers."},
+  {name:"Phaser Cannons", icon:"laser-turret", desc:"Fixed-mount heavy phaser cannons deliver devastating forward firepower."},
+  {name:"Programmable Matter Systems", icon:"matter-states", desc:"32nd-century programmable matter reconfigures consoles, controls, and interior spaces on demand."},
+  {name:"Proto-Warp", icon:"sun", desc:"A protostar-powered drive capable of extraordinary speed beyond conventional warp."},
+  {name:"Repair Facilities", icon:"toolbox", desc:"Starbase-grade repair bays let the ship service and overhaul other vessels in the field."},
+  {name:"Sensor-linked Phasers", icon:"crosshair", desc:"Phaser arrays slaved directly to the sensor suite track and strike targets with exceptional accuracy."},
+  {name:"Ship-wide Holographic Emitters", icon:"holosphere", desc:"Holoemitters throughout the vessel allow holographic crew and projections to operate anywhere aboard."},
+  {name:"Shuttle Fabrication Facilities", icon:"factory", desc:"The ship can fabricate replacement shuttles and support craft from raw materials."},
+  {name:"Smasher Assembly", icon:"siege-ram", desc:"Kwejian structural reinforcement lets the ship ram obstacles and vessels while remaining highly durable."},
+  {name:"Sphere Separation", icon:"stone-sphere", desc:"The sphere section can separate from the ship to operate independently."},
+  {name:"Tactical Maneuver Matrix", icon:"chess-knight", desc:"Computer-assisted combat maneuvering plots and executes evasive and attack patterns."},
+  {name:"Tactical Mode", icon:"crossed-swords", desc:"The vessel can reconfigure itself for combat, pivoting from its standard profile to a dedicated tactical posture."},
+  {name:"Temporal Transporters", icon:"backward-time", desc:"Timeship transporters capable of moving subjects across time as well as space."},
+  {name:"Wide Hallways", icon:"open-gate", desc:"Broad corridors ease the movement of casualties, cargo, and crowds through the ship."},
+];
+
+// Variant spellings used by the class library (and older saves), mapped to
+// catalog names. Keys are normalized through shipTalentKey().
+const SHIP_TALENT_ALIASES = {
+  "advanced research labs":"Advanced Research Facilities",
+  "advanced sensor suite":"Advanced Sensor Suites",
+  "advanced shielding":"Advanced Shields",
+  "advanced sickbay":"Advanced Medical Ward/Sickbay",
+  "advanced medical facilities":"Advanced Medical Ward/Sickbay",
+  "extensive medical facilities":"Advanced Medical Ward/Sickbay",
+  "extensive sickbays":"Advanced Medical Ward/Sickbay",
+  "control ship":"Command Ship",
+  "deluxe galleys":"Deluxe Galley",
+  "emh":"Emergency Medical Hologram",
+  "electronic warfare sys":"Electronic Warfare Systems",
+  "emergency crew holograms":"Advanced Emergency Crew Holograms",
+  "extensive cargo facilities":"Extensive Cargo Holds",
+  "high intensity tractor beams":"High-Power Tractor Beam",
+  "high res sensors":"High-Resolution Sensors",
+  "improved power transfer":"Improved Power Systems",
+  "improved reaction control systems":"Improved Reaction Control System",
+  "modular labs":"Modular Laboratories",
+  "point defense systems":"Point Defense System",
+  "quantum torpedo launcher":"Quantum Torpedoes",
+  "rapid fire torpedoes":"Rapid-Fire Torpedo Launcher",
+  "slim sensor profile":"Slim Sensor Silhouette",
+};
+
+function shipTalentKey(n) { return String(n||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+const SHIP_TALENT_BY_KEY = {};
+SHIP_TALENTS.concat(SHIP_TALENTS_EXTRA).forEach(t => SHIP_TALENT_BY_KEY[shipTalentKey(t.name)] = t);
+function findShipTalent(name) {
+  const k = shipTalentKey(name);
+  if (SHIP_TALENT_BY_KEY[k]) return SHIP_TALENT_BY_KEY[k];
+  const alias = SHIP_TALENT_ALIASES[k];
+  return alias ? SHIP_TALENT_BY_KEY[shipTalentKey(alias)] || null : null;
+}
+// A talent object ready to store on S.ship.talents. Catalog entries carry
+// their description and icon; unknown names come through as custom talents.
+function shipTalentObj(name) {
+  const c = findShipTalent(name);
+  return c ? {name:c.name, desc:c.desc, icon:c.icon} : {name:String(name).trim(), desc:'', icon:''};
+}
+
+// game-icons.net has no API of its own — these are Iconify URLs filtered to
+// that set, drawn as masks so they take the current text colour.
+function talIconURL(slug) { return 'https://api.iconify.design/game-icons/' + encodeURIComponent(slug) + '.svg'; }
+// size 0/null leaves the dimensions to CSS (the map cells size icons at 1em so
+// they follow the grid's responsive font-size breakpoints).
+function talIconHTML(slug, size, style) {
+  const u = talIconURL(slug || 'round-star');
+  const dims = size===0||size===null ? '' : `width:${size||14}px;height:${size||14}px;`;
+  return `<span class="tal-icon" style="${dims}${style||''}-webkit-mask-image:url('${u}');mask-image:url('${u}')"></span>`;
+}
+// Any icon value from saves: a game-icons slug renders as a themed mask;
+// anything else (legacy emoji / free text) renders as escaped text, so old
+// maps keep working untouched.
+function giIsSlug(v) { return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(String(v||'').trim()); }
+function giIconHTML(v, size) {
+  if (!v) return '';
+  return giIsSlug(v) ? talIconHTML(String(v).trim(), size===undefined?null:size) : escH(v);
+}
+
+// <select> options for the full catalog; talents already on the ship are disabled.
+function shipTalentOptions(selectedKeys) {
+  const opt = t => `<option value="${escH(t.name)}"${selectedKeys.includes(shipTalentKey(t.name))?' disabled':''}>${escH(t.name)}${t.req?' ('+escH(t.req)+')':''}</option>`;
+  return `<option value="">— add from talent list —</option>`
+    + `<optgroup label="Standard Talents">${SHIP_TALENTS.map(opt).join('')}</optgroup>`
+    + `<optgroup label="Class-Specific Technology">${SHIP_TALENTS_EXTRA.map(opt).join('')}</optgroup>`;
+}
 
 const ENVIRONMENTS = [
   {name:'Cosmopolitan City', bonus:'Insight +1 or Presence +1', _attrOpts:['insight','presence']},
@@ -1154,6 +1355,16 @@ const SPECIES_NAMES = {
   'Cardassian': { male:['Dukat','Garak','Tain','Macet','Evek','Lemec','Jasad','Madred','Ghemor','Ranor','Pirak','Trepar','Hogue','Rugal','Marritza','Damar','Tekeny','Silaran','Kotan','Belor','Tavor','Errak','Mekar','Dalor','Tenek','Sorvin','Hakor','Telak','Beval','Danek','Rukor','Gorak','Talor','Bevek','Donak','Nekar','Talek','Corat','Gorvel','Deval','Terak','Koval','Norel','Barak','Dalek','Sorel','Gornek','Tarek','Corak','Neval'], female:['Ziyal','Natima','Ocett','Tora','Mila','Rekelen','Gilora','Korinas','Tesanya','Palandine','Bavath','Selena','Tariva','Mevara','Noriva','Terana','Devara','Gorela','Taleva','Solara','Bareva','Norisel','Taliva','Morana','Derika','Gorvela','Talova','Soreva','Norela','Meriva','Bavela','Norana','Taleva','Morisa','Devriva','Gorriva','Talriva','Soriva','Norriva','Meriva','Bavriva','Norriva','Talriva','Morriva','Devriva','Gorela','Talela','Sorela','Norela','Meriva'] },
   'Ferengi':    { male:['Quark','Rom','Nog','Brunt','Garak','Zek','Gint','Hoex','Krax','Gaila','Keldar','Bractor','Goss','Letek','Lokirrim','Arridor','Kol','Fnarg','Gegis','Plegg','Brak','Gorta','Trevak','Dimal','Nozak','Lorm','Frool','Geln','Trak','Daimon','Greln','Preel','Nalok','Torvin','Grel','Drimak','Fneel','Lorkon','Gretal','Prinak','Narot','Grevak','Doral','Fnort','Grevnal','Protal','Narov','Tornak','Grenol','Drimnal'], female:['Ishka','Prinadora','Leeta','Pel','Aluura','Rekelen','Natima','Norva','Lirva','Sheva','Brana','Torela','Drimeva','Preleva','Norela','Greleva','Fnevara','Lorieva','Treleva','Brevara','Nariva','Goriva','Torriva','Drimriva','Prelriva','Norriva','Grelriva','Fneriva','Loririva','Treriva','Breliva','Torela','Drimela','Prelela','Norela','Grelela','Fneela','Loriela','Treela','Brevela','Narela','Gorela','Toriva','Drimara','Prelara','Norara','Grelara','Fneara','Loriara','Trelara'] },
   'Orion':      { male:['Harrad-Sar','Nausicaan','Devna','Morn','Rishon','Tergin','Maras','Korvin','Delvin','Garth','Kelvan','Toran','Siroc','Vorkon','Nelrak','Doral','Garkon','Torvin','Derak','Kornas','Veldak','Norkon','Selrak','Tornak','Delon','Garvek','Torvak','Delrak','Kornek','Velnok','Norak','Selvak','Tornol','Delovak','Garvak','Torlek','Delvak','Kornak','Velnak','Nornak','Selnak','Tornvak','Delovek','Garvek','Torlek','Delvek','Kornak','Velnak','Nornak','Selnak'], female:['Marta','Navaar','D\'Nesh','Maras','Devna','Vina','Areel','Sheva','Kara','Selana','Velara','Norieva','Toreva','Delara','Gorana','Koreva','Veliva','Noreva','Seleva','Torara','Delieva','Goriva','Koriva','Velieva','Noriva','Selieva','Torriva','Delriva','Goriva','Koriva','Velriva','Norriva','Selriva','Torela','Deleva','Gorela','Korela','Velela','Norela','Selela','Torela','Delala','Gorala','Korala','Velala','Norala','Selala','Torala','Delala','Gorala'] },
+  'Betazoid':   { male:['Lon','Tam','Reittan','Devinoni','Xerius','Sark','Aldo','Nivan','Corvin','Jareth','Elar','Movar','Tolan','Serik'], female:['Lwaxana','Deanna','Kestra','Chandra','Hedril','Ilyana','Serona','Amrita','Neela','Talys','Verinne','Elandra','Mirren','Sorana'], surname:['Troi','Elbrun','Suder','Grax','Ral','Xerx','Ohnari','Vandel','Semral','Kestrin'] },
+  'Bolian':     { male:['Mot','Boq\'ta','Hars','Rixx','Zim','Chell','Golwat','Trin','Vozz','Bralt','Kelbo','Dorvan'], female:['Talma','Vesh','Brolla','Zinna','Havli','Marra','Ostra','Pellin','Nirren','Ashka'], surname:['Brott','Adislo','Nirrengarde','Vosk','Belka','Trellin','Danno','Kelvo'] },
+  'Caitian':    { male:['M\'Rell','Sh\'rel','R\'Tan','K\'Vada','M\'Rowr','S\'Harn','R\'Mor','T\'Kar','M\'Baru','K\'Tarn'], female:['M\'Ress','T\'Lyra','S\'Rina','M\'Nara','R\'Vell','T\'Sara','M\'Lita','K\'Ryssa','S\'Vann','M\'Ahri'], surname:['sh\'Rann','sa\'Tolan','th\'Marra','of Ferasa','of the Long Grass'] },
+  'Denobulan':  { male:['Phlox','Mettus','Groznik','Jarvik','Oshan','Torvin','Belvo','Nerok','Doval','Pellik'], female:['Feezal','Vesena','Kessil','Amara','Trevva','Onara','Lissel','Damara','Voreen','Selka'], surname:['Antaak','Yolen','Bresh','Torvel','Nallis','Grethik'] },
+  'El-Aurian':  { male:['Martus','Tolian','Sorel','Amell','Varen','Ondris','Calen','Theron','Jorem','Elandar'], female:['Guinan','Amarie','Selene','Ithra','Vashti','Nerissa','Orenda','Talia','Sabrienne','Miral'], surname:['Mazur','Soran','Verel','Ondin','Aleth','Sarran','Calder'] },
+  'Trill':      { male:['Curzon','Torias','Tobin','Joran','Verad','Arjin','Timor','Selin','Bejal','Hanor','Renar','Talin'], female:['Jadzia','Ezri','Audrid','Lela','Nilani','Renhol','Kareel','Yolad','Emony','Neema','Ardis','Lenara'], surname:['Dax','Kahn','Peers','Odan','Belar','Idaris','Tigan','Pren','Rulan','Naidal','Serat'] },
+  'Pakled':     { male:['Grebnedlog','Reginod','Bilnod','Grunka','Modlek','Drennik','Bolnok','Vandek','Rutlek','Gorbnod'], female:['Trennik','Molnak','Brunda','Gelnok','Vandra','Prilna','Torbek','Grenna'], surname:['of the Mondor','who is Smart','the Strong','who Makes Things Go'] },
+  'Rigellian':  { male:['Sekar','Vorash','Telrun','Haskar','Miron','Delvan','Orath','Kelvar','Sudrik','Ravon'], female:['Ilvara','Neshka','Torani','Selvara','Amrun','Kethra','Dilana','Voresh','Sarani','Tevra'], surname:['Chelon','Tomol','Kolari','Vessin','Draylo','Harnak'] },
+  'Zakdorn':    { male:['Sirna','Zelik','Bregan','Torvald','Nadrik','Ossik','Velmar','Grendik','Palvor','Domik'], female:['Kelvara','Ondrik','Tessala','Marvik','Nolana','Vendra','Sabrik','Trellina','Ovana','Rekana'], surname:['Kolrami','Leybenzon','Grenvik','Sabral','Tordan','Velmash'] },
+  'Tellarite':  { male:['Gral','Naarg','Skalaar','Slar','Chek','Bera','Groth','Tarkal','Hurrek','Brog','Pelnar','Varg'], female:['Grella','Naaris','Skavva','Torrga','Bralla','Nerrik','Hesta','Varra','Grunna','Selka'], surname:['Grethnik','Borrag','Skalvar','Nurrek','Varlash','Tellar'] },
   'Romulan':    { male:['Jarok','Bochra','Chulak','D\'Tan','Hiren','Letant','Mendak','Merrok','Mirok','Neral','Nijil','Pardek','Patahk','Setal','Taibak','Tebok','Thei','Tokath','Tomalek','Vreenak','Velal','Almak','Livara','Ruwon','Tal','Ayel','Xerius','N\'Vek','Telek','Valdore','Morvak','Dekkan','Torvek','Navak','Serrak','Delrak','Torek','Mordek','Narvak','Servek','Dorvak','Terak','Morvek','Nardek','Sertek','Deltek','Torvak','Mordak','Narvek','Servak'], female:['Sela','Liviana','T\'Nae','Charvanek','Vriha','Taev','Sarael','Torael','Nelvael','Devael','Morael','Serael','Torvael','Narvael','Delvael','Gorvael','Kelvael','Norael','Selvael','Torvael','Delaris','Goraris','Kelaris','Noraris','Selaris','Toraris','Moraris','Narvaris','Delvaris','Gorvaris','Kelvaris','Noraris','Selvaris','Torvaris','Delriva','Gorriva','Kelriva','Norriva','Selriva','Torriva','Morriva','Narvriva','Delvriva','Gorvriva','Kelvriva','Norela','Selvela','Torvela','Morela','Narvela'] },
 };
 
@@ -1373,6 +1584,7 @@ function defaultChar() {
     values:['','','','','',''],
     valuesUsed:[false,false,false,false,false,false],
     valuesChallenged:[false,false,false,false,false,false],
+    valuesDetGranted:[false,false,false,false,false,false],
     focuses:[],
     traits:[],
     gear:[],
@@ -1424,6 +1636,11 @@ function defaultState() {
     activeSector: 0,
     npcs: [],
     combatEnemies: [],
+    // Custom stress trackers and extended tasks belong to this officer's
+    // mission, not the browser tab: they used to be window globals, shared
+    // across all three slots and lost on refresh.
+    combatOpp: [],
+    extTasks: [],
     playerStress: [false,false,false],
     log: [],
   };
@@ -1433,9 +1650,22 @@ let ACTIVE_SLOT = 0;
 let S = defaultState();
 window._mapZoom = null;
 
+let _quotaWarned = false;
 function saveSlot() {
-  localStorage.setItem(`stcl_slot_${ACTIVE_SLOT}`, JSON.stringify(S));
-  localStorage.setItem('stcl_active_slot', ACTIVE_SLOT);
+  try {
+    localStorage.setItem(`stcl_slot_${ACTIVE_SLOT}`, JSON.stringify(S));
+    localStorage.setItem('stcl_active_slot', ACTIVE_SLOT);
+    _quotaWarned = false;
+  } catch(e) {
+    // Every mutating action saves before it repaints, so an unhandled throw
+    // here leaves the UI frozen mid-action with no explanation.
+    if (!_quotaWarned) {
+      _quotaWarned = true;
+      setTimeout(()=>alert('Could not save: this browser\u2019s storage for the app is full.\n\n'
+        + 'Your work is still on screen but will be lost if you reload. Use SAVE FILE to keep it, '
+        + 'then trim long log entries or clear an unused mission slot.'), 0);
+    }
+  }
   updateSlotLabels();
   hudBroadcast();
 }
@@ -1453,14 +1683,125 @@ function loadSlot(n) {
       if (saved.activeSector !== undefined) S.activeSector = saved.activeSector;
       if (saved.npcs) S.npcs = saved.npcs;
       if (saved.combatEnemies) S.combatEnemies = saved.combatEnemies;
+      if (saved.combatOpp) S.combatOpp = saved.combatOpp;
+      if (saved.extTasks) S.extTasks = saved.extTasks;
       if (saved.playerStress) S.playerStress = saved.playerStress;
       if (saved.log) S.log = saved.log;
     } catch(e) { S = defaultState(); }
+    // Outside the parse guard on purpose: a migration hiccup must never be
+    // the reason a good save gets replaced by a blank one.
+    try { migrateState(); } catch(e) {}
   } else {
     S = defaultState();
   }
+  // These hold live references into the slot we just replaced. A stale zoom would
+  // let edits made in the old mission's sub-zone land in the new mission's cells.
+  window._mapZoom = null;
+  window._selectedMapCell = null;
+  // An open modal's Save handler acts on whatever S is current when it
+  // fires, so leaving one open across a slot change writes the edit into
+  // the wrong mission. Drop it, along with the other per-mission UI state.
+  closeModal();
+  window._confirmFn = null;
+  window._promptFn = null;
+  window._focusDrafts = {};
+  window._shipClassPreview = null;
+  window._storyResults = {};      // last mission's oracle rolls
+  window._hudOracleQueue = [];    // and its HUD ticker feed
+  window._lastOracleResult = null;
+  window._lastRollResult = null;
+  window._lastShipRollResult = null;
+  window._lastOppRollResult = null;
+  _lastRollData = null;
+  _hudVis.npcSpot = -1;   // roster indices do not survive a slot change
+  window._csShipMode = 'era';
   localStorage.setItem('stcl_active_slot', n);
   updateSlotLabels();
+  // Nothing else pushes to the HUD on a slot change, so the overlay used to
+  // keep showing the previous mission until some later edit called saveSlot.
+  hudBroadcast();
+}
+
+// A 25-cell grid the renderers can trust. Older/hand-edited saves have
+// turned up with 3 cells, and every map renderer indexes 0..24 blind.
+function normalizeCells(list, count, make) {
+  const out = Array.isArray(list) ? list.slice(0, count) : [];
+  while (out.length < count) out.push(make(out.length));
+  for (let i = 0; i < count; i++) {
+    if (!out[i] || typeof out[i] !== 'object') out[i] = make(i);
+  }
+  return out;
+}
+
+function normalizeSector(sec, idx) {
+  const s2 = (sec && typeof sec === 'object') ? sec : {};
+  s2.name = typeof s2.name === 'string' && s2.name ? s2.name : `Sector ${String(idx+1).padStart(3,'0')}`;
+  s2.cells = normalizeCells(s2.cells, 25, () => ({type:'unknown', isVoid:false, name:'', icon:'', notes:'', feature:'', subZone:null}));
+  s2.cells.forEach(c => {
+    if (c.subZone && typeof c.subZone === 'object') {
+      c.subZone.cells = normalizeCells(c.subZone.cells, 25, () => ({name:'', icon:'', isVoid:false, notes:'', feature:'', type:'unknown'}));
+      if (!(c.subZone.currentCell >= 0 && c.subZone.currentCell < 25)) c.subZone.currentCell = 12;
+    } else if (c.subZone) { c.subZone = null; }
+  });
+  if (!(s2.currentCell >= 0 && s2.currentCell < 25)) s2.currentCell = 12;
+  return s2;
+}
+
+// Normalises vocabularies and geometry that changed shape between versions.
+function migrateState() {
+  const fixAttitude = o => {
+    if (!o || typeof o !== 'object') return;
+    const a = NPC_ATTITUDE_ALIASES[o.attitude];
+    if (a) o.attitude = a;
+  };
+  if (Array.isArray(S.npcs)) S.npcs.forEach(fixAttitude);
+  if (Array.isArray(S.combatEnemies)) S.combatEnemies.forEach(fixAttitude);
+  if (S.char) {
+    const r = RANK_ALIASES[S.char.rank];
+    if (r) S.char.rank = r;
+  }
+  // Geometry: never leave the map tab with a grid it cannot render, and
+  // never leave activeSector pointing at nothing (that hid the sector
+  // switcher, so the user had no control to recover with).
+  if (!Array.isArray(S.sectors) || !S.sectors.length) S.sectors = [defaultSector()];
+  S.sectors = S.sectors.map(normalizeSector);
+  if (!(S.activeSector >= 0 && S.activeSector < S.sectors.length)) S.activeSector = 0;
+  if (S.ship && (!Array.isArray(S.ship.interiorCells) || S.ship.interiorCells.length !== 50)) {
+    S.ship.interiorCells = normalizeCells(S.ship.interiorCells, 50,
+      i => ({name:'', icon:'', notes:'', isVoid: SHIP_INTERIOR_HULL[i]}));
+  }
+  // Ship talents saved before the catalog existed have no description or
+  // icon (class selection used to store bare names). Backfill by name match,
+  // normalizing variant spellings; hand-entered text is never overwritten.
+  if (S.ship) {
+    if (!Array.isArray(S.ship.talents)) S.ship.talents = [];
+    S.ship.talents = S.ship.talents
+      .map(t => typeof t === 'string' ? {name:t, desc:'', icon:''} : t)
+      .filter(t => t && t.name);
+    S.ship.talents.forEach(t => {
+      const c = findShipTalent(t.name);
+      if (c) {
+        t.name = c.name;
+        if (!t.desc) t.desc = c.desc;
+        if (!t.icon) t.icon = c.icon;
+      }
+    });
+  }
+  if (!Array.isArray(S.playerStress) || S.playerStress.length !== 3) S.playerStress = [false,false,false];
+  if (!Array.isArray(S.log)) S.log = [];
+  if (!Array.isArray(S.npcs)) S.npcs = [];
+  if (!Array.isArray(S.combatEnemies)) S.combatEnemies = [];
+  // Saves written before these were persisted simply have no field.
+  if (!Array.isArray(S.combatOpp)) S.combatOpp = [];
+  if (!Array.isArray(S.extTasks)) S.extTasks = [];
+  S.combatOpp.forEach(o => {
+    if (!(o.circles >= 1)) o.circles = 3;
+    if (!Array.isArray(o.stress)) o.stress = Array(o.circles).fill(false);
+  });
+  S.extTasks.forEach(t => {
+    if (!(t.circles >= 1)) t.circles = 5;
+    if (!Array.isArray(t.progress)) t.progress = Array(t.circles).fill(false);
+  });
 }
 
 function updateSlotLabels() {
@@ -1530,7 +1871,10 @@ function _applyImport(text) {
         if (data.slots[i]) localStorage.setItem(`stcl_slot_${i}`, JSON.stringify(data.slots[i]));
         else localStorage.removeItem(`stcl_slot_${i}`);
       }
-      loadSlot(data.active ?? 0);
+      // An out-of-range index writes every later save to a slot no button
+      // can reach, and the app keeps landing there on reload.
+      const act = Number(data.active);
+      loadSlot(Number.isInteger(act) && act >= 0 && act <= 2 ? act : 0);
       renderCurrentTab();
     }, 'LOAD FILE', false);
   } catch(e) { openModal(`<p style="font-size:13px;color:var(--danger);margin-bottom:16px">Failed to load file: ${escH(e.message)}</p><button class="btn" onclick="closeModal()" style="width:100%">OK</button>`); }
@@ -1710,6 +2054,10 @@ function renderSheet() {
           <div class="res-btns"><button class="res-btn" data-symbol="-" onclick="adjThreat(-1)"></button><button class="res-btn" data-symbol="+" onclick="adjThreat(1)"></button></div>
         </div>
       </div>
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Determination (${c.determination}/3)</div>
+        <div>${detHTML}</div>
+      </div>
     </div>
 
     <div class="card">
@@ -1779,7 +2127,9 @@ function renderSheet() {
           <p><strong style="color:var(--text)">Species:</strong> ${escH(c.species||'—')}</p>
           <p style="margin-top:4px"><strong style="color:var(--text)">Homeworld:</strong> ${escH(c.homeworld||'—')}</p>
           <p style="margin-top:4px"><strong style="color:var(--text)">Upbringing:</strong> ${escH(c.upbringing||'—')}</p>
+          <p style="margin-top:4px"><strong style="color:var(--text)">Career Length:</strong> ${escH(c.careerLength||'—')}</p>
           <p style="margin-top:4px"><strong style="color:var(--text)">Career Event:</strong> ${escH(c.careerEvent||'—')}</p>
+          <p style="margin-top:4px"><strong style="color:var(--text)">Career Event 2:</strong> ${escH(c.careerEvent2||'—')}</p>
         </div>
         <div class="field" style="margin-top:8px"><label>Background Notes</label>
           <textarea onchange="saveCharField('background',this.value)">${escH(c.background)}</textarea>
@@ -1926,14 +2276,14 @@ function renderCS1() {
   const lp = c._lp || {};
   let envRows = ENVIRONMENTS.map(e=>{
     const sel=c._selectedEnv===e.name;
-    return `<tr onclick="saveCharField('_selectedEnv','${escQ(e.name)}');renderCurrentTab()">
+    return `<tr onclick="setCreationEnv('${escQ(e.name)}')">
       <td><strong${sel?' style="color:var(--accent)"':''}>${e.name}</strong></td>
       <td style="color:var(--muted);font-size:10px">${e.bonus}</td>
     </tr>`;
   }).join('');
   let upRows = UPBRINGINGS.map(u=>{
     const sel=c._selectedUpbringing===u.name;
-    return `<tr onclick="saveCharField('_selectedUpbringing','${escQ(u.name)}');renderCurrentTab()">
+    return `<tr onclick="setCreationUpbringing('${escQ(u.name)}')">
       <td style="color:var(--muted)">${u.d}</td>
       <td><strong${sel?' style="color:var(--accent)"':''}>${u.name}</strong></td>
       <td style="color:var(--muted);font-size:10px">${u.attrBonus}</td>
@@ -2031,7 +2381,7 @@ function renderCS2() {
   const lp = c._lp || {};
   let trackRows = ACADEMY_TRACKS.map(t=>{
     const sel=c._selectedTrack===t.name;
-    return `<tr onclick="saveCharField('_selectedTrack','${escQ(t.name)}');renderCurrentTab()">
+    return `<tr onclick="setCreationTrack('${escQ(t.name)}')">
       <td><strong${sel?' style="color:var(--accent)"':''}>${t.name}</strong></td>
       <td style="color:var(--muted);font-size:10px">${t.disBonus}</td>
       <td style="color:var(--muted);font-size:10px">${t.focus}</td>
@@ -2261,6 +2611,7 @@ function renderCS5() {
     const rank=c[d.key]||1;
     const lpB=lpD[d.key]||0;
     const finalRank=rank+lpB;
+    const overMax=finalRank>5;
     let dots='<div class="disc-dots">';
     for(let i=1;i<=5;i++) dots+=`<div class="dot${i<=rank?' filled':''}" onclick="creationSetDisc('${d.key}',${i})" ondblclick="creationSetDisc('${d.key}',1)"></div>`;
     dots+='</div>';
@@ -2269,7 +2620,7 @@ function renderCS5() {
       <span class="disc-name">${d.full}</span>
       ${dots}
       <span style="font-size:11px;color:var(--accent);min-width:16px">${rank}</span>
-      ${lpB>0?`<span style="font-size:9px;color:var(--muted);flex-shrink:0">(+${lpB})</span>`:''}
+      ${lpB>0?`<span style="font-size:9px;color:${overMax?'var(--danger)':'var(--muted)'};flex-shrink:0">(+${lpB}) = ${finalRank}${overMax?' \u26a0':''}</span>`:''}
     </div>`;
   });
   discHTML+='</div>';
@@ -2337,7 +2688,7 @@ function renderCS7() {
     saveSlot();
   }
   const species = c.species || '';
-  const rankOpts = ['Cadet','Ensign','Lieutenant Junior Grade','Lieutenant','Lieutenant Commander','Commander','Captain','Commodore','Admiral'].map(r=>`<option${c.rank===r?' selected':''}>${r}</option>`).join('');
+  const rankOpts = RANKS.map(r=>`<option${c.rank===r?' selected':''}>${r}</option>`).join('');
   let dirRows = DIRECTIVE_TABLE.map(d=>{
     const sel = c.directive === d.desc;
     return `<tr onclick="setCreationDirective('${escQ(d.desc)}')" class="${sel?'selected':''}">
@@ -2351,7 +2702,7 @@ function renderCS7() {
       <button class="btn btn-sm btn-accent" onclick="rollRandomName()" title="Random name for ${escH(species||'selected species')}">🎲 Random</button>
     </div>
   </div>
-  <div class="field"><label>Rank</label><select onchange="saveCharField('rank',this.value)"><option>— Select Rank —</option>${rankOpts}</select></div>
+  <div class="field"><label>Rank</label><select onchange="saveCharField('rank',this.value)"><option value="">— Select Rank —</option>${rankOpts}</select></div>
   <div class="field"><label>Assignment / Ship</label><input value="${escH(S.ship.name?(S.ship.name+(S.ship.registry?' '+S.ship.registry:'')):c.assignment)}" placeholder="e.g. USS Enterprise NCC-1701" onchange="saveCharField('assignment',this.value);saveShipField('name',this.value.replace(/\\s+NCC-\\S+$/i,'').trim());var _r=this.value.match(/NCC-\\S+$/i);if(_r)saveShipField('registry',_r[0]);"></div>
   <div class="field"><label>Role / Department Head</label><input value="${escH(c.role)}" placeholder="e.g. Chief Science Officer" onchange="saveCharField('role',this.value)"></div>
   <div class="field"><label>Homeworld</label><input value="${escH(c.homeworld)}" placeholder="e.g. Vulcan, Earth, Andoria…" onchange="saveCharField('homeworld',this.value)"></div>
@@ -2451,7 +2802,43 @@ function renderCS8() {
     <button class="btn btn-sm${mode==='all'?' btn-accent':''}" onclick="window._csShipMode='all';renderCurrentTab()">All Classes</button>
     <button class="btn btn-sm${mode==='custom'?' btn-accent':''}" onclick="window._csShipMode='custom';renderCurrentTab()">Custom</button>
   </div>
-  ${mode === 'custom' ? customForm : classTable}`;
+  ${mode === 'custom' ? customForm : classTable}
+  ${buildCreationTalentPicker()}`;
+}
+
+// Talent selection for the wizard's ship step: one talent per point of Scale,
+// suggested talents for the chosen class offered as toggles, plus the full
+// catalog. Shown once a class is chosen (or in custom mode, where Scale is set
+// by hand).
+function buildCreationTalentPicker() {
+  const sh = S.ship;
+  if (!sh.className && (window._csShipMode||'era') !== 'custom') return '';
+  const scale = sh.scale || 3;
+  const talents = sh.talents || [];
+  const selKeys = talents.map(t => shipTalentKey(t.name));
+  const suggNames = [...new Set((SHIP_SUGGESTED_TALENTS[sh.className]||[]).map(n => { const c = findShipTalent(n); return c ? c.name : n; }))];
+  const chips = talents.map((t,i) =>
+    `<span class="tal-chip sel" title="${escH(t.desc||'')}">${talIconHTML(t.icon,14)}${escH(t.name)}<b style="cursor:pointer;margin-left:3px" onclick="removeShipTalent(${i})">✕</b></span>`).join(' ');
+  const suggChips = suggNames.map(n => {
+    const on = selKeys.includes(shipTalentKey(n));
+    const c = findShipTalent(n);
+    return `<span class="tal-chip${on?' sel':''}" title="${escH(c?c.desc:'')}" onclick="creationToggleShipTalent('${escQ(n)}')">${talIconHTML(c&&c.icon,14)}${escH(n)}</span>`;
+  }).join(' ');
+  const over = talents.length > scale;
+  return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700">Ship Talents</span>
+      <span style="font-size:11px;color:${over?'#f66':'var(--muted)'}">${talents.length} of ${scale} chosen (one per point of Scale)</span>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${chips || '<span style="font-size:11px;color:var(--muted);font-style:italic">No talents chosen yet.</span>'}</div>
+    ${suggNames.length ? `<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:8px 0 4px">Suggested for the ${escH(sh.className)} class — tap to toggle</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">${suggChips}</div>` : ''}
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+      <select id="cs-talent-select" style="flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">${shipTalentOptions(selKeys)}</select>
+      <button class="btn btn-sm btn-accent" onclick="creationAddShipTalent()">ADD</button>
+    </div>
+    <p style="font-size:10px;color:var(--muted);margin-top:6px">Hover a talent for its description. Talents work like Focuses for ship tasks; you can also change them later on the Ship tab.</p>
+  </div>`;
 }
 
 // ============================================================
@@ -2507,7 +2894,7 @@ function renderSectorMap() {
     // Sub-zone grid
     let szGridHTML = '<div id="map-grid">';
     for(let i=0;i<25;i++){
-      const cell = sz.cells[i];
+      const cell = sz.cells[i] || (sz.cells[i] = {name:'', icon:'', isVoid:false, notes:'', feature:'', type:'unknown'});
       const isCurrent = sz.currentCell === i;
       const isAdj = isAdjacentCell(sz.currentCell, i) && !cell.isVoid;
       let cls = 'map-cell';
@@ -2516,7 +2903,7 @@ function renderSectorMap() {
       else if(isAdj) cls += ' adjacent';
       else if(cell.type === 'explored') cls += ' explored';
       else cls += ' unexplored';
-      const icon = cell.icon || (isCurrent ? areaIconHtml(sz, 30) : '·');
+      const icon = cell.icon ? giIconHTML(cell.icon) : (isCurrent ? areaIconHtml(sz, 30) : '·');
       szGridHTML += `<div class="${cls}" onclick="clickSubZoneCell(${i})" title="${escH(cell.name)||'Area '+(i+1)}">
         <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
         <span class="cell-icon">${icon}</span>
@@ -2541,8 +2928,12 @@ function renderSectorMap() {
         <div class="field"><label>Area Name</label>
           <input value="${escH(szSelCell.name)}" placeholder="e.g. Engineering Bay, Cargo Hold, Plaza…" onchange="setSubZoneCellProp(${szSelIdx},'name',this.value)">
         </div>
-        <div class="field"><label>Icon (emoji)</label>
-          <input value="${escH(szSelCell.icon)}" placeholder="e.g. 🏔 🌳 🏙 ⚡ 🌊" onchange="setSubZoneCellProp(${szSelIdx},'icon',this.value)">
+        <div class="field"><label>Icon</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn btn-sm" style="flex:none;line-height:0;padding:5px 7px" title="Pick an icon (game-icons.net)" onclick="openTalIconPicker('subzone:${szSelIdx}')">${giIconHTML(szSelCell.icon,18)||talIconHTML('',18)}</button>
+            <input style="flex:1;min-width:0" value="${escH(szSelCell.icon)}" placeholder="or type an emoji" onchange="setSubZoneCellProp(${szSelIdx},'icon',this.value);renderCurrentTab()">
+            ${szSelCell.icon?`<button class="btn btn-xs btn-danger" style="flex:none" title="Clear icon" onclick="setSubZoneCellProp(${szSelIdx},'icon','');renderCurrentTab()">✕</button>`:''}
+          </div>
         </div>
         <div class="field"><label>Feature</label>
           <input value="${escH(szSelCell.feature)}" placeholder="e.g. Ruins, Outpost, Natural Landmark…" onchange="setSubZoneCellProp(${szSelIdx},'feature',this.value)">
@@ -2589,7 +2980,7 @@ function renderSectorMap() {
   // Grid
   let gridHTML = '<div id="map-grid">';
   for(let i=0;i<25;i++){
-    const cell = m.cells[i];
+    const cell = m.cells[i] || (m.cells[i] = {type:'unknown', isVoid:false, name:'', icon:'', notes:'', feature:'', subZone:null});
     const isCurrent = m.currentCell === i;
     const isAdj = isAdjacentCell(m.currentCell, i) && !cell.isVoid;
     let cls = 'map-cell';
@@ -2598,7 +2989,7 @@ function renderSectorMap() {
     else if(isAdj) cls += ' adjacent';
     else if(cell.type === 'explored') cls += ' explored';
     else cls += ' unexplored';
-    const icon = cell.icon || (isCurrent ? shipIconHtml(30) : '·');
+    const icon = cell.icon ? giIconHTML(cell.icon) : (isCurrent ? shipIconHtml(30) : '·');
     gridHTML += `<div class="${cls}" onclick="clickMapCell(${i})" title="${escH(cell.name)||'Zone '+(i+1)}">
       <span style="font-size:9px;color:var(--muted);position:absolute;top:2px;left:4px">${i+1}</span>
       <span class="cell-icon">${icon}</span>
@@ -2624,8 +3015,12 @@ function renderSectorMap() {
       <div class="field"><label>Zone Name</label>
         <input value="${escH(selCell.name)}" placeholder="e.g. Veridian III, Deep Space 9…" onchange="setCellProp(${selIdx},'name',this.value)">
       </div>
-      <div class="field"><label>Icon (emoji)</label>
-        <input value="${escH(selCell.icon)}" placeholder="e.g. 🌍 ⭐ 🏛 ☄️ 🌌 💫" onchange="setCellProp(${selIdx},'icon',this.value)">
+      <div class="field"><label>Icon</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-sm" style="flex:none;line-height:0;padding:5px 7px" title="Pick an icon (game-icons.net)" onclick="openTalIconPicker('cell:${selIdx}')">${giIconHTML(selCell.icon,18)||talIconHTML('',18)}</button>
+          <input style="flex:1;min-width:0" value="${escH(selCell.icon)}" placeholder="or type an emoji" onchange="setCellProp(${selIdx},'icon',this.value);renderCurrentTab()">
+          ${selCell.icon?`<button class="btn btn-xs btn-danger" style="flex:none" title="Clear icon" onclick="setCellProp(${selIdx},'icon','');renderCurrentTab()">✕</button>`:''}
+        </div>
       </div>
       <div class="field"><label>Feature</label>
         <input value="${escH(selCell.feature)}" placeholder="e.g. Class-M Planet, Starbase…" onchange="setCellProp(${selIdx},'feature',this.value)">
@@ -2751,9 +3146,14 @@ function renderShipTab() {
   });
   deptHTML += '</div>';
 
-  // Ship talents
+  // Ship talents — icon (click to change), name, description, remove.
   let talHTML = '';
-  if(sh.talents&&sh.talents.length) talHTML = sh.talents.map((t,i)=>`<div class="perk-item"><span class="perk-name">${escH(t.name)}</span> — ${escH(t.desc||'')} <button class="btn btn-xs btn-danger" onclick="removeShipTalent(${i})">✕</button></div>`).join('');
+  if(sh.talents&&sh.talents.length) talHTML = sh.talents.map((t,i)=>`<div class="perk-item" style="display:flex;align-items:flex-start;gap:8px">
+    <button class="btn btn-xs" style="padding:4px 6px;flex:none;line-height:0" title="Change icon (game-icons.net)" onclick="openTalIconPicker(${i})">${talIconHTML(t.icon,32)}</button>
+    <div style="flex:1;min-width:0"><span class="perk-name">${escH(t.name)}</span>${t.desc?`<div style="font-size:10px;color:var(--muted);line-height:1.5;margin-top:2px">${escH(t.desc)}</div>`:''}</div>
+    <button class="btn btn-xs btn-danger" style="flex:none" onclick="removeShipTalent(${i})">✕</button>
+  </div>`).join('');
+  const talCount = (sh.talents||[]).length, talMax = sh.scale||3;
 
   const scaleOpts = [1,2,3,4,5,6,7].map(s=>`<option${sh.scale===s?' selected':''}>${s}</option>`).join('');
 
@@ -2803,7 +3203,7 @@ function renderShipTab() {
         <div class="field" style="flex:2;margin:0"><label>Class</label>
           <input value="${escH(sh.className)}" placeholder="e.g. Constitution, Galaxy, Intrepid" onchange="saveShipField('className',this.value)">
         </div>
-        <div class="field" style="flex:1;margin:0"><label>Scale (1–6)</label>
+        <div class="field" style="flex:1;margin:0"><label>Scale (1–7)</label>
           <select onchange="saveShipField('scale',parseInt(this.value))">${scaleOpts}</select>
         </div>
       </div>
@@ -2825,29 +3225,36 @@ function renderShipTab() {
     </div>
   </div>
 
+  <div class="card-row">
+  ${interiorMapHTML}
+  <div style="flex:1;min-width:0">
   <div class="card">
-    <div class="collapsible-header" onclick="toggleCollapsible('ship-talent-body')">
+    <div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--accent-dim)">
       <span class="card-title" style="margin:0">SHIP TALENTS</span>
-      <span class="collapse-icon">▼</span>
+      <span style="font-size:11px;color:${talCount>talMax?'#f66':'var(--muted)'};margin-left:10px">${talCount} / ${talMax} (Scale)</span>
     </div>
-    <div class="collapsible-body${window._openCollapsibles&&window._openCollapsibles['ship-talent-body']!==false?' open':''}" id="ship-talent-body">
-      ${talHTML||'<p style="color:var(--muted);font-size:11px">No talents.</p>'}
+    <div id="ship-talent-body" style="padding-top:8px">
+      ${talHTML||'<p style="color:var(--muted);font-size:11px">No talents. A ship may take one talent per point of Scale — pick from the list below or add your own.</p>'}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-        <input id="ship-talent-name-in" placeholder="Talent name" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
+        <select id="ship-talent-cat" style="flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">${shipTalentOptions((sh.talents||[]).map(t=>shipTalentKey(t.name)))}</select>
+        <button class="btn btn-sm btn-accent" onclick="addShipTalentFromCatalog()">ADD</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-sm" id="ship-talent-icon-btn" style="flex:none;line-height:0;padding:5px 7px" title="Pick an icon (game-icons.net)" onclick="openTalIconPicker('new')">${talIconHTML(window._talIconSel||'',16)}</button>
+        <input id="ship-talent-name-in" placeholder="Custom talent name" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
         <input id="ship-talent-desc-in" placeholder="Description" style="flex:2;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;min-width:0">
         <button class="btn btn-sm btn-accent" onclick="addShipTalent()">ADD</button>
       </div>
     </div>
   </div>
-
-  <div class="card-row">
-    ${interiorMapHTML}
     <div class="card">
       <div class="field"><label>Ship Notes</label>
         <textarea rows="6" onchange="saveShipField('notes',this.value)">${escH(sh.notes)}</textarea>
       </div>
     </div>
   </div>
+  </div>
+
   <div class="vessel-profile-mobile">${vesselProfileCard}</div>
 `;
 }
@@ -2872,7 +3279,7 @@ function renderNPCsTab() {
       let circles = '<div class="stress-track">';
       for(let i=0;i<3;i++) circles += `<div class="stress-circle${stress[i]?' hit':''}" onclick="toggleEnemyStress(${idx},${i})"></div>`;
       circles += '</div>';
-      const attColor = ae.attitude==='Hostile'?'var(--danger)':ae.attitude==='Suspicious'?'var(--warning)':ae.attitude==='Friendly'?'var(--success)':ae.attitude==='Allied'?'var(--accent)':'var(--muted)';
+      const attColor = NPC_ATTITUDE_COLOR[ae.attitude] || 'var(--muted)';
       activeHTML += `<div style="border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
           <span style="font-size:13px;font-weight:bold;flex:1">${escH(ae.name)}</span>
@@ -2900,7 +3307,7 @@ function renderNPCsTab() {
   let npcListHTML = '';
   visible.forEach((npc,idx)=>{
     const realIdx = S.npcs.indexOf(npc);
-    const attClass = npc.attitude==='Hostile'?'att-hostile':npc.attitude==='Suspicious'?'att-suspicious':npc.attitude==='Friendly'?'att-friendly':npc.attitude==='Allied'?'att-allied':'att-neutral';
+    const attClass = NPC_ATTITUDE_CLASS[npc.attitude] || 'att-neutral';
     const inEncounter = S.combatEnemies.some(e=>e.npcId===realIdx);
     const hasDetails = npc.role || npc.trait || npc.goal || npc.notes;
     npcListHTML += `<div class="npc-card">
@@ -2945,7 +3352,6 @@ function renderNPCsTab() {
 
 function renderDiceTab() {
   const c = S.char;
-  const maxStress = c.fitness + c.security;
 
   // Player stress
   let psHTML = '<div class="stress-track">';
@@ -3044,7 +3450,7 @@ function renderDiceTab() {
 
   <div class="card" style="flex:1;min-width:0">
     <div class="card-title">SHIP TASK ROLLER</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Roll 2d20 vs System + Department TN. Ship Talents work like Focuses: when a talent applies, any die ≤ the System value scores 2 successes.</p>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Roll 2d20 vs System + Department TN. Ship Talents work like Focuses: when a talent applies, any die ≤ the Department value scores 2 successes.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end">
       <div class="field" style="margin:0;flex:1;min-width:130px">
         <label>System</label>
@@ -3063,6 +3469,7 @@ function renderDiceTab() {
         <input type="checkbox" id="ship-talent-check" style="cursor:pointer"> Ship Talent applies?
       </label>
     </div>
+    ${(S.ship.talents&&S.ship.talents.length)?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${S.ship.talents.map(t=>`<span class="tal-chip" style="cursor:help" title="${escH(t.desc||'')}">${talIconHTML(t.icon,13)}${escH(t.name)}</span>`).join('')}</div>`:''}
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
       <span style="font-size:11px;color:var(--muted)">Extra dice (spend Momentum):</span>
       <select id="ship-extra-dice" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px;border-radius:3px;font-size:12px">
@@ -3131,8 +3538,8 @@ function renderDiceTab() {
 }
 
 function renderCombatOpponents() {
-  if(!window._combatOpp || !window._combatOpp.length) return '<p style="font-size:11px;color:var(--muted)">No opponents. Add one above.</p>';
-  return window._combatOpp.map((opp,i)=>{
+  if(!S.combatOpp || !S.combatOpp.length) return '<p style="font-size:11px;color:var(--muted)">No opponents. Add one above.</p>';
+  return S.combatOpp.map((opp,i)=>{
     let circles = '<div class="stress-track">';
     for(let j=0;j<opp.circles;j++) circles += `<div class="stress-circle${opp.stress[j]?' hit':''}" onclick="toggleOppStress(${i},${j})"></div>`;
     circles += '</div>';
@@ -3165,7 +3572,7 @@ function rollOpposition() {
   let totalSucc=0, complications=0;
   const diceHTML=rolls.map(r=>{
     let succ=0, cls='fail';
-    if(r===20){ complications++; cls='complication'; }
+    if(r===20){ complications++; cls='complication'; if(r<=tn) succ=1; }
     else if(r===1){ succ=2; cls='critical'; }
     else if(focusCheck && r<=focusThreshold){ succ=2; cls='success'; }
     else if(r<=tn){ succ=1; cls='success'; }
@@ -3206,7 +3613,8 @@ function rollShipTask() {
   const [sKey,sv]=sEl.value.split('|');
   const [dKey,dv]=dEl.value.split('|');
   const sysVal=parseInt(sv);
-  const tn=sysVal+parseInt(dv);
+  const deptVal=parseInt(dv);
+  const tn=sysVal+deptVal;
 
   if(extra>0){
     const spent=Math.min(extra,S.char.momentum);
@@ -3221,9 +3629,9 @@ function rollShipTask() {
   let totalSucc=0, complications=0;
   const diceHTML=rolls.map(r=>{
     let succ=0, cls='fail';
-    if(r===20){ complications++; cls='complication'; }
+    if(r===20){ complications++; cls='complication'; if(r<=tn) succ=1; }
     else if(r===1){ succ=2; cls='critical'; }
-    else if(talentCheck && r<=sysVal){ succ=2; cls='success'; }
+    else if(talentCheck && r<=deptVal){ succ=2; cls='success'; }
     else if(r<=tn){ succ=1; cls='success'; }
     totalSucc+=succ;
     return `<div class="die-result ${cls}" title="${succ>0?succ+' success':''}">${r}</div>`;
@@ -3577,10 +3985,10 @@ function renderLogTab() {
       entriesHTML += `<div class="${cls}"${dragAttrs}${reorder?' style="cursor:grab"':''}>
         <div style="display:flex;align-items:flex-start;gap:8px">
           ${reorder ? `<span class="log-grip" style="margin-top:2px">⠿</span>` : ''}
-          <span style="font-size:${isMajor?'22':'18'}px">${emoji}</span>
+          <span style="font-size:${isMajor?'22':'18'}px">${escH(emoji)}</span>
           <div style="flex:1;min-width:0">
             <div style="font-size:${isMajor?'14':'12'}px;font-weight:bold;color:${isMajor?'var(--accent)':isAlert?'var(--danger)':isSupp?'var(--info)':'var(--text)'}">${escH(entry.title||label)}</div>
-            <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:1px">${label} · ${entry.date||''}</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:1px">${label} · ${escH(entry.date||'')}</div>
           </div>
           ${!reorder ? `<button class="btn btn-xs" onclick="editLogEntry(${i})" style="margin-right:2px">✎</button>
           <button class="btn btn-xs btn-danger" onclick="deleteLogEntry(${i})">✕</button>` : ''}
@@ -3596,7 +4004,7 @@ function renderLogTab() {
       <div class="card-title" style="margin:0">CAPTAIN'S LOG</div>
       <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
         ${!reorder ? `<button onclick="addEpisodeBreak()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px">▶ EPISODE START</button>` : ''}
-        ${!reorder ? `<button class="export-log-btn" onclick="exportLog()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:11px;letter-spacing:1px">↗ EXPORT</button>` : ''}
+        ${!reorder ? `<button class="export-log-btn" onclick="exportLog()" style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px;font-weight:700">↗ EXPORT</button>` : ''}
         ${!reorder ? `<button onclick="window._logNewestFirst=!window._logNewestFirst;renderCurrentTab()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:11px">
           ${nf?'↓ Newest':'↑ Oldest'}
         </button>` : ''}
@@ -3619,8 +4027,12 @@ function openModal(html) {
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 function closeModal(e) {
-  if(!e || e.target===document.getElementById('modal-overlay'))
+  if(!e || e.target===document.getElementById('modal-overlay')) {
     document.getElementById('modal-overlay').classList.add('hidden');
+    // Drop the fields too: every saver reads the DOM when it fires, and a
+    // dismissed modal's inputs must not be readable afterwards.
+    document.getElementById('modal-body').innerHTML = '';
+  }
 }
 function dismissModal() { closeModal(); }
 
@@ -3646,7 +4058,7 @@ function showPrompt(msg, defaultVal, fn) {
   </div>`);
   setTimeout(()=>{const i=document.getElementById('prompt-input');if(i){i.focus();i.select();}},50);
 }
-function _doPrompt() { const v=document.getElementById('prompt-input')?.value; const fn=window._promptFn; window._promptFn=null; closeModal(); if(fn&&v)fn(v); }
+function _doPrompt() { const v=document.getElementById('prompt-input')?.value; const fn=window._promptFn; window._promptFn=null; closeModal(); if(fn && v!==undefined && v!==null) fn(v); }
 
 function openSlotModal() {
   openModal(`<h2>SAVE SLOTS</h2>
@@ -3654,7 +4066,7 @@ function openSlotModal() {
   ${[0,1,2].map(i=>{
     const raw=localStorage.getItem(`stcl_slot_${i}`);
     let label=`Mission ${i+1} — Empty`;
-    if(raw){try{const d=JSON.parse(raw);if(d.char?.name)label=`Mission ${i+1} — ${d.char.name}`;}catch(e){}}
+    if(raw){try{const d=JSON.parse(raw);if(d.char?.name)label=`Mission ${i+1} — ${escH(d.char.name)}`;}catch(e){}}
     return `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:4px">
       <span style="flex:1;font-size:12px">${label}</span>
       <button class="btn btn-sm btn-accent" onclick="selectSlot(${i});dismissModal()">${i===ACTIVE_SLOT?'Active':'Load'}</button>
@@ -3666,7 +4078,13 @@ function openSlotModal() {
 function clearSlot(i) {
   showConfirm(`Clear Mission ${i+1}? This cannot be undone.`, ()=>{
     localStorage.removeItem(`stcl_slot_${i}`);
-    if(i===ACTIVE_SLOT){ S=defaultState(); saveSlot(); }
+    if(i===ACTIVE_SLOT){
+      // Deliberately no saveSlot() here - it would write the slot straight back.
+      S = defaultState();
+      window._mapZoom = null;
+      window._selectedMapCell = null;
+      renderCurrentTab();
+    }
     updateSlotLabels(); openSlotModal();
   });
 }
@@ -3757,6 +4175,7 @@ function showAddLogEntryTyped(typeKey) {
 }
 
 function saveLogEntry() {
+  if(!document.getElementById('log-type-in')) return;   // modal was dismissed
   const type  = document.getElementById('log-type-in').value;
   const emoji = document.getElementById('log-emoji-in').value;
   const title = document.getElementById('log-title-in').value.trim();
@@ -3782,7 +4201,7 @@ function editLogEntry(i) {
   <div class="field"><label>Entry</label>
     <textarea id="log-body-in" rows="7">${escH(entry.body||'')}</textarea>
   </div>
-  <input type="hidden" id="log-type-in" value="${entry.type}">
+  <input type="hidden" id="log-type-in" value="${escH(entry.type)}">
   <input type="hidden" id="log-emoji-in" value="${escH(entry.emoji||t.emoji)}">
   <input type="hidden" id="log-edit-idx" value="${i}">
   <div style="display:flex;gap:8px;margin-top:10px">
@@ -3792,7 +4211,9 @@ function editLogEntry(i) {
 }
 
 function saveLogEntryEdit() {
-  const i = parseInt(document.getElementById('log-edit-idx').value);
+  const idxEl = document.getElementById('log-edit-idx');
+  if(!idxEl) return;   // modal was dismissed
+  const i = parseInt(idxEl.value);
   const entry = S.log[i]; if (!entry) return;
   entry.title = document.getElementById('log-title-in').value.trim();
   entry.body  = document.getElementById('log-body-in').value.trim();
@@ -3862,14 +4283,18 @@ function exportLog() {
   const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const J = x => JSON.stringify(x).replace(/<\//g,'<\\/');
 
-  const allSectors = (S.sectors || []).map(s => {
+  const allSectors = (S.sectors || []).map((s, i) => {
     const cells = (s.cells || []).slice(0,25);
     while (cells.length < 25) cells.push({});
-    return {name: s.name || 'Sector', cells};
-  }).filter((s,i) => s.name !== 'Sector' || i === (S.activeSector || 0));
+    // `named` records whether the user actually titled this sector; the old
+    // code inferred it by comparing the name to the literal 'Sector', which
+    // dropped any sector a user genuinely called that.
+    return {name: s.name || 'Sector', named: !!s.name, cells, _i: i};
+  }).filter(s => s.named || s._i === (S.activeSector || 0));
   // keep at least one sector
-  if (!allSectors.length) allSectors.push({name:'Sector Map', cells: Array(25).fill({})});
-  const sec = allSectors[S.activeSector || 0] || allSectors[0];
+  if (!allSectors.length) allSectors.push({name:'Sector Map', named:true, cells: Array(25).fill({}), _i:0});
+  // index by original position - allSectors has been filtered
+  const sec = allSectors.find(x => x._i === (S.activeSector || 0)) || allSectors[0];
   const secCells = sec.cells;
   const intCells = (S.ship.interiorCells || []).slice(0,50);
   while (intCells.length < 50) intCells.push({});
@@ -4130,7 +4555,7 @@ function exportLog() {
 var EPISODES = ${J(episodes)};
 var DROPPED = [];
 var SRC_NPCS = ${J(S.npcs || [])};
-var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:{control:S.char.control,fitness:S.char.fitness,presence:S.char.presence,daring:S.char.daring,insight:S.char.insight,reason:S.char.reason},disciplines:{command:S.char.command,conn:S.char.conn,security:S.char.security,engineering:S.char.engineering,science:S.char.science,medicine:S.char.medicine},focuses:S.char.focuses||[],traits:(S.char.traits||[]).join?.(', ')||S.char.traits||'',talents:S.char.talents||[]})};
+var SRC_CHAR = ${J({name:S.char.name,rank:S.char.rank,species:S.char.species,attributes:{control:S.char.control,fitness:S.char.fitness,presence:S.char.presence,daring:S.char.daring,insight:S.char.insight,reason:S.char.reason},disciplines:{command:S.char.command,conn:S.char.conn,security:S.char.security,engineering:S.char.engineering,science:S.char.science,medicine:S.char.medicine},focuses:S.char.focuses||[],traits:(S.char.traits||[]).join?.(', ')||'',talents:S.char.talents||[],values:(S.char.values||[]).filter(Boolean),directive:S.char.directive||'',homeworld:S.char.homeworld||'',upbringing:S.char.upbringing||'',careerLength:S.char.careerLength||'',careerEvent:S.char.careerEvent||'',careerEvent2:S.char.careerEvent2||'',determination:S.char.determination||0,era:S.char.era||'',role:S.char.role||''})};
 var SRC_SHIP = ${J({name:S.ship.name,className:S.ship.className,scale:S.ship.scale,registry:S.ship.registry||'',thumb:thumbAbs,trait:S.ship.trait||'',systems:{comms:S.ship.comms,computers:S.ship.computers,engines:S.ship.engines,sensors:S.ship.sensors,structure:S.ship.structure,weapons:S.ship.weapons},departments:{command:S.ship.command,conn:S.ship.conn,security:S.ship.security,engineering:S.ship.engineering,science:S.ship.science,medicine:S.ship.medicine},traits:(S.ship.traits||[]).join?.(', ')||S.ship.traits||'',talents:S.ship.talents||[]})};
 var SRC_SHIP_THUMB = ${J(thumbAbs)};
 var ALL_SECTORS = ${J(allSectors)};
@@ -4235,6 +4660,19 @@ function renderDroppedCard(item, idx) {
     if (ch.focuses && ch.focuses.length) { h += '<div class="stat-sec">Focuses</div><div style="font-size:10px;color:var(--text)">'+ch.focuses.map(function(f){return esc(f);}).join(', ')+'</div>'; }
     if (ch.talents && ch.talents.length) { h += '<div class="stat-sec">Talents</div>'+ch.talents.map(function(t){ return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--accent);font-weight:700">'+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
     if (ch.traits) { h += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(ch.traits)+'</div>'; }
+    if (ch.values && ch.values.length) {
+      h += '<div class="stat-sec">Values</div>' + ch.values.map(function(v){
+        return '<div style="font-size:10px;margin-bottom:3px;color:var(--text)">\u2022 '+esc(v)+'</div>';
+      }).join('');
+    }
+    if (ch.directive) { h += '<div class="stat-sec">Mission Directive</div><div style="font-size:10px;color:var(--text)">'+esc(ch.directive)+'</div>'; }
+    var bg = [['Homeworld',ch.homeworld],['Upbringing',ch.upbringing],['Career Length',ch.careerLength],
+             ['Career Event',ch.careerEvent],['Career Event 2',ch.careerEvent2]].filter(function(r){return r[1];});
+    if (bg.length) {
+      h += '<div class="stat-sec">Background</div>' + bg.map(function(r){
+        return statRow(r[0], r[1]);
+      }).join('');
+    }
     return h+'</div>';
   }
   if (item.kind === 'ship-stats') {
@@ -4246,7 +4684,7 @@ function renderDroppedCard(item, idx) {
     ['Comms','Engines','Structure','Computers','Sensors','Weapons'].forEach(function(s){ h2 += statRow(s, sys[s.toLowerCase()]); });
     h2 += '<div class="stat-sec">Departments</div>';
     ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h2 += statRow(d, dep[d.toLowerCase()]); });
-    if (sh.talents && sh.talents.length) { h2 += '<div class="stat-sec">Talents</div>'+sh.talents.map(function(t){ return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--lcars-ltblue);font-weight:700">'+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
+    if (sh.talents && sh.talents.length) { h2 += '<div class="stat-sec">Talents</div>'+sh.talents.map(function(t){ var ic=t.icon?'<span style="display:inline-block;width:22px;height:22px;vertical-align:-6px;margin-right:5px;background:currentColor;-webkit-mask:url(https://api.iconify.design/game-icons/'+encodeURIComponent(t.icon)+'.svg) center/contain no-repeat;mask:url(https://api.iconify.design/game-icons/'+encodeURIComponent(t.icon)+'.svg) center/contain no-repeat"></span>':''; return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--lcars-ltblue);font-weight:700">'+ic+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
     if (sh.traits) { h2 += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(sh.traits)+'</div>'; }
     return h2+'</div>';
   }
@@ -4287,16 +4725,29 @@ function cdStart(e, idx) {
   e.stopPropagation();
 }
 function cdOver(e, idx) {
+  if (_reorderIdx === null && _srcDragItem) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; return; }
   if (_reorderIdx === null || _reorderIdx === idx) return;
   e.preventDefault(); e.dataTransfer.dropEffect = 'move';
   e.currentTarget.classList.add('drag-over-top');
 }
 function cdDrop(e, idx) {
   e.preventDefault(); e.stopPropagation();
+  // A drop from the source panel lands here whenever it hits an existing
+  // card rather than bare drop-zone; handle it as an insert at this
+  // position instead of swallowing it.
+  if (_reorderIdx === null && _srcDragItem) {
+    DROPPED.splice(idx, 0, _srcDragItem);
+    _srcDragItem = null;
+    var dz = document.getElementById('drop-zone');
+    if (dz) dz.classList.remove('drag-over');
+    renderDroppedItems();
+    return;
+  }
   if (_reorderIdx === null || _reorderIdx === idx) { _reorderIdx = null; return; }
-  var item = DROPPED.splice(_reorderIdx, 1)[0];
-  var target = idx;
-  DROPPED.splice(target, 0, item);
+  var from = _reorderIdx;
+  var item = DROPPED.splice(from, 1)[0];
+  // removing the item first shifts everything above it down by one
+  DROPPED.splice(from < idx ? idx - 1 : idx, 0, item);
   _reorderIdx = null;
   renderDroppedItems();
 }
@@ -4374,7 +4825,7 @@ ${'<'+'/script>'}
 
 function showAddNPC() {
   const factionOpts = ['Federation','Klingon','Romulan','Cardassian','Borg','Ferengi','Civilian','Other'].map(f=>`<option>${f}</option>`).join('');
-  const attOpts = ['Hostile','Cautious','Neutral','Allied','Crew'].map(a=>`<option${a==='Neutral'?' selected':''}>${a}</option>`).join('');
+  const attOpts = NPC_ATTITUDES.map(a=>`<option${a==='Neutral'?' selected':''}>${a}</option>`).join('');
   const speciesOpts = Object.keys(SPECIES_NAMES).map(s=>`<option${s==='Human'?' selected':''}>${s}</option>`).join('');
   openModal(`<h2>CREATE NPC</h2>
   <div class="field"><label>Species</label><div style="display:flex;gap:6px"><select id="npc-species-sel" style="flex:1">${speciesOpts}</select><button class="btn btn-xs" onclick="(()=>{const ks=Object.keys(SPECIES_NAMES);document.getElementById('npc-species-sel').value=ks[Math.floor(Math.random()*ks.length)]})()" title="Random species">🎲</button></div></div>
@@ -4394,7 +4845,7 @@ function showAddNPC() {
 function editNPC(i) {
   const npc = S.npcs[i];
   const factionOpts = ['Federation','Klingon','Romulan','Cardassian','Borg','Ferengi','Civilian','Other'].map(f=>`<option${npc.faction===f?' selected':''}>${f}</option>`).join('');
-  const attOpts = ['Hostile','Suspicious','Neutral','Friendly','Allied'].map(a=>`<option${npc.attitude===a?' selected':''}>${a}</option>`).join('');
+  const attOpts = NPC_ATTITUDES.map(a=>`<option${npc.attitude===a?' selected':''}>${a}</option>`).join('');
   const speciesOpts = Object.keys(SPECIES_NAMES).map(s=>`<option${s==='Human'?' selected':''}>${s}</option>`).join('');
   openModal(`<h2>EDIT NPC</h2>
   <div class="field"><label>Species</label><div style="display:flex;gap:6px"><select id="npc-species-sel" style="flex:1">${speciesOpts}</select><button class="btn btn-xs" onclick="(()=>{const ks=Object.keys(SPECIES_NAMES);document.getElementById('npc-species-sel').value=ks[Math.floor(Math.random()*ks.length)]})()" title="Random species">🎲</button></div></div>
@@ -4412,8 +4863,10 @@ function editNPC(i) {
 }
 
 function submitNPC(idx) {
+  const nameEl = document.getElementById('npc-name-in');
+  if(!nameEl) return;   // modal was dismissed
   const npc = {
-    name: document.getElementById('npc-name-in').value.trim(),
+    name: nameEl.value.trim(),
     faction: document.getElementById('npc-faction-sel').value,
     role: document.getElementById('npc-role-in').value.trim(),
     attitude: document.getElementById('npc-att-sel').value,
@@ -4428,7 +4881,18 @@ function submitNPC(idx) {
 }
 
 function deleteNPC(i) {
-  showConfirm('Delete this NPC?', ()=>{ S.npcs.splice(i,1); saveSlot(); renderCurrentTab(); });
+  showConfirm('Delete this NPC?', ()=>{
+    S.npcs.splice(i,1);
+    // combatEnemies store roster indices, so drop the deleted one and shift the rest
+    // down or the 'In Encounter' marker ends up pointing at the wrong officer.
+    S.combatEnemies = (S.combatEnemies||[]).filter(e => e.npcId !== i);
+    S.combatEnemies.forEach(e => { if (typeof e.npcId === 'number' && e.npcId > i) e.npcId--; });
+    // The HUD spotlight is a bare index too - without this it silently
+    // starts spotlighting whoever shuffled into the deleted slot.
+    if (_hudVis.npcSpot === i) _hudVis.npcSpot = -1;
+    else if (_hudVis.npcSpot > i) _hudVis.npcSpot--;
+    saveSlot(); renderCurrentTab(); refreshHudCtrl();
+  });
 }
 
 function rollNPCName(species) {
@@ -4464,7 +4928,7 @@ function generateNPC() {
     name: rollNPCName(factionSpecies[faction]||'Human'),
     faction,
     role: pick(NPC_ARCHETYPES),
-    attitude: pick(['Hostile','Cautious','Neutral','Neutral','Allied']),
+    attitude: pick(['Hostile','Cautious','Neutral','Neutral','Allied','Crew']),
     trait: pick(NPC_TRAITS),
     goal: pick(NPC_GOALS),
     notes: '',
@@ -4487,7 +4951,7 @@ function clearEncounter() {
 }
 
 function toggleEnemyStress(idx,j) {
-  if(!S.combatEnemies[idx].stress) S.combatEnemies[idx].stress=[false,false,false,false,false,false];
+  if(!S.combatEnemies[idx].stress) S.combatEnemies[idx].stress=[false,false,false];
   S.combatEnemies[idx].stress[j] = !S.combatEnemies[idx].stress[j];
   saveSlot(); renderCurrentTab();
 }
@@ -4502,27 +4966,28 @@ function toggleNPC(id) {
 // DICE + COMBAT FUNCTIONS
 // ============================================================
 
-if(!window._combatOpp) window._combatOpp = [];
-if(!window._extTasks) window._extTasks = [];
+// combatOpp / extTasks now live in S (per mission, saved). The oracle
+// ticker stays transient - it is a feed of recent rolls, not a record -
+// but loadSlot clears it so one officer's rolls do not follow another.
 if(!window._hudOracleQueue) window._hudOracleQueue = [];
-var _focusDrafts = {};
+var _focusDrafts = {};   // cleared on slot change / new officer
 var _oppRollerOpen = false;
 
 function addCombatOpponent() {
-  window._combatOpp.push({name:'Opponent', circles:3, stress:Array(3).fill(false)});
-  renderCurrentTab(); hudBroadcast();
+  S.combatOpp.push({name:'Opponent', circles:3, stress:Array(3).fill(false)});
+  saveSlot(); renderCurrentTab();
 }
-function removeOpp(i) { window._combatOpp.splice(i,1); renderCurrentTab(); hudBroadcast(); }
-function renameOpp(i,v) { window._combatOpp[i].name=v; hudBroadcast(); }
-function resetOppStress(i) { window._combatOpp[i].stress=Array(window._combatOpp[i].circles).fill(false); renderCurrentTab(); hudBroadcast(); }
+function removeOpp(i) { S.combatOpp.splice(i,1); saveSlot(); renderCurrentTab(); }
+function renameOpp(i,v) { S.combatOpp[i].name=v; saveSlot(); }
+function resetOppStress(i) { S.combatOpp[i].stress=Array(S.combatOpp[i].circles).fill(false); saveSlot(); renderCurrentTab(); }
 function toggleOppStress(i,j) {
-  window._combatOpp[i].stress[j]=!window._combatOpp[i].stress[j]; renderCurrentTab(); hudBroadcast();
+  S.combatOpp[i].stress[j]=!S.combatOpp[i].stress[j]; saveSlot(); renderCurrentTab();
 }
 function adjustOppCircles(i,d) {
-  const opp = window._combatOpp[i];
+  const opp = S.combatOpp[i];
   opp.circles = Math.max(1, Math.min(20, opp.circles+d));
   opp.stress = Array(opp.circles).fill(false).map((v,j)=>opp.stress[j]||false);
-  renderCurrentTab(); hudBroadcast();
+  saveSlot(); renderCurrentTab();
 }
 function toggleOppRoller() {
   _oppRollerOpen = !_oppRollerOpen;
@@ -4532,26 +4997,26 @@ function toggleOppRoller() {
   if(icon) icon.textContent = _oppRollerOpen ? '▲' : '▼';
 }
 function addExtTask() {
-  window._extTasks.push({name:'Extended Task', circles:5, progress:Array(5).fill(false)});
-  renderCurrentTab(); hudBroadcast();
+  S.extTasks.push({name:'Extended Task', circles:5, progress:Array(5).fill(false)});
+  saveSlot(); renderCurrentTab();
 }
-function removeExtTask(i) { window._extTasks.splice(i,1); renderCurrentTab(); hudBroadcast(); }
-function renameExtTask(i,v) { window._extTasks[i].name=v; hudBroadcast(); }
+function removeExtTask(i) { S.extTasks.splice(i,1); saveSlot(); renderCurrentTab(); }
+function renameExtTask(i,v) { S.extTasks[i].name=v; saveSlot(); }
 function adjustExtTaskCircles(i,d) {
-  const t=window._extTasks[i];
+  const t=S.extTasks[i];
   t.circles=Math.max(1,Math.min(20,t.circles+d));
   t.progress=Array(t.circles).fill(false).map((v,j)=>t.progress[j]||false);
-  renderCurrentTab(); hudBroadcast();
+  saveSlot(); renderCurrentTab();
 }
 function toggleExtTaskProgress(i,j) {
-  window._extTasks[i].progress[j]=!window._extTasks[i].progress[j]; renderCurrentTab(); hudBroadcast();
+  S.extTasks[i].progress[j]=!S.extTasks[i].progress[j]; saveSlot(); renderCurrentTab();
 }
 function resetExtTask(i) {
-  window._extTasks[i].progress=Array(window._extTasks[i].circles).fill(false); renderCurrentTab(); hudBroadcast();
+  S.extTasks[i].progress=Array(S.extTasks[i].circles).fill(false); saveSlot(); renderCurrentTab();
 }
 function renderExtTasks() {
-  if(!window._extTasks.length) return '<p style="font-size:11px;color:var(--muted)">No extended tasks. Add one above.</p>';
-  return window._extTasks.map((t,i)=>{
+  if(!S.extTasks.length) return '<p style="font-size:11px;color:var(--muted)">No extended tasks. Add one above.</p>';
+  return S.extTasks.map((t,i)=>{
     const filled=t.progress.filter(Boolean).length;
     let circles='<div class="stress-track">';
     for(let j=0;j<t.circles;j++) circles+=`<div class="stress-circle${t.progress[j]?' hit':''}${!t.progress[j]?' ext-task-circle':''}" onclick="toggleExtTaskProgress(${i},${j})" style="${t.progress[j]?'background:var(--success);border-color:var(--success)':''}"></div>`;
@@ -4628,7 +5093,7 @@ function rollSkillTest() {
   let totalSucc=0, complications=0;
   const diceHTML = rolls.map(r=>{
     let succ=0, cls='fail';
-    if(r===20){ complications++; cls='complication'; succ=1; } // 20 = complication + 1 success if ≤ TN
+    if(r===20){ complications++; cls='complication'; if(r<=tn) succ=1; } // 20 always complicates; scores only if 20 ≤ TN
     else if(r===1){ succ=2; cls='critical'; }
     else if(focusCheck && r<=discRank){ succ=2; cls='success'; }
     else if(r<=tn){ succ=1; cls='success'; }
@@ -4772,10 +5237,21 @@ function genOracle(type) {
       break;
     }
   }
-  const _res = window._storyResults[type];
+  // action_word / meaning_word / mission_gen store under camelCase keys,
+  // so looking up by `type` missed exactly the tables a solo GM uses most.
+  const ORACLE_RESULT_KEYS = {action_word:['actionWord'], meaning_word:['meaningWord'],
+                              mission_gen:['actionWord','meaningWord']};
+  const _keys = ORACLE_RESULT_KEYS[type] || [type];
+  const _res = _keys.length === 1
+    ? window._storyResults[_keys[0]]
+    : _keys.map(k => window._storyResults[k]).filter(Boolean).reduce((acc, r) =>
+        ({desc: [acc && acc.desc, [r.word, r.prompt].filter(Boolean).join(' \u2014 ')]
+          .filter(Boolean).join('  \u00b7  ')}), null);
   if (_res) {
     const _label = type.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    window._lastOracleResult = { type: _label, result: [_res.name, _res.desc].filter(Boolean).join(' — ') };
+    // word tables carry {word, prompt} rather than {name, desc}
+    const _text = [_res.name, _res.word, _res.desc, _res.prompt].filter(Boolean).join(' — ');
+    window._lastOracleResult = { type: _label, result: _text };
     pushHudOracle(window._lastOracleResult);
     hudBroadcast();
   }
@@ -4815,11 +5291,11 @@ function rollRandomName() {
   let name;
   if (key === 'Human') {
     const nat = HUMAN_NATIONALITIES[Math.floor(Math.random() * HUMAN_NATIONALITIES.length)];
-    const fnData = HUMAN_FIRST_NAMES[nat];
+    const fnData = HUMAN_FIRST_NAMES[nat] || HUMAN_FIRST_NAMES['United States'];
     const isFemale = Math.random() < 0.5;
     const firstPool = isFemale ? fnData.female : fnData.male;
     const firstName = firstPool[Math.floor(Math.random() * firstPool.length)];
-    const lastPool = HUMAN_LAST_NAMES[nat];
+    const lastPool = HUMAN_LAST_NAMES[nat] || HUMAN_LAST_NAMES['United States'];
     const lastName = lastPool[Math.floor(Math.random() * lastPool.length)];
     name = firstName + ' ' + lastName;
   } else {
@@ -4853,6 +5329,9 @@ function creationAdjAttr(key,d) {
   const current=ATTRIBUTES.reduce((s,a)=>s+(c[a.key]-base),0);
   if(d>0&&current>=pool) return;
   if(d>0&&c[key]>=12) return;
+  // Lifepath bonuses land on Finish and used to be silently clamped away,
+  // so the wizard let you spend points it then threw out. Cap the spend.
+  if(d>0&&c[key]+(lpAttrBonuses()[key]||0)>=12) return;
   if(d>0&&c[key]===11&&ATTRIBUTES.some(a=>a.key!==key&&c[a.key]>=12)) return;
   if(d<0&&c[key]<=base) return;
   c[key]+=d; saveSlot(); renderCurrentTab();
@@ -4863,7 +5342,10 @@ function creationSetDisc(key,v) {
   const currentOthers=DISCIPLINES.reduce((s,d)=>d.key===key?s:s+(c[d.key]-base),0);
   const maxVal=Math.min(5,base+pool-currentOthers);
   const otherAt5=DISCIPLINES.some(d=>d.key!==key&&c[d.key]>=5);
-  const effectiveMax=otherAt5?Math.min(4,maxVal):maxVal;
+  let effectiveMax=otherAt5?Math.min(4,maxVal):maxVal;
+  // Same reason as creationAdjAttr: don't let the player buy ranks that
+  // Finish will clamp away without saying so.
+  effectiveMax=Math.min(effectiveMax, 5-(lpDiscBonuses()[key]||0));
   c[key]=Math.max(base,Math.min(effectiveMax,v)); saveSlot(); renderCurrentTab();
 }
 function randomizeAttrs() {
@@ -4893,9 +5375,6 @@ function randomizeDiscs() {
     c[d.key]++; rem--;
   }
   saveSlot(); renderCurrentTab();
-}
-function toggleStress(i) {
-  S.char.stress= i<=S.char.stress ? i-1 : i; saveSlot(); renderCurrentTab();
 }
 function toggleDet(i) {
   const cur=S.char.determination;
@@ -4960,12 +5439,23 @@ function setValueText(i,v) {
 }
 function addValue() {
   S.char.values.push(''); S.char.valuesUsed.push(false); S.char.valuesChallenged.push(false);
+  if(Array.isArray(S.char.valuesDetGranted)) S.char.valuesDetGranted.push(false);
   saveSlot(); renderCurrentTab();
 }
 function toggleValueUsed(i) { S.char.valuesUsed[i]=!S.char.valuesUsed[i]; saveSlot(); renderCurrentTab(); }
 function toggleValueChallenged(i) {
+  if(!Array.isArray(S.char.valuesDetGranted)) S.char.valuesDetGranted=[];
   S.char.valuesChallenged[i]=!S.char.valuesChallenged[i];
-  if(S.char.valuesChallenged[i]) S.char.determination=Math.min(3,S.char.determination+1);
+  // Un-toggling is an undo, so hand the Determination back - but only if
+  // the challenge actually granted one (at 3/3 it is capped and grants none).
+  if(S.char.valuesChallenged[i]) {
+    const granted = S.char.determination < 3;
+    if(granted) S.char.determination++;
+    S.char.valuesDetGranted[i]=granted;
+  } else {
+    if(S.char.valuesDetGranted[i]) S.char.determination=Math.max(0,S.char.determination-1);
+    S.char.valuesDetGranted[i]=false;
+  }
   saveSlot(); renderCurrentTab();
 }
 function addFocus() {
@@ -5006,7 +5496,7 @@ function editCharName() {
 
 function editOfficerDetails() {
   const c = S.char;
-  const rankOpts = ['Ensign','Lieutenant JG','Lieutenant','Lieutenant Commander','Commander','Captain','Fleet Captain','Commodore','Rear Admiral'].map(r=>`<option${c.rank===r?' selected':''}>${r}</option>`).join('');
+  const rankOpts = RANKS.map(r=>`<option${c.rank===r?' selected':''}>${r}</option>`).join('');
   const eraOpts = ERAS.map(e=>`<option${c.era===e?' selected':''}>${e}</option>`).join('');
   openModal(`<h2 style="margin-bottom:12px">EDIT OFFICER DETAILS</h2>
   <div class="field"><label>Name</label><input id="od-name" value="${escH(c.name)}" placeholder="Officer name" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px"></div>
@@ -5023,6 +5513,7 @@ function editOfficerDetails() {
 }
 
 function saveOfficerDetails() {
+  if(!document.getElementById('od-name')) return;   // modal was dismissed
   S.char.name       = document.getElementById('od-name').value.trim();
   S.char.rank       = document.getElementById('od-rank').value;
   S.char.species    = document.getElementById('od-species').value.trim();
@@ -5033,7 +5524,13 @@ function saveOfficerDetails() {
   saveSlot(); closeModal(); renderCurrentTab();
 }
 
-function _doDeleteChar() { S.char=defaultChar(); saveSlot(); closeModal(); renderCurrentTab(); }
+function _doDeleteChar() {
+  S.char=defaultChar();
+  // otherwise the new officer's Academy focus boxes open pre-filled with
+  // the deleted officer's drafts
+  window._focusDrafts = {};
+  saveSlot(); closeModal(); renderCurrentTab();
+}
 function confirmNewChar() {
   openModal(`<h2 style="margin-bottom:8px">DELETE OFFICER?</h2>
   <p style="font-size:12px;color:var(--muted);margin-bottom:16px">This will permanently erase this officer and restart character creation for this save slot. This cannot be undone.</p>
@@ -5150,7 +5647,39 @@ function creationNext() {
 function creationBack() {
   S.char.creationStep=Math.max(0,(S.char.creationStep||0)-1); saveSlot(); renderCurrentTab();
 }
-function setCreationSpecies(name) { S.char._selectedSpecies=name; saveSlot(); renderCurrentTab(); }
+function setCreationSpecies(name) {
+  if (S.char._selectedSpecies !== name) {
+    // The picker highlights a button only when it matches the stored choice
+    // and warns only when the choice is empty, so a stale pick from the
+    // previous species rendered as neither selected nor missing - and was
+    // still applied on Finish.
+    const lp = S.char._lp || (S.char._lp = {});
+    lp.speciesAttrFree = [];
+    lp.speciesDiscChoice = '';
+    lp.speciesDiscFree = [];
+  }
+  S.char._selectedSpecies=name; saveSlot(); renderCurrentTab();
+}
+
+function setCreationEnv(name) {
+  if (S.char._selectedEnv !== name) { if (S.char._lp) S.char._lp.envAttr = ''; }
+  S.char._selectedEnv=name; saveSlot(); renderCurrentTab();
+}
+
+function setCreationUpbringing(name) {
+  if (S.char._selectedUpbringing !== name) {
+    if (S.char._lp) { S.char._lp.upbrAttr=''; S.char._lp.upbrDisc=''; }
+  }
+  S.char._selectedUpbringing=name; saveSlot(); renderCurrentTab();
+}
+
+function setCreationTrack(name) {
+  if (S.char._selectedTrack !== name) {
+    const lp = S.char._lp || (S.char._lp = {});
+    lp.trackDiscFree2 = []; lp.trackDiscFree1 = ''; lp.trackDiscFree = [];
+  }
+  S.char._selectedTrack=name; saveSlot(); renderCurrentTab();
+}
 function rollUpbringing() {
   const r=Math.floor(Math.random()*20);
   let up=UPBRINGINGS[UPBRINGINGS.length-1];
@@ -5158,7 +5687,7 @@ function rollUpbringing() {
     const [lo,hi]=(u.d+'-'+u.d).replace(/(\d+)–(\d+)/,'$1-$2').split('-').map(Number);
     if(r+1>=lo&&r+1<=(hi||lo)){up=u;break;}
   }
-  S.char._selectedUpbringing=up.name; saveSlot(); renderCurrentTab();
+  setCreationUpbringing(up.name);
 }
 function rollCareerLength() {
   const r = Math.floor(Math.random()*20)+1;
@@ -5197,16 +5726,163 @@ function rollDirective() {
 function saveShipField(key,val) { S.ship[key]=val; if(key==='name'||key==='registry') { S.char.assignment=(S.ship.name||'')+(S.ship.registry?' '+S.ship.registry:''); } saveSlot(); }
 function adjShipSys(key,d) { S.ship[key]=Math.max(5,Math.min(15,(S.ship[key]||7)+d)); saveSlot(); renderCurrentTab(); }
 function setShipDept(key,v) { S.ship[key]=v; saveSlot(); renderCurrentTab(); }
-function toggleShipStress(i) {
-  S.ship.shipStress= i<=S.ship.shipStress ? i-1 : i; saveSlot(); renderCurrentTab();
-}
 function addShipTalent() {
   const n=document.getElementById('ship-talent-name-in'),d=document.getElementById('ship-talent-desc-in');
   if(!n||!n.value.trim())return;
   if(!S.ship.talents)S.ship.talents=[];
-  S.ship.talents.push({name:n.value.trim(),desc:(d?.value||'').trim()}); saveSlot(); renderCurrentTab();
+  // A typed name that matches the catalog gets the canonical spelling,
+  // description, and icon filled in; anything the user supplied wins.
+  const cat=findShipTalent(n.value);
+  const newKey=shipTalentKey(cat?cat.name:n.value);
+  if(S.ship.talents.some(t=>shipTalentKey(t.name)===newKey)){ n.value=''; return; }
+  S.ship.talents.push({
+    name:(cat?cat.name:n.value.trim()),
+    desc:(d?.value||'').trim()||(cat?cat.desc:''),
+    icon:window._talIconSel||(cat?cat.icon:''),
+  });
+  window._talIconSel='';
+  saveSlot(); renderCurrentTab();
 }
 function removeShipTalent(i) { S.ship.talents.splice(i,1); saveSlot(); renderCurrentTab(); }
+
+// Shared add-by-name path: catalog select on the Ship tab and the wizard.
+function addShipTalentByName(name) {
+  if(!name) return;
+  if(!S.ship.talents) S.ship.talents=[];
+  const t=shipTalentObj(name);
+  if(S.ship.talents.some(x=>shipTalentKey(x.name)===shipTalentKey(t.name))) return;
+  S.ship.talents.push(t); saveSlot(); renderCurrentTab();
+}
+function addShipTalentFromCatalog() {
+  const sel=document.getElementById('ship-talent-cat');
+  if(sel&&sel.value) addShipTalentByName(sel.value);
+}
+// Wizard toggle: enforces the one-talent-per-Scale cap during creation.
+function creationToggleShipTalent(name) {
+  const sh=S.ship;
+  if(!sh.talents) sh.talents=[];
+  const k=shipTalentKey(shipTalentObj(name).name);
+  const i=sh.talents.findIndex(t=>shipTalentKey(t.name)===k);
+  if(i>=0){ sh.talents.splice(i,1); saveSlot(); renderCurrentTab(); return; }
+  const scale=sh.scale||3;
+  if(sh.talents.length>=scale){ alert('Your ship can take '+scale+' talents (one per point of Scale). Remove one first.'); return; }
+  sh.talents.push(shipTalentObj(name)); saveSlot(); renderCurrentTab();
+}
+function creationAddShipTalent() {
+  const sel=document.getElementById('cs-talent-select');
+  if(sel&&sel.value) creationToggleShipTalent(sel.value);
+}
+
+// ── game-icons picker ───────────────────────────────────────────────────────
+// game-icons.net has no API; this is Iconify's search endpoint filtered to
+// that set — the same source the sibling apps use. Targets:
+//   <number>       — a ship talent index (saves, closes, re-renders)
+//   'new'          — the custom-talent row (updates its preview button only,
+//                    so in-flight typing in the name/desc inputs isn't wiped)
+//   'cell:<i>'     — a sector map cell
+//   'subzone:<i>'  — a sub-zone map cell
+//   'input:<id>'   — inline mode: writes the slug into that input and stays
+//                    open (used inside the interior-room modal, which can't
+//                    stack a second modal on top of itself)
+
+// Curated starter palettes shown before the user searches (slugs verified
+// against the API).
+const GI_QUICKSETS = {
+  space:['ringed-planet','earth-america','sun','moon','asteroid','comet-spark','galaxy','black-hole-bolas','vortex','portal','defense-satellite','ufo'],
+  area:['mountains','forest','desert','island','cave-entrance','modern-city','village','castle','ancient-columns','campfire','factory','radar-dish'],
+  room:['laptop','bed','gears','test-tubes','medical-pack','chef-toque','cargo-crate','toolbox','teleport','holosphere','desk','space-shuttle'],
+};
+function giQuicksetFor(t) {
+  if(typeof t!=='string') return null;
+  if(t.indexOf('cell:')===0) return 'space';
+  if(t.indexOf('subzone:')===0) return 'area';
+  if(t.indexOf('input:')===0) return 'room';
+  return null;
+}
+function giCurrentIcon() {
+  const t=window._talIconTarget;
+  if(typeof t==='number') return (S.ship.talents&&S.ship.talents[t]?S.ship.talents[t].icon:'')||'';
+  if(t==='new') return window._talIconSel||'';
+  if(typeof t==='string'&&t.indexOf('cell:')===0){ const c=(S.sectors[S.activeSector]||{cells:[]}).cells[+t.slice(5)]; return (c&&giIsSlug(c.icon))?c.icon.trim():''; }
+  if(typeof t==='string'&&t.indexOf('subzone:')===0){ const sz=window._mapZoom&&window._mapZoom.subZone; const c=sz&&sz.cells[+t.slice(8)]; return (c&&giIsSlug(c.icon))?c.icon.trim():''; }
+  if(typeof t==='string'&&t.indexOf('input:')===0){ const el=document.getElementById(t.slice(6)); return (el&&giIsSlug(el.value))?el.value.trim():''; }
+  return '';
+}
+function giRenderIcons(icons) {
+  const res=document.getElementById('tal-ico-results');
+  if(!res) return;
+  const cur=giCurrentIcon();
+  res.innerHTML = icons.length
+    ? icons.map(ic=>`<button type="button" class="tal-ico-opt${ic===cur?' sel':''}" data-icon="${escH(ic)}" title="${escH(ic)}" onclick="pickTalIcon('${escQ(ic)}')">${talIconHTML(ic,22)}</button>`).join('')
+    : '<div style="grid-column:1/-1;font-size:11px;color:var(--muted)">No icons found — try another word (planet, station, shield, beam).</div>';
+}
+function openTalIconPicker(target) {
+  window._talIconTarget = target;
+  const isMap = giQuicksetFor(target)!==null;
+  openModal(`<h2 style="margin-bottom:4px">${isMap?'MAP ICON':'TALENT ICON'}</h2>
+  <p style="font-size:10px;color:var(--muted);margin-bottom:10px">Icons from game-icons.net (via Iconify). Click to choose; click the chosen icon again to clear it.</p>
+  <input id="tal-ico-search" placeholder="${isMap?'Search — planet, star, station, nebula…':'Search — shield, laser, radar, warp…'}" oninput="talIconSearch()" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-size:12px">
+  <div id="tal-ico-results" class="tal-ico-results"><div style="grid-column:1/-1;font-size:11px;color:var(--muted)">Searching…</div></div>
+  <div style="margin-top:12px;text-align:right"><button class="btn" onclick="dismissModal()">CLOSE</button></div>`);
+  const seed = typeof target==='number'
+    ? ((S.ship.talents[target]||{}).name||'')
+    : (target==='new' ? (document.getElementById('ship-talent-name-in')?.value||'') : '');
+  talIconSearch(seed||'');
+}
+function talIconSearch(q) {
+  const inp=document.getElementById('tal-ico-search');
+  const res=document.getElementById('tal-ico-results');
+  const raw=(typeof q==='string'?q:(inp?inp.value:'')).trim();
+  clearTimeout(window._talIconTimer);
+  // Sequence token: invalidates any in-flight fetch from an earlier search
+  // (or an earlier picker), so a slow stale response can't overwrite the
+  // results of the search that superseded it.
+  const myReq = window._talIconReq = (window._talIconReq||0)+1;
+  const quick=giQuicksetFor(window._talIconTarget);
+  // Empty query on a map/room target: show the curated starter palette, no fetch.
+  if(!raw && quick){ giRenderIcons(GI_QUICKSETS[quick]); return; }
+  const term=raw||'star';
+  window._talIconTimer=setTimeout(()=>{
+    fetch('https://api.iconify.design/search?query='+encodeURIComponent(term)+'&prefix=game-icons&limit=60')
+      .then(r=>r.json())
+      .then(d=>{ if(myReq!==window._talIconReq) return; giRenderIcons((d.icons||[]).map(i=>i.replace('game-icons:',''))); })
+      .catch(()=>{ if(myReq===window._talIconReq && res) res.innerHTML='<div style="grid-column:1/-1;font-size:11px;color:var(--muted)">Couldn’t reach game-icons.net — check your connection. Everything works fine without an icon.</div>'; });
+  }, 250);
+}
+function pickTalIcon(slug) {
+  const t=window._talIconTarget;
+  if(typeof t==='number' && S.ship.talents && S.ship.talents[t]) {
+    S.ship.talents[t].icon = (S.ship.talents[t].icon===slug)?'':slug;
+    saveSlot(); dismissModal(); renderCurrentTab(); return;
+  }
+  if(typeof t==='string' && t.indexOf('cell:')===0) {
+    const i=+t.slice(5), c=(S.sectors[S.activeSector]||{cells:[]}).cells[i];
+    setCellProp(i,'icon',(c&&c.icon===slug)?'':slug);
+    dismissModal(); renderCurrentTab(); return;
+  }
+  if(typeof t==='string' && t.indexOf('subzone:')===0) {
+    const i=+t.slice(8), sz=window._mapZoom&&window._mapZoom.subZone, c=sz&&sz.cells[i];
+    setSubZoneCellProp(i,'icon',(c&&c.icon===slug)?'':slug);
+    dismissModal(); renderCurrentTab(); return;
+  }
+  if(typeof t==='string' && t.indexOf('input:')===0) {
+    // Inline mode (interior-room modal): write into the input, refresh the
+    // preview and highlight, and stay open — the surrounding modal owns the
+    // save button.
+    const el=document.getElementById(t.slice(6));
+    if(el) el.value=(el.value.trim()===slug)?'':slug;
+    const pv=document.getElementById('ic-icon-preview');
+    if(pv) pv.innerHTML=giIconHTML(el?el.value.trim():'',22)||'<span style="font-size:9px;color:var(--muted)">no icon</span>';
+    const res=document.getElementById('tal-ico-results');
+    if(res){ const now=el?el.value.trim():''; [].slice.call(res.querySelectorAll('.tal-ico-opt')).forEach(b=>b.classList.toggle('sel',b.getAttribute('data-icon')===now)); }
+    return;
+  }
+  // 'new' — the custom-talent row on the ship sheet
+  window._talIconSel = (window._talIconSel===slug)?'':slug;
+  const btn=document.getElementById('ship-talent-icon-btn');
+  if(btn) btn.innerHTML = talIconHTML(window._talIconSel||'',16);
+  dismissModal();
+}
 
 function toggleRedAlert() {
   const on = document.body.classList.toggle('red-alert');
@@ -5234,8 +5910,8 @@ function buildShipPreviewPanel() {
   const suggested = SHIP_SUGGESTED_TALENTS[c.name];
   const talentsHTML = suggested && suggested.length
     ? `<div style="margin-top:10px;clear:both">
-        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Suggested Talents</div>
-        ${suggested.map(t=>`<div style="font-size:11px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border)">${escH(t)}</div>`).join('')}
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Suggested Talents (ship takes ${c.scale} — one per point of Scale)</div>
+        ${suggested.map(n=>{const t=shipTalentObj(n);return `<div style="font-size:11px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px" title="${escH(t.desc||'')}">${talIconHTML(t.icon,14)}${escH(t.name)}</div>`;}).join('')}
       </div>` : '';
   return `<div class="ship-detail-panel">
     ${thumb}
@@ -5263,10 +5939,14 @@ function loadShipClass(name) {
   sh.engineering = c.engineering; sh.science = c.science; sh.medicine = c.medicine;
   sh.trait = c.trait;
   sh.thumb = c.thumb || '';
-  const suggested = SHIP_SUGGESTED_TALENTS[c.name];
-  if (suggested && suggested.length) {
-    sh.talents = suggested.map(t => ({name: t, desc: ''}));
-  }
+  // Seed the class's suggested talents (resolved through the catalog so they
+  // carry descriptions and icons), capped at Scale — the rules allow one
+  // talent per point of Scale. The picker lets the player swap any of them.
+  const suggested = SHIP_SUGGESTED_TALENTS[c.name] || [];
+  const seen = {};
+  sh.talents = suggested.map(shipTalentObj)
+    .filter(t => { const k = shipTalentKey(t.name); if (seen[k]) return false; seen[k] = true; return true; })
+    .slice(0, c.scale);
   window._shipClassPreview = name;
   saveSlot(); renderCurrentTab();
 }
@@ -5281,7 +5961,7 @@ function interiorCellHTML(i) {
     return `<div id="ship-cell-${i}" style="background:${bg};border:${border};border-radius:3px;min-height:42px;cursor:pointer" onclick="toggleInteriorVoid(${i})" title="Click to include in ship layout"></div>`;
   }
   return `<div id="ship-cell-${i}" style="background:${bg};border:${border};border-radius:3px;min-height:42px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;text-align:center" onclick="editInteriorCell(${i})">
-    ${cell.icon ? `<div style="font-size:14px;line-height:1">${escH(cell.icon)}</div>` : ''}
+    ${cell.icon ? `<div style="font-size:14px;line-height:1">${giIconHTML(cell.icon,28)}</div>` : ''}
     ${cell.name ? `<div style="font-size:9px;color:var(--text);line-height:1.1;word-break:break-word">${escH(cell.name)}</div>` : (isVoid ? '' : '<div style="font-size:8px;color:var(--muted)">·</div>')}
   </div>`;
 }
@@ -5294,8 +5974,13 @@ function updateInteriorCell(i) {
 function editInteriorCell(i) {
   const cell = S.ship.interiorCells[i];
   openModal(`<h2 style="margin-bottom:12px">ROOM / COMPARTMENT</h2>
-  <div class="field"><label>Icon / Emoji</label>
-    <input id="ic-icon-in" value="${escH(cell.icon||'')}" placeholder="e.g. 🖥️ 🛏️ ⚙️" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-size:18px">
+  <div class="field"><label>Icon</label>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+      <span id="ic-icon-preview" style="line-height:0;color:var(--accent)">${giIconHTML(cell.icon||'',22)||'<span style="font-size:9px;color:var(--muted)">no icon</span>'}</span>
+      <input id="ic-icon-in" value="${escH(cell.icon||'')}" placeholder="game-icon below, or type an emoji" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-size:13px">
+    </div>
+    <input id="tal-ico-search" placeholder="Search game-icons.net — console, bed, cargo…" oninput="talIconSearch()" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-size:12px">
+    <div id="tal-ico-results" class="tal-ico-results"></div>
   </div>
   <div class="field"><label>Room Name</label>
     <input id="ic-name-in" value="${escH(cell.name||'')}" placeholder="e.g. Bridge, Engineering, Cargo Bay" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px">
@@ -5309,10 +5994,14 @@ function editInteriorCell(i) {
     <button class="btn" onclick="clearInteriorCell(${i})">CLEAR</button>
     <button class="btn" onclick="closeModal()" style="flex:1">CANCEL</button>
   </div>`);
+  // Inline picker mode: clicks write into #ic-icon-in and keep this modal open.
+  window._talIconTarget = 'input:ic-icon-in';
+  talIconSearch('');
 }
 
 function saveInteriorCell(i) {
   const cell = S.ship.interiorCells[i];
+  if(!cell || !document.getElementById('ic-icon-in')) return;   // modal was dismissed
   cell.icon = document.getElementById('ic-icon-in').value.trim();
   cell.name = document.getElementById('ic-name-in').value.trim();
   cell.notes = document.getElementById('ic-notes-in').value.trim();
@@ -5363,7 +6052,10 @@ function clickMapCell(i) {
 }
 function warpTo(i) {
   const sector=S.sectors[S.activeSector]; if(!sector)return;
-  sector.cells[sector.currentCell].isCurrent=false;
+  if(!sector.cells[i])return;
+  // currentCell can be out of range in an imported save; warpToSubZone
+  // already guarded this, warpTo did not.
+  if(sector.cells[sector.currentCell]) sector.cells[sector.currentCell].isCurrent=false;
   sector.currentCell=i;
   sector.cells[i].isCurrent=true;
   sector.cells[i].type='explored';
@@ -5378,22 +6070,24 @@ function toggleVoid(i) {
   const sector=S.sectors[S.activeSector]; if(!sector)return;
   sector.cells[i].isVoid=!sector.cells[i].isVoid; saveSlot(); renderCurrentTab();
 }
-function switchSector(i) { S.activeSector=i; window._selectedMapCell=null; saveSlot(); renderCurrentTab(); }
+function switchSector(i) { S.activeSector=i; window._selectedMapCell=null; window._mapZoom=null; saveSlot(); renderCurrentTab(); }
 function newSector() {
   showPrompt('Name the new sector:', `Sector ${String(S.sectors.length+1).padStart(3,'0')}`, (name)=>{
-    S.sectors.push(defaultSector(name)); S.activeSector=S.sectors.length-1;
+    if(!name.trim()) return;
+    S.sectors.push(defaultSector(name.trim())); S.activeSector=S.sectors.length-1;
     window._selectedMapCell=null; saveSlot(); renderCurrentTab();
   });
 }
 function renameSector() {
   const sector=S.sectors[S.activeSector]; if(!sector)return;
-  showPrompt('Rename sector:', sector.name, (name)=>{ sector.name=name; saveSlot(); renderCurrentTab(); });
+  showPrompt('Rename sector:', sector.name, (name)=>{ if(!name.trim()) return; sector.name=name.trim(); saveSlot(); renderCurrentTab(); });
 }
 function deleteSector() {
   if(S.sectors.length<=1){openModal('<p style="font-size:13px;margin-bottom:16px">Cannot delete the only sector.</p><button class="btn" onclick="closeModal()" style="width:100%">OK</button>');return;}
   showConfirm('Delete this sector? This cannot be undone.', ()=>{
     S.sectors.splice(S.activeSector,1);
     S.activeSector=Math.max(0,S.activeSector-1);
+    window._mapZoom=null; window._selectedMapCell=null;
     saveSlot(); renderCurrentTab();
   });
 }
@@ -5499,7 +6193,15 @@ function escH(s) {
 }
 function escQ(s) {
   if(!s) return '';
-  return String(s).replace(/'/g,"\\'").replace(/\n/g,' ');
+  // Values pass through here into an inline onclick="..." JS string, so the
+  // backslash must go first, then the quote characters that would close
+  // either the JS literal or the HTML attribute around it.
+  return String(s)
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/"/g,'&quot;')
+    .replace(/&(?!quot;)/g,'&amp;')
+    .replace(/[\r\n]/g,' ');
 }
 function toggleCollapsible(id) {
   const el=document.getElementById(id); if(!el)return;
@@ -5509,12 +6211,25 @@ function toggleCollapsible(id) {
 }
 
 // ============================================================
+// LIVE HUD - state
+// Declared before BOOT: the init IIFE calls loadSlot(), which
+// broadcasts to the HUD, and `let` bindings are not hoisted.
+// ============================================================
+let _hudVis = {stats:true, vitals:true, dice:true, log:true, encounter:true, npcSpot:-1, shipStats:false, sectorMap:false, interiorMap:false};
+let _hudCamResH = parseInt(localStorage.getItem('stcl-cam-res')||'720')||720;
+let _hudWin = null;
+let _hudChannel = null;
+let _hudPanelOpen = false;
+let _lastRollData = null;
+let _hudRec = false, _hudRecTimer = null, _hudRecSecs = 0, _hudRecIdleTicks = 0;
+
+// ============================================================
 // BOOT
 // ============================================================
 
 (function init() {
-  const saved = localStorage.getItem('stcl_active_slot');
-  ACTIVE_SLOT = saved ? parseInt(saved) : 0;
+  const saved = parseInt(localStorage.getItem('stcl_active_slot'), 10);
+  ACTIVE_SLOT = (saved >= 0 && saved <= 2) ? saved : 0;
   loadSlot(ACTIVE_SLOT);
   if (S.ship.className && !window._shipClassPreview) {
     window._shipClassPreview = S.ship.className;
@@ -5535,13 +6250,36 @@ function toggleCollapsible(id) {
 // LIVE HUD
 // ============================================================
 
-let _hudVis = {stats:true, vitals:true, dice:true, log:true, encounter:true, npcSpot:-1, shipStats:false, sectorMap:false, interiorMap:false};
-let _hudCamResH = parseInt(localStorage.getItem('stcl-cam-res')||'720')||720;
-let _hudWin = null;
-let _hudChannel = null;
-let _hudPanelOpen = false;
-let _lastRollData = null;
-let _hudRec = null, _hudRecChunks = [], _hudRecTimer = null, _hudRecSecs = 0;
+// (HUD state is declared above BOOT - loadSlot touches it during init)
+
+// The recorder itself lives in the HUD popup (it owns the screen-capture and
+// the camera audio track). This button just drives it and mirrors its state.
+function toggleHudRec() {
+  if (!_hudWin || _hudWin.closed || typeof _hudWin.toggleRec !== 'function') {
+    alert('Open the HUD first - recording captures the HUD window.');
+    return;
+  }
+  _hudWin.toggleRec();
+  startHudRecPoll();
+}
+
+function startHudRecPoll() {
+  if (_hudRecTimer) return;
+  _hudRecIdleTicks = 0;
+  _hudRecTimer = setInterval(() => {
+    const live = !!(_hudWin && !_hudWin.closed && _hudWin._rec);
+    if (live !== _hudRec) { _hudRec = live; _hudRecIdleTicks = 0; refreshHudCtrl(); }
+    if (live) {
+      _hudRecSecs = _hudWin._secs || 0;
+      const t = document.getElementById('hud-rec-timer');
+      if (t) t.textContent = `${String(Math.floor(_hudRecSecs/60)).padStart(2,'0')}:`
+        + `${String(_hudRecSecs%60).padStart(2,'0')}`;
+    } else if (++_hudRecIdleTicks > 60) {
+      // give up after ~30s of nothing - the user probably cancelled the picker
+      clearInterval(_hudRecTimer); _hudRecTimer = null; _hudRecSecs = 0;
+    }
+  }, 500);
+}
 
 function toggleHudPanel() {
   _hudPanelOpen = !_hudPanelOpen;
@@ -5556,7 +6294,11 @@ function buildHudCtrlHTML() {
     .map(([label, idx]) => `<button class="hc-chip${_hudVis.npcSpot===idx?' on':''}" onclick="setHudNpc(${idx})">${escH(label)}</button>`).join('');
   // on = not explicitly false (default-on chips show as active unless turned off)
   // Determine active key per zone for chip highlighting
-  const rightActive = _hudVis.sectorMap===true ? 'sectorMap' : _hudVis.interiorMap===true ? 'interiorMap' : 'log';
+  // `log` is only the active right panel when it has not been switched off,
+  // otherwise the chip claimed the journal was on stage over a blank panel.
+  const rightActive = _hudVis.sectorMap===true ? 'sectorMap'
+    : _hudVis.interiorMap===true ? 'interiorMap'
+    : _hudVis.log!==false ? 'log' : null;
   const centerActive = _hudVis.encounter===true ? 'encounter' : _hudVis.oracle===true ? 'oracle' : _hudVis.extTasks===true ? 'extTasks' : 'mission';
   const visChip  = (key, label) =>
     `<button class="hc-chip${_hudVis[key]!==false?' on':''}" onclick="toggleHudVis('${key}')">${label}</button>`;
@@ -5726,17 +6468,18 @@ function hudBroadcast(extra) {
       comms: sh.comms, computers: sh.computers, engines: sh.engines,
       sensors: sh.sensors, structure: sh.structure, weapons: sh.weapons,
       command: sh.command, conn: sh.conn, security: sh.security,
-      engineering: sh.engineering, science: sh.science, medicine: sh.medicine
+      engineering: sh.engineering, science: sh.science, medicine: sh.medicine,
+      talents: (sh.talents||[]).map(t=>({name:t.name, desc:t.desc||'', icon:t.icon||''}))
     },
     sectorMap: (() => { const sec = S.sectors[S.activeSector] || {}; const cur = sec.cells ? sec.cells[sec.currentCell] || {} : {}; return { name: sec.name, currentCell: sec.currentCell, cells: (sec.cells||[]).map(c=>({name:c.name, icon:c.icon, isVoid:c.isVoid})), curName: cur.name||'', curFeature: cur.feature||'', curNotes: cur.notes||'', curType: cur.type||'' }; })(),
     interiorMap: { cells: (sh.interiorCells||[]).map(c=>({name:c.name, icon:c.icon, isVoid:c.isVoid})), shipName: sh.name||'', shipClass: sh.className||'', shipScale: sh.scale||'' },
     npcs: S.npcs || [],
     encounter: S.combatEnemies || [],
-    combatOpps: window._combatOpp || [],
+    combatOpps: S.combatOpp || [],
     playerStress: S.playerStress || [false,false,false],
     oracle: window._lastOracleResult || null,
     oracleQueue: window._hudOracleQueue || [],
-    extTasks: (window._extTasks || []).map(t=>({name:t.name, circles:t.circles, progress:t.progress.slice()})),
+    extTasks: (S.extTasks || []).map(t=>({name:t.name, circles:t.circles, progress:(t.progress||[]).slice()})),
     dice: _lastRollData,
     log: (S.log || []).slice(-3).reverse(),
     vis: _hudVis,
@@ -5941,6 +6684,11 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
     <div class="sec-div"></div>
     <div class="sec-lbl" style="color:#99CCFF">Ship Departments</div>
     <div id="h-ship-dept"></div>
+    <div id="h-ship-tal-wrap" style="display:none">
+      <div class="sec-div"></div>
+      <div class="sec-lbl" style="color:#99CCFF">Ship Talents</div>
+      <div id="h-ship-tal"></div>
+    </div>
   </div>
   <div id="h-vitals-wrap">
     <div class="sec-div"></div>
@@ -5948,6 +6696,12 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
     <div class="res-mini">
       <div class="rmi"><div class="rv" id="h-momentum">0</div><div class="rl">Momentum</div></div>
       <div class="rmi"><div class="rv" id="h-threat">0</div><div class="rl">Threat</div></div>
+    </div>
+    <div class="res-mini" style="margin-top:4px">
+      <div class="rmi" style="flex:1">
+        <div class="rv" id="h-det" style="display:flex;gap:4px;justify-content:center;align-items:center;min-height:18px"></div>
+        <div class="rl">Determination</div>
+      </div>
     </div>
   </div>
 </div>
@@ -6028,7 +6782,19 @@ var _segThreshold=140,_segFeather=4,_segModelSel=1,_camResH=720;
 var _ch=new BroadcastChannel('stcl-hud');
 _ch.onmessage=function(e){if(e.data&&e.data.type==='state')applyState(e.data);};
 
-var CREATION_STEP_NAMES=['Species & Era','Environment','Academy Track','Attributes','Disciplines','Values & Focuses','Officer Details','Your Ship'];
+// The popup is its own document - it cannot reach the main window's helpers.
+function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// A game-icons slug renders as a themed mask; emoji / free text renders as text.
+function giCell(v,px){
+  v=String(v==null?'':v).trim();
+  if(!v) return '';
+  if(!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(v)) return escH(v);
+  var u='https://api.iconify.design/game-icons/'+encodeURIComponent(v)+'.svg';
+  return '<span style="display:inline-block;width:'+px+'px;height:'+px+'px;vertical-align:middle;background:currentColor;-webkit-mask:url('+u+') center/contain no-repeat;mask:url('+u+') center/contain no-repeat"></span>';
+}
+
+// Derived from CREATION_STEPS so the two can never drift apart again.
+var CREATION_STEP_NAMES=${JSON.stringify(CREATION_STEPS.map(st=>st.title))};
 
 function applyState(d){
   var vis=d.vis||{};
@@ -6057,7 +6823,12 @@ function applyState(d){
     setHTML('cr-body',cb||'<div class="sml">Waiting for input\u2026</div>');
     show('p-creation',true);
     show('p-left',false);
-    show('p-right',vis.log!==false);
+    // A new officer has no journal yet, and the right panel still held the
+    // previous character's entries (or a stale sector map underneath).
+    show('p-right',false);
+    show('h-log-section',false);
+    show('h-right-smap',false);
+    show('h-right-imap',false);
     show('p-center',false);
     show('p-spotlight',false);
     show('p-dice',vis.dice!==false);
@@ -6096,11 +6867,12 @@ function applyState(d){
     if(listEl){
       if(!tasks.length){listEl.innerHTML='<div style="font-size:11px;color:#7a4a1a">No extended tasks</div>';}
       else{listEl.innerHTML=tasks.map(function(t){
-        var filled=t.progress.filter(Boolean).length;
-        var circles=t.progress.map(function(p,j){
+        var prog=Array.isArray(t.progress)?t.progress:[];
+        var filled=prog.filter(Boolean).length;
+        var circles=prog.map(function(p,j){
           return '<div style="width:18px;height:18px;border-radius:50%;border:2px solid '+(p?'#66CC66':'#7a4a1a')+';background:'+(p?'#66CC66':'#000')+';display:inline-block;margin:1px"></div>';
         }).join('');
-        return '<div style="margin-bottom:10px"><div style="font-size:11px;color:#FFCC99;font-weight:700;letter-spacing:1px;margin-bottom:4px">'+t.name+'</div><div style="font-size:9px;color:#7a4a1a;margin-bottom:4px">'+filled+'/'+t.circles+' complete</div><div style="display:flex;flex-wrap:wrap;gap:2px">'+circles+'</div></div>';
+        return '<div style="margin-bottom:10px"><div style="font-size:11px;color:#FFCC99;font-weight:700;letter-spacing:1px;margin-bottom:4px">'+escH(t.name)+'</div><div style="font-size:9px;color:#7a4a1a;margin-bottom:4px">'+filled+'/'+t.circles+' complete</div><div style="display:flex;flex-wrap:wrap;gap:2px">'+circles+'</div></div>';
       }).join('');}
     }
   }
@@ -6113,9 +6885,9 @@ function applyState(d){
       ticker.innerHTML=queue.length?queue.map(function(orc,i){
         var isNew=(orc.id||0)>lastId;
         return '<div class="oracle-tick'+(i===0&&isNew?' tick-new':'')+'">'+
-          '<div style="font-size:8px;color:#7a4a1a;letter-spacing:1px;text-transform:uppercase">'+orc.type+'</div>'+
-          '<div style="font-size:15px;font-weight:700;color:#CC99FF;text-transform:uppercase;letter-spacing:1px;line-height:1.2">'+orc.result+'</div>'+
-          (orc.sub?'<div style="font-size:9px;color:#7a4a1a;margin-top:1px">'+orc.sub+'</div>':'')+
+          '<div style="font-size:8px;color:#7a4a1a;letter-spacing:1px;text-transform:uppercase">'+escH(orc.type)+'</div>'+
+          '<div style="font-size:15px;font-weight:700;color:#CC99FF;text-transform:uppercase;letter-spacing:1px;line-height:1.2">'+escH(orc.result)+'</div>'+
+          (orc.sub?'<div style="font-size:9px;color:#7a4a1a;margin-top:1px">'+escH(orc.sub)+'</div>':'')+
           '</div>';
       }).join(''):'<span class="sml">No results yet</span>';
       if(newTop)ticker.dataset.lastId=newTop;
@@ -6167,7 +6939,7 @@ function applyState(d){
   setText('h-ship-text',sh.name?(sh.name+(sh.className?' \u00b7 '+sh.className:'')+(sh.scale?' \u00b7 Scale '+sh.scale:'')):'No ship configured');
 
   // Ship thumbnail
-  setHTML('h-ship-thumb', sh.thumb ? '<img src="'+sh.thumb+'" style="max-width:100%;max-height:90px;object-fit:contain;filter:drop-shadow(0 0 8px #99CCFF)" onerror="this.style.display=\\'none\\'">' : '');
+  setHTML('h-ship-thumb', sh.thumb ? '<img src="'+escH(sh.thumb)+'" style="max-width:100%;max-height:90px;object-fit:contain;filter:drop-shadow(0 0 8px #99CCFF)" onerror="this.style.display=\\'none\\'">' : '');
 
   // Ship Stats — systems use bars (max 12), departments use pip dots (max 5)
   var SYS=[['Comms',sh.comms],['Computers',sh.computers],['Engines',sh.engines],['Sensors',sh.sensors],['Structure',sh.structure],['Weapons',sh.weapons]];
@@ -6182,6 +6954,13 @@ function applyState(d){
     return '<div class="disc-item-v"><span class="dn">'+a[0]+'</span><div class="dd">'+dots+'</div></div>';
   }).join(''));
 
+  // Ship talents (icon + name; description in the tooltip)
+  var shTals=sh.talents||[];
+  show('h-ship-tal-wrap',shTals.length>0);
+  setHTML('h-ship-tal',shTals.map(function(t){
+    return '<div style="font-size:10px;margin-bottom:3px;color:#99CCFF;font-weight:700" title="'+escH(t.desc||'')+'">'+(t.icon?giCell(t.icon,13)+' ':'')+escH(t.name)+'</div>';
+  }).join(''));
+
   // Sector map
   var sm=d.sectorMap||{};
   setText('h-sector-name',(sm.name||'Sector')+' \u2014 Map');
@@ -6189,8 +6968,8 @@ function applyState(d){
   var smCur=sm.currentCell!=null?sm.currentCell:12;
   setHTML('h-smap',smCells.map(function(cell,idx){
     var cls='scell'+(cell.isVoid?' void':'')+(idx===smCur?' cur':'');
-    var icon=cell.icon||(idx===smCur?'\uD83D\uDE80':'\u00b7');
-    var nameEl=cell.name?'<div class="scell-name">'+cell.name+'</div>':'';
+    var icon=cell.icon?giCell(cell.icon,16):(idx===smCur?'\uD83D\uDE80':'\u00b7');
+    var nameEl=cell.name?'<div class="scell-name">'+escH(cell.name)+'</div>':'';
     return '<div class="'+cls+'">'+icon+nameEl+'</div>';
   }).join(''));
   setText('h-smap-cur-name',sm.curName||('Location '+(smCur+1)));
@@ -6203,8 +6982,8 @@ function applyState(d){
   setText('h-interior-name',(im.shipName||sh.name||'Ship')+' Interior');
   setHTML('h-imap',imCells.map(function(cell){
     var cls='icell'+(cell.isVoid?' void':'');
-    var icon=cell.icon||'';
-    var nameEl=cell.name?'<div class="icell-name">'+cell.name+'</div>':'';
+    var icon=cell.icon?giCell(cell.icon,13):'';
+    var nameEl=cell.name?'<div class="icell-name">'+escH(cell.name)+'</div>':'';
     return '<div class="'+cls+'">'+(icon||(!cell.isVoid?'\u00b7':''))+nameEl+'</div>';
   }).join(''));
   setText('h-imap-ship-name',im.shipName||sh.name||'');
@@ -6228,7 +7007,8 @@ function applyState(d){
   var log=d.log||[];
   setHTML('h-log-content',log.length?log.map(function(e){
     if(e.type==='episode') return '<div style="display:flex;align-items:center;gap:6px;margin:10px 0 6px"><div style="flex:1;height:1px;background:#3a2000"></div><div style="font-size:9px;color:#FF9933;letter-spacing:2px;text-transform:uppercase;white-space:nowrap">'+escH(e.title||'Episode')+'</div><div style="flex:1;height:1px;background:#3a2000"></div></div>';
-    return '<div class="log-entry"><div class="log-title">'+(e.title||e.type||'Log')+'</div><div class="log-date">'+(e.date||'')+'</div>'+(e.body?'<div class="log-body">'+e.body.slice(0,140)+'</div>':'')+'</div>';
+    var body = typeof e.body === 'string' ? e.body : (e.body == null ? '' : String(e.body));
+    return '<div class="log-entry"><div class="log-title">'+escH(e.title||e.type||'Log')+'</div><div class="log-date">'+escH(e.date||'')+'</div>'+(body?'<div class="log-body">'+escH(body.slice(0,140))+'</div>':'')+'</div>';
   }).join(''):'<span class="sml">No entries</span>');
 
   // Encounter — player stress at top, then combat enemies (both NPC encounter + manual opponents)
@@ -6238,13 +7018,13 @@ function applyState(d){
   var ps=d.playerStress||[false,false,false];
   var charName=(d.char&&d.char.name)||'Crew';
   var psDots=ps.map(function(s){return '<div class="sdot'+(s?' hit':'')+'"></div>';}).join('');
-  var playerRow='<div class="enc-row"><div class="enc-name" style="color:#FF9933">'+charName+'</div><div class="stress-dots">'+psDots+'</div></div>';
+  var playerRow='<div class="enc-row"><div class="enc-name" style="color:#FF9933">'+escH(charName)+'</div><div class="stress-dots">'+psDots+'</div></div>';
   var oppRows=allOpps.map(function(e){
     var stress=e.stress||[];
     var count=e.circles||stress.length||3;
     var dots='';
     for(var i=0;i<count;i++) dots+='<div class="sdot'+(stress[i]?' hit':'')+'"></div>';
-    return '<div class="enc-row"><div class="enc-name">'+(e.name||'Unknown')+'</div><div class="stress-dots">'+dots+'</div></div>';
+    return '<div class="enc-row"><div class="enc-name">'+escH(e.name||'Unknown')+'</div><div class="stress-dots">'+dots+'</div></div>';
   }).join('');
   setHTML('h-enc-content',playerRow+(allOpps.length?'<div class="sec-div" style="margin:4px 0"></div>'+oppRows:''));
 }
