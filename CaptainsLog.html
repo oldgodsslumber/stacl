@@ -32,6 +32,10 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{touch-action:manipulation}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;letter-spacing:0.5px}
+/* Desktop readability: the app's text is authored at 10-12px inline, which
+   reads tiny on a monitor. Font sizes are inline (unreachable from a media
+   query), so scale the whole page — 1.2x turns 10px into 12, 11 into ~13. */
+@media(min-width:768px){body{zoom:1.2}}
 body.red-alert{--accent:#CD6363;--accent-dim:#5a0000;--accent-glow:rgba(205,99,99,0.18);--text:#FFAAAA;--muted:#6a2020;--border:#2a0a0a;--surface:#0d0000;--surface2:#150000;--surface3:#1e0000}
 body.red-alert #nav-character{background:#CD6363}
 body.red-alert #nav-map{background:#C05050}
@@ -4004,7 +4008,8 @@ function renderLogTab() {
       <div class="card-title" style="margin:0">CAPTAIN'S LOG</div>
       <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
         ${!reorder ? `<button onclick="addEpisodeBreak()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px">▶ EPISODE START</button>` : ''}
-        ${!reorder ? `<button class="export-log-btn" onclick="exportLog()" style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px;font-weight:700">↗ EXPORT</button>` : ''}
+        ${!reorder ? `<button class="export-log-btn" onclick="exportLog()" style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px;font-weight:700">↗ EXPORT</button>
+        <button class="export-log-btn" onclick="openLogbookModal()" title="Print a blank handwriting logbook — one episode per page" style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px;font-weight:700">🖨 LOGBOOK</button>` : ''}
         ${!reorder ? `<button onclick="window._logNewestFirst=!window._logNewestFirst;renderCurrentTab()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:11px">
           ${nf?'↓ Newest':'↑ Oldest'}
         </button>` : ''}
@@ -4810,6 +4815,130 @@ function removeDropped(idx) {
 
 window.addEventListener('DOMContentLoaded', renderLogOutput);
 ${'<'+'/script>'}
+</body></html>`;
+
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank');
+  if (!w) { URL.revokeObjectURL(url); alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+// ============================================================
+// PRINTABLE LOGBOOK EXPORT
+// ============================================================
+// A blank handwriting journal: one episode per page, ruled like looseleaf,
+// structured as the rules' mission format — three acts of five scenes each
+// (p.185: "Each mission has three acts. Each act usually has five scenes.")
+// with the Mission Tracker's deltas as the scene markers. Print it, then
+// play and write with a pen.
+
+function openLogbookModal() {
+  openModal(`<h2 style="margin-bottom:6px">PRINTABLE LOGBOOK</h2>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Generates blank, lined episode pages — one mission per page, three acts of five scenes each — for writing your logs by hand at the table.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <div class="field" style="flex:1;min-width:110px"><label>Episode pages</label>
+      <input id="lb-pages" type="number" min="1" max="50" value="10">
+    </div>
+    <div class="field" style="flex:1;min-width:110px"><label>Paper</label>
+      <select id="lb-paper"><option value="letter">US Letter</option><option value="a4">A4</option></select>
+    </div>
+  </div>
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin:4px 0 14px">
+    <input type="checkbox" id="lb-notes"> Add a lined Mission Notes page after each episode
+  </label>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-accent" style="flex:1" onclick="exportLogbook()">GENERATE</button>
+    <button class="btn" onclick="closeModal()">CANCEL</button>
+  </div>`);
+}
+
+function exportLogbook() {
+  const pages = Math.max(1, Math.min(50, parseInt(document.getElementById('lb-pages')?.value) || 10));
+  const paper = document.getElementById('lb-paper')?.value === 'a4' ? 'a4' : 'letter';
+  const notes = document.getElementById('lb-notes')?.checked || false;
+  closeModal();
+
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const officer = esc([S.char.rank, S.char.name].filter(Boolean).join(' '));
+  const shipLine = esc([S.ship.name, S.ship.registry].filter(Boolean).join(' '));
+  const byline = officer + (officer && shipLine ? ' · ' : '') + shipLine;
+
+  // Page box = the printable area inside @page's 0.5in margins.
+  const pw = paper==='a4' ? '7.27in' : '7.5in';
+  const ph = paper==='a4' ? '10.6in' : '9.9in';
+  const notesH = paper==='a4' ? '9.2in' : '8.5in';
+
+  const ACTS = [
+    ['ACT I','THE HOOK','You are set on a mission — arrival, briefing, and the first challenges.'],
+    ['ACT II','ESCALATION','The challenges escalate; complications mount toward a crisis.'],
+    ['ACT III','CLIMAX &amp; RESOLUTION','The climax must be faced and resolved — log the outcome.'],
+  ];
+  const boxes = n => Array.from({length:n},()=> '<span class="tick"></span>').join('');
+  const sceneRow = n => `<div class="scene"><div class="delta">&#9653;<span>${n}</span></div><div class="ruled r2"></div></div>`;
+  const actBlock = (a,i) => `<div class="act"><div class="act-hd"><b>${a[0]} — ${a[1]}</b><span>${a[2]}</span></div>${[1,2,3,4,5].map(s=>sceneRow(i*5+s)).join('')}</div>`;
+
+  const epPage = `<div class="page">
+    <div class="masthead"><div class="mh-l">CAPTAIN'S LOG</div><div class="mh-r">${byline}</div></div>
+    <div class="hdr-fields">
+      <div class="hf" style="flex:0 0 1.1in"><label>Episode</label><div class="wl"></div></div>
+      <div class="hf" style="flex:1"><label>Title</label><div class="wl"></div></div>
+      <div class="hf" style="flex:0 0 1.5in"><label>Stardate</label><div class="wl"></div></div>
+    </div>
+    <div class="hdr-fields"><div class="hf" style="flex:1"><label>Directive</label><div class="wl"></div></div></div>
+    ${ACTS.map(actBlock).join('')}
+    <div class="trackers">
+      <div class="trk"><label>Momentum</label>${boxes(6)}</div>
+      <div class="trk"><label>Threat</label>${boxes(8)}</div>
+      <div class="trk"><label>Determination</label>${boxes(3)}</div>
+      <div class="trk-note">Cross off a delta &#9653; as each scene resolves — 15 scenes completes the mission.</div>
+    </div>
+  </div>`;
+
+  const notesPage = `<div class="page">
+    <div class="masthead"><div class="mh-l">MISSION NOTES</div><div class="mh-r">${byline}</div></div>
+    <div class="hdr-fields"><div class="hf" style="flex:0 0 1.1in"><label>Episode</label><div class="wl"></div></div><div class="hf" style="flex:1"></div></div>
+    <div class="ruled" style="height:${notesH};margin-top:0.1in"></div>
+  </div>`;
+
+  let pagesHTML = '';
+  for (let i=0; i<pages; i++) { pagesHTML += epPage; if (notes) pagesHTML += notesPage; }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>Captain's Log — Blank Logbook</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:${paper==='a4'?'A4':'letter'};margin:0.5in}
+body{background:#20242a;font-family:'Arial Narrow',Arial,Helvetica,sans-serif;padding:58px 0 30px}
+#toolbar{position:fixed;top:0;left:0;right:0;background:#000;color:#FF9933;display:flex;gap:14px;align-items:center;padding:9px 16px;font-size:13px;letter-spacing:2px;z-index:5}
+#toolbar button{background:#FF9933;color:#000;border:none;border-radius:4px;padding:5px 16px;font-weight:700;letter-spacing:1px;cursor:pointer;font-family:inherit}
+#toolbar span{font-size:10px;color:#997755;letter-spacing:1px}
+.page{width:${pw};height:${ph};background:#fff;color:#111;margin:0 auto 26px;padding:0.12in 0.08in;box-shadow:0 4px 24px rgba(0,0,0,.55);page-break-after:always;break-after:page;overflow:hidden}
+.page:last-child{page-break-after:auto;break-after:auto}
+.masthead{display:flex;justify-content:space-between;align-items:center;background:#000;color:#fff;border-radius:0 10px 10px 0;padding:0.06in 0.14in;height:0.34in}
+.mh-l{font-size:15px;font-weight:700;letter-spacing:4px}
+.mh-r{font-size:10px;letter-spacing:1.5px;color:#FF9933;text-transform:uppercase}
+.hdr-fields{display:flex;gap:0.18in;margin-top:0.09in}
+.hf label{display:block;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#666}
+.hf .wl{border-bottom:1.5px solid #444;height:0.21in}
+.act{margin-top:0.09in}
+.act-hd{display:flex;align-items:baseline;gap:0.12in;border-bottom:2px solid #000;padding-bottom:2px}
+.act-hd b{font-size:11px;letter-spacing:2px;white-space:nowrap}
+.act-hd span{font-size:8.5px;color:#555;letter-spacing:0.5px;font-style:italic}
+.scene{display:flex;align-items:stretch;margin-top:0.035in}
+.delta{flex:0 0 0.34in;text-align:center;font-size:13px;color:#333;line-height:1;padding-top:0.02in}
+.delta span{display:block;font-size:7px;color:#888;letter-spacing:1px}
+.ruled{flex:1;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(0.21in - 1px),#a5c6de calc(0.21in - 1px),#a5c6de 0.21in);background-position:0 0}
+.r2{height:0.42in}
+.trackers{display:flex;gap:0.22in;align-items:center;border-top:2px solid #000;margin-top:0.12in;padding-top:0.07in;flex-wrap:wrap}
+.trk{display:flex;align-items:center;gap:4px}
+.trk label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#444;font-weight:700;margin-right:2px}
+.tick{display:inline-block;width:0.14in;height:0.14in;border:1.5px solid #333;border-radius:2px}
+.trk-note{font-size:7.5px;color:#888;letter-spacing:0.5px;margin-left:auto;font-style:italic}
+@media print{body{background:#fff;padding:0}.page{margin:0;box-shadow:none;padding:0.12in 0.08in}#toolbar{display:none}}
+</style></head><body>
+<div id="toolbar"><b>CAPTAIN'S LOG — PRINTABLE LOGBOOK</b><button onclick="window.print()">&#128424; PRINT</button><span>${pages} episode page${pages!==1?'s':''}${notes?' + notes pages':''} · print at 100% scale, ${paper==='a4'?'A4':'US Letter'}</span></div>
+${pagesHTML}
 </body></html>`;
 
   const blob = new Blob([html], {type:'text/html;charset=utf-8'});
