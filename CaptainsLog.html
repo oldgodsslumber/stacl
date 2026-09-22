@@ -2820,13 +2820,15 @@ function buildCreationTalentPicker() {
   const scale = sh.scale || 3;
   const talents = sh.talents || [];
   const selKeys = talents.map(t => shipTalentKey(t.name));
-  const suggNames = [...new Set((SHIP_SUGGESTED_TALENTS[sh.className]||[]).map(n => { const c = findShipTalent(n); return c ? c.name : n; }))];
+  // Suggestions that are already on the ship drop out of the suggested row —
+  // a taken talent lives only in the selected chips above, never twice.
+  const suggNames = [...new Set((SHIP_SUGGESTED_TALENTS[sh.className]||[]).map(n => { const c = findShipTalent(n); return c ? c.name : n; }))]
+    .filter(n => !selKeys.includes(shipTalentKey(n)));
   const chips = talents.map((t,i) =>
     `<span class="tal-chip sel" title="${escH(t.desc||'')}">${talIconHTML(t.icon,14)}${escH(t.name)}<b style="cursor:pointer;margin-left:3px" onclick="removeShipTalent(${i})">✕</b></span>`).join(' ');
   const suggChips = suggNames.map(n => {
-    const on = selKeys.includes(shipTalentKey(n));
     const c = findShipTalent(n);
-    return `<span class="tal-chip${on?' sel':''}" title="${escH(c?c.desc:'')}" onclick="creationToggleShipTalent('${escQ(n)}')">${talIconHTML(c&&c.icon,14)}${escH(n)}</span>`;
+    return `<span class="tal-chip" title="${escH(c?c.desc:'')}" onclick="creationToggleShipTalent('${escQ(n)}')">${talIconHTML(c&&c.icon,14)}${escH(n)}</span>`;
   }).join(' ');
   const over = talents.length > scale;
   return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
@@ -2835,7 +2837,7 @@ function buildCreationTalentPicker() {
       <span style="font-size:11px;color:${over?'#f66':'var(--muted)'}">${talents.length} of ${scale} chosen (one per point of Scale)</span>
     </div>
     <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${chips || '<span style="font-size:11px;color:var(--muted);font-style:italic">No talents chosen yet.</span>'}</div>
-    ${suggNames.length ? `<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:8px 0 4px">Suggested for the ${escH(sh.className)} class — tap to toggle</div>
+    ${suggNames.length ? `<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:8px 0 4px">Suggested for the ${escH(sh.className)} class — tap to add</div>
     <div style="display:flex;gap:4px;flex-wrap:wrap">${suggChips}</div>` : ''}
     <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
       <select id="cs-talent-select" style="flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">${shipTalentOptions(selKeys)}</select>
@@ -3115,7 +3117,7 @@ function renderShipTab() {
         </table>
       </div>
       ${buildShipPreviewPanel()}
-      <p style="font-size:10px;color:var(--muted);margin-top:6px">Tap a class to preview it. Ship name and registry are preserved when you select.</p>
+      <p style="font-size:10px;color:var(--muted);margin-top:6px">Tap a class to preview it. Ship name and registry are preserved when you select; stats and talents reset to the new class.</p>
     </div>
   </div>`;
 
@@ -3158,6 +3160,12 @@ function renderShipTab() {
     <button class="btn btn-xs btn-danger" style="flex:none" onclick="removeShipTalent(${i})">✕</button>
   </div>`).join('');
   const talCount = (sh.talents||[]).length, talMax = sh.scale||3;
+  // Class suggestions not yet taken, offered as one-tap add chips.
+  const shTalKeys = (sh.talents||[]).map(t=>shipTalentKey(t.name));
+  const shSuggNames = [...new Set((SHIP_SUGGESTED_TALENTS[sh.className]||[]).map(n=>{const c=findShipTalent(n);return c?c.name:n;}))]
+    .filter(n=>!shTalKeys.includes(shipTalentKey(n)));
+  const shSuggHTML = shSuggNames.length ? `<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:8px 0 4px">Suggested for the ${escH(sh.className)} class — tap to add</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">${shSuggNames.map(n=>{const c=findShipTalent(n);return `<span class="tal-chip" title="${escH(c?c.desc:'')}" onclick="addShipTalentByName('${escQ(n)}')">${talIconHTML(c&&c.icon,14)}${escH(n)}</span>`;}).join('')}</div>` : '';
 
   const scaleOpts = [1,2,3,4,5,6,7].map(s=>`<option${sh.scale===s?' selected':''}>${s}</option>`).join('');
 
@@ -3238,7 +3246,8 @@ function renderShipTab() {
       <span style="font-size:11px;color:${talCount>talMax?'#f66':'var(--muted)'};margin-left:10px">${talCount} / ${talMax} (Scale)</span>
     </div>
     <div id="ship-talent-body" style="padding-top:8px">
-      ${talHTML||'<p style="color:var(--muted);font-size:11px">No talents. A ship may take one talent per point of Scale — pick from the list below or add your own.</p>'}
+      ${talHTML||'<p style="color:var(--muted);font-size:11px">No talents. A ship may take one talent per point of Scale — tap a suggestion or pick from the list below.</p>'}
+      ${shSuggHTML}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
         <select id="ship-talent-cat" style="flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">${shipTalentOptions((sh.talents||[]).map(t=>shipTalentKey(t.name)))}</select>
         <button class="btn btn-sm btn-accent" onclick="addShipTalentFromCatalog()">ADD</button>
@@ -4283,27 +4292,20 @@ function parseEpisodes(log) {
   return groups.filter(g => g.label==='Campaign Log' ? g.entries.length>0 : true);
 }
 
-function exportLog() {
-  const episodes = parseEpisodes(S.log);
-  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  const J = x => JSON.stringify(x).replace(/<\//g,'<\\/');
-
+// Map data serialized the same way for both exports (doc view + logbook).
+function collectExportMaps() {
   const allSectors = (S.sectors || []).map((s, i) => {
     const cells = (s.cells || []).slice(0,25);
     while (cells.length < 25) cells.push({});
     // `named` records whether the user actually titled this sector; the old
     // code inferred it by comparing the name to the literal 'Sector', which
     // dropped any sector a user genuinely called that.
-    return {name: s.name || 'Sector', named: !!s.name, cells, _i: i};
+    return {name: s.name || 'Sector', named: !!s.name, cells, _i: i, currentCell: s.currentCell};
   }).filter(s => s.named || s._i === (S.activeSector || 0));
   // keep at least one sector
-  if (!allSectors.length) allSectors.push({name:'Sector Map', named:true, cells: Array(25).fill({}), _i:0});
-  // index by original position - allSectors has been filtered
-  const sec = allSectors.find(x => x._i === (S.activeSector || 0)) || allSectors[0];
-  const secCells = sec.cells;
+  if (!allSectors.length) allSectors.push({name:'Sector Map', named:true, cells: Array(25).fill({}), _i:0, currentCell:-1});
   const intCells = (S.ship.interiorCells || []).slice(0,50);
   while (intCells.length < 50) intCells.push({});
-
   // Collect all sub-zones from all sector cells
   const allSubZones = [];
   allSectors.forEach((s, si) => {
@@ -4317,6 +4319,18 @@ function exportLog() {
       }
     });
   });
+  return { allSectors, intCells, allSubZones };
+}
+
+function exportLog() {
+  const episodes = parseEpisodes(S.log);
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // Escape every "<" (not just "</") — "<!--" followed by "<script" in user
+  // text would otherwise put the HTML tokenizer into double-escaped state and
+  // swallow the popup's real closing script tag.
+  const J = x => JSON.stringify(x).replace(/</g,'\\u003c');
+
+  const { allSectors, intCells, allSubZones } = collectExportMaps();
 
   const charName = esc(S.char.name || 'Unknown Officer');
   const shipName = esc(S.ship.name || '');
@@ -4514,13 +4528,13 @@ function exportLog() {
 <div id="main">
   <div id="src-panel">
     <div id="src-tabs">
-      <button class="stab active" id="stab-crew" onclick="showSTab('crew')">NPCs</button>
+      <button class="stab active" id="stab-stats" onclick="showSTab('stats')">STATS</button>
+      <button class="stab" id="stab-crew" onclick="showSTab('crew')">NPCs</button>
       <button class="stab" id="stab-maps" onclick="showSTab('maps')">MAPS</button>
-      <button class="stab" id="stab-stats" onclick="showSTab('stats')">STATS</button>
     </div>
-    <div id="tab-crew">${npcCardsHTML}</div>
+    <div id="tab-crew" style="display:none">${npcCardsHTML}</div>
     <div id="tab-maps" style="display:none">${secGridHTML}${intGridHTML}${subZoneHTML}</div>
-    <div id="tab-stats" style="display:none">
+    <div id="tab-stats">
       <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'char-stats',0)">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-lavender);margin-bottom:4px">OFFICER PROFILE</div>
         <div style="font-size:10px;color:var(--muted)">${charName}</div>
@@ -4817,11 +4831,14 @@ window.addEventListener('DOMContentLoaded', renderLogOutput);
 ${'<'+'/script>'}
 </body></html>`;
 
-  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const w = window.open(url, '_blank');
-  if (!w) { URL.revokeObjectURL(url); alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  // Write into a plain popup (same pattern as the bridge HUD) instead of a
+  // blob: URL — a blob document may not load file:// images, so the ship
+  // thumbnail silently vanished when the app runs from disk.
+  const w = window.open('', '_blank');
+  if (!w) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 
 // ============================================================
@@ -4844,8 +4861,21 @@ function openLogbookModal() {
       <select id="lb-paper"><option value="letter">US Letter</option><option value="a4">A4</option></select>
     </div>
   </div>
-  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin:4px 0 14px">
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin:4px 0 4px">
     <input type="checkbox" id="lb-notes"> Add a lined Mission Notes page after each episode
+  </label>
+  <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:10px 0 4px">Front matter</div>
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-bottom:3px">
+    <input type="checkbox" id="lb-cover" checked> Cover page (ship image &amp; officer)
+  </label>
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-bottom:3px">
+    <input type="checkbox" id="lb-ref" checked> Officer &amp; ship reference pages
+  </label>
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-bottom:3px">
+    <input type="checkbox" id="lb-maps" checked> Map pages (sectors, ship interior, zones)
+  </label>
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-bottom:14px">
+    <input type="checkbox" id="lb-blank"> Two blank sector charts at the back (map as you explore)
   </label>
   <div style="display:flex;gap:8px">
     <button class="btn btn-accent" style="flex:1" onclick="exportLogbook()">GENERATE</button>
@@ -4854,9 +4884,14 @@ function openLogbookModal() {
 }
 
 function exportLogbook() {
-  const pages = Math.max(1, Math.min(50, parseInt(document.getElementById('lb-pages')?.value) || 10));
+  const pagesRaw = parseInt(document.getElementById('lb-pages')?.value);
+  const pages = Math.max(1, Math.min(50, isNaN(pagesRaw) ? 10 : pagesRaw));
   const paper = document.getElementById('lb-paper')?.value === 'a4' ? 'a4' : 'letter';
   const notes = document.getElementById('lb-notes')?.checked || false;
+  const optCover = document.getElementById('lb-cover')?.checked || false;
+  const optRef = document.getElementById('lb-ref')?.checked || false;
+  const optMaps = document.getElementById('lb-maps')?.checked || false;
+  const optBlank = document.getElementById('lb-blank')?.checked || false;
   closeModal();
 
   const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -4901,8 +4936,98 @@ function exportLogbook() {
     <div class="ruled" style="height:${notesH};margin-top:0.1in"></div>
   </div>`;
 
+  // ── Front matter: cover, reference pages, map pages ─────────────────────
+  const c = S.char, sh = S.ship;
+  const thumbAbs = sh.thumb ? new URL(sh.thumb, location.href).href : '';
+  const maps = collectExportMaps();
+  // Print icon: a game-icons slug becomes a black mask glyph; emoji and free
+  // text print as-is.
+  const gi = v => { v=String(v||'').trim(); if(!v) return '';
+    if(!giIsSlug(v)) return esc(v);
+    const u=talIconURL(v);
+    return '<span class="pgi" style="-webkit-mask-image:url('+u+');mask-image:url('+u+')"></span>'; };
+  const sb = (l,v)=>`<div class="sb"><div class="sbv">${v==null?'':esc(String(v))}</div><div class="sbl">${l}</div></div>`;
+  const list = arr => (arr&&arr.length) ? arr.map(x=>`<div class="ref-li">${typeof x==='string'?esc(x):`<b>${esc(x.name||'')}</b>${x.desc?`<span class="ref-desc"> — ${esc(x.desc)}</span>`:''}`}</div>`).join('') : '<div class="ref-li ref-desc" style="font-style:italic">—</div>';
+
+  const coverPage = `<div class="page cover">
+    <div class="masthead"><div class="mh-l">CAPTAIN'S LOG</div><div class="mh-r">${esc(c.era||'')}</div></div>
+    <div class="cv-mid">
+      ${thumbAbs?`<img class="cv-img" src="${esc(thumbAbs)}">`:''}
+      <div class="cv-ship">${esc(sh.name)||'U.S.S. ______________'}</div>
+      <div class="cv-sub">${esc([sh.registry, sh.className?sh.className+' Class':'', sh.scale?'Scale '+sh.scale:''].filter(Boolean).join(' · '))}</div>
+      <div class="cv-rule"></div>
+      <div class="cv-of">THE MISSION LOG OF</div>
+      <div class="cv-name">${officer||'______________________'}</div>
+    </div>
+    <div class="hdr-fields">
+      <div class="hf" style="flex:1"><label>Log begins — stardate</label><div class="wl"></div></div>
+      <div class="hf" style="flex:1"><label>Log ends — stardate</label><div class="wl"></div></div>
+    </div>
+  </div>`;
+
+  const officerRefPage = `<div class="page page-flex">
+    <div class="masthead"><div class="mh-l">OFFICER REFERENCE</div><div class="mh-r">${byline}</div></div>
+    <div class="ref-title">${officer||'Officer'}${c.species?' · '+esc(c.species):''}${c.role?' · '+esc(c.role):''}</div>
+    <div class="ref-hd">Attributes</div>
+    <div class="sb-row">${sb('Control',c.control)+sb('Daring',c.daring)+sb('Fitness',c.fitness)+sb('Insight',c.insight)+sb('Presence',c.presence)+sb('Reason',c.reason)}</div>
+    <div class="ref-hd">Disciplines</div>
+    <div class="sb-row">${sb('Command',c.command)+sb('Conn',c.conn)+sb('Security',c.security)+sb('Engineering',c.engineering)+sb('Science',c.science)+sb('Medicine',c.medicine)}</div>
+    <div class="ref-hd">Values</div>${list((c.values||[]).filter(Boolean))}
+    <div class="ref-hd">Focuses</div>${list(c.focuses)}
+    <div class="ref-hd">Talents</div>${list(c.talents)}
+    ${c.directive?`<div class="ref-hd">Directive</div><div class="ref-li">${esc(c.directive)}</div>`:''}
+  </div>`;
+
+  const shipTalList = (sh.talents&&sh.talents.length) ? sh.talents.map(t=>`<div class="ref-li"><b>${t.icon?gi(t.icon)+' ':''}${esc(t.name)}</b>${t.desc?`<span class="ref-desc"> — ${esc(t.desc)}</span>`:''}</div>`).join('') : '<div class="ref-li ref-desc" style="font-style:italic">—</div>';
+  const shipRefPage = `<div class="page page-flex">
+    <div class="masthead"><div class="mh-l">SHIP REFERENCE</div><div class="mh-r">${byline}</div></div>
+    <div class="ref-title">${esc(sh.name)||'Vessel'}${sh.registry?' · '+esc(sh.registry):''}${sh.className?' · '+esc(sh.className)+' Class':''}${sh.scale?' · Scale '+sh.scale:''}</div>
+    <div class="ref-hd">Systems</div>
+    <div class="sb-row">${sb('Comms',sh.comms)+sb('Computers',sh.computers)+sb('Engines',sh.engines)+sb('Sensors',sh.sensors)+sb('Structure',sh.structure)+sb('Weapons',sh.weapons)}</div>
+    <div class="ref-hd">Departments</div>
+    <div class="sb-row">${sb('Command',sh.command)+sb('Conn',sh.conn)+sb('Security',sh.security)+sb('Engineering',sh.engineering)+sb('Science',sh.science)+sb('Medicine',sh.medicine)}</div>
+    ${sh.trait?`<div class="ref-hd">Profile</div><div class="ref-li ref-desc">${esc(sh.trait)}</div>`:''}
+    <div class="ref-hd">Ship Talents (${(sh.talents||[]).length} / ${sh.scale||3})</div>${shipTalList}
+  </div>`;
+
+  const gridCells = (cells, curIdx, cellCls) => cells.map((cl,i)=>{
+    cl=cl||{};
+    return `<div class="gcell${cellCls?' '+cellCls:''}${cl.isVoid?' void':''}${i===curIdx?' cur':''}"><span class="gnum">${i+1}</span>${cl.isVoid?'':`<div class="gi">${gi(cl.icon)}</div><div class="gn">${esc(cl.name||'')}</div>`}</div>`;
+  }).join('');
+  const pad25 = cells => { const a=(cells||[]).slice(0,25); while(a.length<25) a.push({}); return a; };
+  const sectorPage = s => `<div class="page">
+    <div class="masthead"><div class="mh-l">SECTOR CHART</div><div class="mh-r">${byline}</div></div>
+    <div class="ref-title">${esc(s.name)}</div>
+    <div class="grid">${gridCells(s.cells, s.currentCell)}</div>
+    <div class="ref-hd" style="margin-top:0.12in">Notes</div>
+    <div class="ruled" style="height:1.26in"></div>
+  </div>`;
+  const interiorPage = `<div class="page">
+    <div class="masthead"><div class="mh-l">SHIP INTERIOR</div><div class="mh-r">${byline}</div></div>
+    <div class="ref-title">${esc(sh.name||'Vessel')} — deck layout</div>
+    <div class="grid">${gridCells(maps.intCells, -1, 'short')}</div>
+  </div>`;
+  let subZonePages = '';
+  for (let z=0; z<maps.allSubZones.length; z+=2) {
+    subZonePages += `<div class="page"><div class="masthead"><div class="mh-l">ZONE MAPS</div><div class="mh-r">${byline}</div></div>`
+      + maps.allSubZones.slice(z, z+2).map(zz=>`<div class="ref-title" style="margin-top:0.1in">${esc(zz.subZone.name||zz.cellName)} <span class="ref-desc" style="font-size:9px">${esc(zz.sectorName)} · ${esc(zz.cellName)}</span></div>
+      <div class="grid">${gridCells(pad25(zz.subZone.cells), zz.subZone.currentCell, 'sub')}</div>`).join('')
+      + '</div>';
+  }
+  const blankChart = `<div class="page">
+    <div class="masthead"><div class="mh-l">SECTOR CHART</div><div class="mh-r">${byline}</div></div>
+    <div class="hdr-fields"><div class="hf" style="flex:1"><label>Sector Name</label><div class="wl"></div></div><div class="hf" style="flex:0 0 1.5in"><label>Stardate</label><div class="wl"></div></div></div>
+    <div class="grid" style="margin-top:0.1in">${gridCells(Array.from({length:25},()=>({})), -1)}</div>
+    <div class="ref-hd" style="margin-top:0.12in">Notes</div>
+    <div class="ruled" style="height:1.2in"></div>
+  </div>`;
+
   let pagesHTML = '';
+  if (optCover) pagesHTML += coverPage;
+  if (optRef) pagesHTML += officerRefPage + shipRefPage;
+  if (optMaps) { maps.allSectors.forEach(s => pagesHTML += sectorPage(s)); pagesHTML += interiorPage + subZonePages; }
   for (let i=0; i<pages; i++) { pagesHTML += epPage; if (notes) pagesHTML += notesPage; }
+  if (optBlank) pagesHTML += blankChart + blankChart;
 
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
 <title>Captain's Log — Blank Logbook</title>
@@ -4935,17 +5060,50 @@ body{background:#20242a;font-family:'Arial Narrow',Arial,Helvetica,sans-serif;pa
 .trk label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#444;font-weight:700;margin-right:2px}
 .tick{display:inline-block;width:0.14in;height:0.14in;border:1.5px solid #333;border-radius:2px}
 .trk-note{font-size:7.5px;color:#888;letter-spacing:0.5px;margin-left:auto;font-style:italic}
+.cover{display:flex;flex-direction:column}
+.cv-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.cv-img{max-width:5.6in;max-height:3.1in;object-fit:contain;margin-bottom:0.25in}
+.cv-ship{font-size:30px;font-weight:700;letter-spacing:5px;text-transform:uppercase}
+.cv-sub{font-size:12px;letter-spacing:3px;color:#555;margin-top:0.06in;text-transform:uppercase}
+.cv-rule{width:3in;border-bottom:2px solid #000;margin:0.28in 0}
+.cv-of{font-size:10px;letter-spacing:4px;color:#666}
+.cv-name{font-size:20px;font-weight:700;letter-spacing:3px;margin-top:0.08in;text-transform:uppercase}
+.ref-title{font-size:14px;font-weight:700;letter-spacing:2px;margin-top:0.1in;text-transform:uppercase}
+.ref-hd{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;border-bottom:1.5px solid #000;margin-top:0.14in;padding-bottom:2px}
+.ref-li{font-size:10px;margin-top:0.045in;line-height:1.45}
+.ref-desc{color:#555;font-weight:400}
+.sb-row{display:flex;gap:0.08in;margin-top:0.07in}
+.sb{flex:1;border:1.5px solid #333;border-radius:4px;text-align:center;padding:0.05in 0}
+.sbv{font-size:17px;font-weight:700;min-height:0.24in}
+.sbl{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#666}
+.pgi{display:inline-block;width:0.16in;height:0.16in;vertical-align:-0.03in;background:#111;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);margin-top:0.08in;border-top:1px solid #777;border-left:1px solid #777}
+.gcell{border-right:1px solid #777;border-bottom:1px solid #777;height:0.95in;position:relative;padding:0.03in;overflow:hidden}
+.gcell.short{height:0.55in}
+.gcell.sub{height:0.64in}
+.gcell.void{background:repeating-linear-gradient(45deg,#f2f2f2 0,#f2f2f2 4px,#e2e2e2 4px,#e2e2e2 8px)}
+.gcell.cur{box-shadow:inset 0 0 0 2.5px #000}
+.gnum{position:absolute;top:2px;left:3px;font-size:6.5px;color:#999}
+.gi{text-align:center;margin-top:0.12in;font-size:13px;line-height:1}
+.gcell.short .gi,.gcell.sub .gi{margin-top:0.03in}
+.gn{text-align:center;font-size:7.5px;line-height:1.15;word-break:break-word;margin-top:0.02in}
+.gi .pgi{width:0.24in;height:0.24in}
+/* Reference pages hold data-driven lists (values, focuses, talents) — let
+   them grow past one sheet and paginate rather than clipping the overflow. */
+.page.page-flex{height:auto;min-height:${ph};overflow:visible}
 @media print{body{background:#fff;padding:0}.page{margin:0;box-shadow:none;padding:0.12in 0.08in}#toolbar{display:none}}
 </style></head><body>
 <div id="toolbar"><b>CAPTAIN'S LOG — PRINTABLE LOGBOOK</b><button onclick="window.print()">&#128424; PRINT</button><span>${pages} episode page${pages!==1?'s':''}${notes?' + notes pages':''} · print at 100% scale, ${paper==='a4'?'A4':'US Letter'}</span></div>
 ${pagesHTML}
 </body></html>`;
 
-  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const w = window.open(url, '_blank');
-  if (!w) { URL.revokeObjectURL(url); alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  // document.write popup (not a blob: URL) so the cover's ship image can load
+  // from disk when the app runs from file:// — same fix as the doc export.
+  const w = window.open('', '_blank');
+  if (!w) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 
 // ============================================================
@@ -6059,6 +6217,11 @@ function loadShipClass(name) {
   const c = SHIP_CLASSES.find(x => x.name === name);
   if (!c) return;
   const sh = S.ship;
+  // Talents can include hand-written customs that exist nowhere else — never
+  // discard them silently.
+  if (sh.talents && sh.talents.length &&
+      !confirm('Selecting a class resets the ship\'s talents (' + sh.talents.length +
+        ' currently chosen) so you can pick for the new class. Continue?')) return;
   sh.className = c.name;
   sh.era = c.era;
   sh.scale = c.scale;
@@ -6068,14 +6231,10 @@ function loadShipClass(name) {
   sh.engineering = c.engineering; sh.science = c.science; sh.medicine = c.medicine;
   sh.trait = c.trait;
   sh.thumb = c.thumb || '';
-  // Seed the class's suggested talents (resolved through the catalog so they
-  // carry descriptions and icons), capped at Scale — the rules allow one
-  // talent per point of Scale. The picker lets the player swap any of them.
-  const suggested = SHIP_SUGGESTED_TALENTS[c.name] || [];
-  const seen = {};
-  sh.talents = suggested.map(shipTalentObj)
-    .filter(t => { const k = shipTalentKey(t.name); if (seen[k]) return false; seen[k] = true; return true; })
-    .slice(0, c.scale);
+  // Talents are NOT auto-attached: the class's suggested talents are offered
+  // as one-tap chips in the wizard and on the ship sheet, and the player
+  // chooses up to Scale of them. Changing class clears the old class's picks.
+  sh.talents = [];
   window._shipClassPreview = name;
   saveSlot(); renderCurrentTab();
 }
