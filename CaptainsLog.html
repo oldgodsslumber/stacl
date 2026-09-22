@@ -4018,7 +4018,7 @@ function renderLogTab() {
       <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
         ${!reorder ? `<button onclick="addEpisodeBreak()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px">▶ EPISODE START</button>` : ''}
         ${!reorder ? `<button class="export-log-btn" onclick="exportLog()" style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px;font-weight:700">↗ EXPORT</button>
-        <button class="export-log-btn" onclick="openLogbookModal()" title="Print a blank handwriting logbook — one episode per page" style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px;font-weight:700">🖨 LOGBOOK</button>` : ''}
+        <button class="export-log-btn" onclick="exportLog('blank')" title="Open the export in Blank Logbook mode — handwriting pages, one mission per page" style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--accent);font-family:var(--font);font-size:11px;letter-spacing:1px;font-weight:700">🖨 LOGBOOK</button>` : ''}
         ${!reorder ? `<button onclick="window._logNewestFirst=!window._logNewestFirst;renderCurrentTab()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:11px">
           ${nf?'↓ Newest':'↑ Oldest'}
         </button>` : ''}
@@ -4322,7 +4322,7 @@ function collectExportMaps() {
   return { allSectors, intCells, allSubZones };
 }
 
-function exportLog() {
+function exportLog(startMode) {
   const episodes = parseEpisodes(S.log);
   const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   // Escape every "<" (not just "</") — "<!--" followed by "<script" in user
@@ -4415,6 +4415,7 @@ function exportLog() {
     --left-bg:#000;--divider:#FF9933;
     --src-card-bg:#000;--src-card-border:#1a0800;
     --drop-hint:#1a0800;--drop-hint-text:#5a3a0a;
+    --rule:#2a1200;--tick:#7a4a1a;
     font-family:'Antonio','Arial Narrow',Arial,sans-serif;
   }
   body.print-mode {
@@ -4429,6 +4430,7 @@ function exportLog() {
     --left-bg:#f5f5f5;--divider:#bbb;
     --src-card-bg:#fff;--src-card-border:#ddd;
     --drop-hint:#eee;--drop-hint-text:#aaa;
+    --rule:#a5c6de;--tick:#333;
   }
   html{height:100%;background:var(--bg)}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -4490,6 +4492,24 @@ function exportLog() {
   .dc-handle:hover{color:var(--accent)}
   .dc-wrap .dropped-card{border-radius:0 0 6px 6px;margin-bottom:0}
   .notes-ta{width:100%;background:transparent;border:1px solid var(--accent-dim);color:var(--text);font-family:inherit;font-size:11px;padding:8px;border-radius:4px;resize:vertical;min-height:80px;margin-top:6px}
+  /* ── Blank logbook mode (handwriting pages in the log column) ── */
+  .blank-ep{margin-bottom:34px}
+  .ep-banner .be-hline{border-bottom:1.5px solid rgba(0,0,0,0.5);height:22px;min-width:90px}
+  .be-field{display:flex;align-items:flex-end;gap:8px;margin:8px 0 2px}
+  .be-lbl{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;flex-shrink:0;padding-bottom:3px}
+  .be-line{border-bottom:1.5px solid var(--accent-dim);height:18px;flex:1}
+  .be-act{margin-top:12px}
+  .be-act-hd{display:flex;gap:10px;align-items:baseline;border-bottom:2px solid var(--accent);padding-bottom:2px}
+  .be-act-hd b{font-size:12px;letter-spacing:2px;color:var(--accent);white-space:nowrap}
+  .be-act-hd span{font-size:9px;color:var(--muted);font-style:italic;letter-spacing:0.5px}
+  .be-scene{display:flex;margin-top:6px}
+  .be-delta{flex:0 0 26px;text-align:center;color:var(--sub);font-size:13px;line-height:1.1;padding-top:3px}
+  .be-delta span{display:block;font-size:7px;letter-spacing:1px;color:var(--muted)}
+  .be-ruled{flex:1;height:44px;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 21px,var(--rule) 21px,var(--rule) 22px)}
+  .be-trk{display:flex;gap:16px;align-items:center;border-top:2px solid var(--accent);margin-top:12px;padding-top:8px;flex-wrap:wrap}
+  .be-trk label{font-size:8px;letter-spacing:2px;color:var(--muted);font-weight:700;margin-right:2px;text-transform:uppercase}
+  .be-tick{display:inline-block;width:13px;height:13px;border:1.5px solid var(--tick);border-radius:2px;margin-right:3px;vertical-align:middle}
+  .be-note{font-size:8px;color:var(--muted);font-style:italic;margin-left:auto;letter-spacing:0.5px}
   @media print {
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     html,body{overflow:visible;height:auto}
@@ -4506,6 +4526,8 @@ function exportLog() {
     #drop-zone{display:none}
     #doc-left,#doc-right{overflow:visible;height:auto}
     .log-card,.dropped-card,.ep-banner,.col-hdr{page-break-inside:avoid}
+    .blank-ep{page-break-after:always;page-break-inside:avoid}
+    .blank-ep:last-child{page-break-after:auto}
     .dc-handle{display:none}
     .dc-wrap .dropped-card{border-radius:6px}
     .rm-btn{display:none}
@@ -4519,6 +4541,12 @@ function exportLog() {
 <div id="topbar">
   <div id="tb-title">AFTER ACTION REPORT // ${charName}</div>
   <div id="ep-selector">${epChecks}</div>
+  <span id="blank-ctl" style="display:none;font-size:11px;letter-spacing:1px;align-items:center;gap:6px;flex:1">BLANK EPISODES
+    <select id="blank-count" onchange="renderLogOutput()" style="background:var(--bg);border:1px solid var(--accent-dim);color:var(--text);font-family:inherit;font-size:11px;padding:3px 6px;border-radius:4px">
+      ${[1,3,5,10,15,20,25].map(n=>`<option${n===10?' selected':''}>${n}</option>`).join('')}
+    </select>
+  </span>
+  <button class="tb-btn" id="mode-btn" onclick="toggleDocMode()">✎ BLANK LOGBOOK</button>
   <button class="tb-btn" id="theme-btn" onclick="toggleTheme()">◑ PRINT MODE</button>
   <button class="tb-btn" onclick="window.print()">🖨 PRINT</button>
 </div>
@@ -4533,8 +4561,17 @@ function exportLog() {
       <button class="stab" id="stab-maps" onclick="showSTab('maps')">MAPS</button>
     </div>
     <div id="tab-crew" style="display:none">${npcCardsHTML}</div>
-    <div id="tab-maps" style="display:none">${secGridHTML}${intGridHTML}${subZoneHTML}</div>
+    <div id="tab-maps" style="display:none">${secGridHTML}${intGridHTML}${subZoneHTML}
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'blank-chart',0)" style="margin-top:10px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:4px">BLANK SECTOR CHART</div>
+        <div style="font-size:10px;color:var(--muted)">Empty 5×5 grid — map new space by hand</div>
+      </div>
+    </div>
     <div id="tab-stats">
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'cover',0)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:4px">COVER PAGE</div>
+        <div style="font-size:10px;color:var(--muted)">Ship image · "The Mission Log of…" · stardate lines</div>
+      </div>
       <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'char-stats',0)">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-lavender);margin-bottom:4px">OFFICER PROFILE</div>
         <div style="font-size:10px;color:var(--muted)">${charName}</div>
@@ -4581,6 +4618,7 @@ var ALL_SECTORS = ${J(allSectors)};
 var ALL_SUBZONES = ${J(allSubZones)};
 var INT_CELLS = ${J(intCells)};
 var SHIP_NAME = ${J(S.ship.name||'Ship Interior')};
+var DOC_MODE = ${J(startMode==='blank'?'blank':'log')};
 
 var _srcDragItem = null;
 var _reorderIdx = null;
@@ -4601,6 +4639,56 @@ function toggleTheme() {
   var pm = b.classList.contains('print-mode');
   document.documentElement.style.background = pm ? '#fff' : '#000';
   document.getElementById('theme-btn').textContent = pm ? '◐ DARK MODE' : '◑ PRINT MODE';
+}
+
+// ── Blank logbook mode ──────────────────────────────────────────────────────
+// The log column swaps between the typed mission log and blank handwriting
+// pages (three acts of five delta-marked scenes each, per the rules' mission
+// format). Annexes work identically in both modes.
+function toggleDocMode() {
+  DOC_MODE = DOC_MODE === 'log' ? 'blank' : 'log';
+  syncModeUI();
+  renderLogOutput();
+}
+function syncModeUI() {
+  var blank = DOC_MODE === 'blank';
+  document.getElementById('mode-btn').textContent = blank ? '📓 MISSION LOG' : '✎ BLANK LOGBOOK';
+  document.getElementById('blank-ctl').style.display = blank ? 'inline-flex' : 'none';
+  document.getElementById('ep-selector').style.display = blank ? 'none' : 'flex';
+  var hdr = document.querySelector('.col-hdr-log');
+  if (hdr) hdr.textContent = blank ? 'BLANK LOGBOOK' : 'MISSION LOG';
+}
+var BE_ACTS = [
+  ['ACT I — THE HOOK', 'You are set on a mission — arrival, briefing, and the first challenges.'],
+  ['ACT II — ESCALATION', 'The challenges escalate; complications mount toward a crisis.'],
+  ['ACT III — CLIMAX & RESOLUTION', 'The climax must be faced and resolved — log the outcome.']
+];
+function beTicks(n) { var h=''; for (var i=0;i<n;i++) h+='<span class="be-tick"></span>'; return h; }
+function blankEpisodeHTML(num) {
+  var h = '<div class="blank-ep">'
+    + '<div class="ep-banner"><div style="flex:1"><div class="ep-banner-label">Episode '+num+' — Title</div><div class="be-hline"></div></div>'
+    + '<div style="width:110px"><div class="ep-banner-label">Stardate</div><div class="be-hline" style="min-width:0"></div></div></div>'
+    + '<div class="be-field"><span class="be-lbl">Directive</span><div class="be-line"></div></div>';
+  for (var a=0;a<3;a++) {
+    h += '<div class="be-act"><div class="be-act-hd"><b>'+BE_ACTS[a][0]+'</b><span>'+BE_ACTS[a][1]+'</span></div>';
+    for (var s=1;s<=5;s++) {
+      h += '<div class="be-scene"><div class="be-delta">&#9653;<span>'+(a*5+s)+'</span></div><div class="be-ruled"></div></div>';
+    }
+    h += '</div>';
+  }
+  h += '<div class="be-trk">'
+    + '<div><label>Momentum</label>'+beTicks(6)+'</div>'
+    + '<div><label>Threat</label>'+beTicks(8)+'</div>'
+    + '<div><label>Determination</label>'+beTicks(3)+'</div>'
+    + '<div class="be-note">Cross off a delta &#9653; as each scene resolves — 15 scenes completes the mission.</div>'
+    + '</div></div>';
+  return h;
+}
+function renderBlankLogbook() {
+  var count = parseInt(document.getElementById('blank-count').value) || 10;
+  var h = '';
+  for (var i=1;i<=count;i++) h += blankEpisodeHTML(i);
+  return h;
 }
 
 function epAllChanged(cb) {
@@ -4717,6 +4805,33 @@ function renderDroppedCard(item, idx) {
     if (sp.trait) { h3 += '<div style="font-size:10px;color:var(--sub);font-style:italic;text-align:left;line-height:1.5">'+esc(sp.trait)+'</div>'; }
     return h3+'</div>';
   }
+  if (item.kind === 'cover') {
+    var cv = SRC_SHIP, co = SRC_CHAR || {};
+    var cname = ((co.rank||'')+' '+(co.name||'')).trim();
+    var h4 = '<div class="dropped-card" style="border-color:var(--accent);text-align:center;padding:24px 12px">'+rm;
+    if (SRC_SHIP_THUMB) h4 += '<img src="'+esc(SRC_SHIP_THUMB)+'" style="max-width:100%;max-height:160px;object-fit:contain;margin-bottom:12px" alt="">';
+    h4 += '<div style="font-size:22px;font-weight:700;letter-spacing:4px;color:var(--accent);text-transform:uppercase">'+(esc(cv.name)||'U.S.S. ______________')+'</div>';
+    var cvsub = [cv.registry, cv.className?cv.className+' Class':'', cv.scale?'Scale '+cv.scale:''].filter(Boolean).join(' · ');
+    if (cvsub) h4 += '<div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;text-transform:uppercase">'+esc(cvsub)+'</div>';
+    h4 += '<div style="width:120px;border-bottom:2px solid var(--accent);margin:14px auto"></div>';
+    h4 += '<div style="font-size:9px;letter-spacing:3px;color:var(--muted)">THE MISSION LOG OF</div>';
+    h4 += '<div style="font-size:15px;font-weight:700;letter-spacing:2px;margin-top:4px;text-transform:uppercase;color:var(--text)">'+(esc(cname)||'______________________')+'</div>';
+    if (co.era) h4 += '<div style="font-size:9px;color:var(--sub);margin-top:4px;letter-spacing:1px">'+esc(co.era)+'</div>';
+    h4 += '<div style="display:flex;gap:16px;margin-top:18px;text-align:left">'
+      + '<div style="flex:1"><div style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">Log begins — stardate</div><div style="border-bottom:1.5px solid var(--accent-dim);height:18px"></div></div>'
+      + '<div style="flex:1"><div style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">Log ends — stardate</div><div style="border-bottom:1.5px solid var(--accent-dim);height:18px"></div></div>'
+      + '</div>';
+    return h4+'</div>';
+  }
+  if (item.kind === 'blank-chart') {
+    var bcells = '';
+    for (var bi=1;bi<=25;bi++) bcells += '<div style="aspect-ratio:1;background:var(--empty-cell);border:1px solid var(--cell-border);border-radius:2px;position:relative"><span style="position:absolute;top:2px;left:4px;font-size:7px;color:var(--cell-text)">'+bi+'</span></div>';
+    return '<div class="dropped-card">'+rm
+      + '<div class="dropped-map-title">SECTOR CHART</div>'
+      + '<div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:8px"><span style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">Sector Name</span><div style="flex:1;border-bottom:1.5px solid var(--accent-dim);height:16px"></div></div>'
+      + '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px">'+bcells+'</div>'
+      + '</div>';
+  }
   if (item.kind === 'notes') {
     var nlabel = esc(item.label || 'NOTES');
     return '<div class="dropped-card" style="border-color:var(--lcars-gold)">'+rm
@@ -4773,6 +4888,10 @@ function cdDrop(e, idx) {
 function cdEnd() { _reorderIdx = null; document.querySelectorAll('.dc-wrap').forEach(function(el){ el.classList.remove('drag-over-top'); }); }
 
 function renderLogOutput() {
+  if (DOC_MODE === 'blank') {
+    document.getElementById('log-output').innerHTML = renderBlankLogbook();
+    return;
+  }
   var selectedIdxs = [];
   document.querySelectorAll('.ep-chk').forEach(function(c,i){ if(c.checked) selectedIdxs.push(i); });
   var html = '';
@@ -4827,278 +4946,13 @@ function removeDropped(idx) {
   renderDroppedItems();
 }
 
-window.addEventListener('DOMContentLoaded', renderLogOutput);
+window.addEventListener('DOMContentLoaded', function(){ syncModeUI(); renderLogOutput(); });
 ${'<'+'/script>'}
 </body></html>`;
 
   // Write into a plain popup (same pattern as the bridge HUD) instead of a
   // blob: URL — a blob document may not load file:// images, so the ship
   // thumbnail silently vanished when the app runs from disk.
-  const w = window.open('', '_blank');
-  if (!w) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-}
-
-// ============================================================
-// PRINTABLE LOGBOOK EXPORT
-// ============================================================
-// A blank handwriting journal: one episode per page, ruled like looseleaf,
-// structured as the rules' mission format — three acts of five scenes each
-// (p.185: "Each mission has three acts. Each act usually has five scenes.")
-// with the Mission Tracker's deltas as the scene markers. Print it, then
-// play and write with a pen.
-
-function openLogbookModal() {
-  openModal(`<h2 style="margin-bottom:6px">PRINTABLE LOGBOOK</h2>
-  <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Generates blank, lined episode pages — one mission per page, three acts of five scenes each — for writing your logs by hand at the table.</p>
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <div class="field" style="flex:1;min-width:110px"><label>Episode pages</label>
-      <input id="lb-pages" type="number" min="1" max="50" value="10">
-    </div>
-    <div class="field" style="flex:1;min-width:110px"><label>Paper</label>
-      <select id="lb-paper"><option value="letter">US Letter</option><option value="a4">A4</option></select>
-    </div>
-  </div>
-  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin:4px 0 4px">
-    <input type="checkbox" id="lb-notes"> Add a lined Mission Notes page after each episode
-  </label>
-  <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:10px 0 4px">Front matter</div>
-  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-bottom:3px">
-    <input type="checkbox" id="lb-cover" checked> Cover page (ship image &amp; officer)
-  </label>
-  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-bottom:3px">
-    <input type="checkbox" id="lb-ref" checked> Officer &amp; ship reference pages
-  </label>
-  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-bottom:3px">
-    <input type="checkbox" id="lb-maps" checked> Map pages (sectors, ship interior, zones)
-  </label>
-  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-bottom:14px">
-    <input type="checkbox" id="lb-blank"> Two blank sector charts at the back (map as you explore)
-  </label>
-  <div style="display:flex;gap:8px">
-    <button class="btn btn-accent" style="flex:1" onclick="exportLogbook()">GENERATE</button>
-    <button class="btn" onclick="closeModal()">CANCEL</button>
-  </div>`);
-}
-
-function exportLogbook() {
-  const pagesRaw = parseInt(document.getElementById('lb-pages')?.value);
-  const pages = Math.max(1, Math.min(50, isNaN(pagesRaw) ? 10 : pagesRaw));
-  const paper = document.getElementById('lb-paper')?.value === 'a4' ? 'a4' : 'letter';
-  const notes = document.getElementById('lb-notes')?.checked || false;
-  const optCover = document.getElementById('lb-cover')?.checked || false;
-  const optRef = document.getElementById('lb-ref')?.checked || false;
-  const optMaps = document.getElementById('lb-maps')?.checked || false;
-  const optBlank = document.getElementById('lb-blank')?.checked || false;
-  closeModal();
-
-  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  const officer = esc([S.char.rank, S.char.name].filter(Boolean).join(' '));
-  const shipLine = esc([S.ship.name, S.ship.registry].filter(Boolean).join(' '));
-  const byline = officer + (officer && shipLine ? ' · ' : '') + shipLine;
-
-  // Page box = the printable area inside @page's 0.5in margins.
-  const pw = paper==='a4' ? '7.27in' : '7.5in';
-  const ph = paper==='a4' ? '10.6in' : '9.9in';
-  const notesH = paper==='a4' ? '9.2in' : '8.5in';
-
-  const ACTS = [
-    ['ACT I','THE HOOK','You are set on a mission — arrival, briefing, and the first challenges.'],
-    ['ACT II','ESCALATION','The challenges escalate; complications mount toward a crisis.'],
-    ['ACT III','CLIMAX &amp; RESOLUTION','The climax must be faced and resolved — log the outcome.'],
-  ];
-  const boxes = n => Array.from({length:n},()=> '<span class="tick"></span>').join('');
-  const sceneRow = n => `<div class="scene"><div class="delta">&#9653;<span>${n}</span></div><div class="ruled r2"></div></div>`;
-  const actBlock = (a,i) => `<div class="act"><div class="act-hd"><b>${a[0]} — ${a[1]}</b><span>${a[2]}</span></div>${[1,2,3,4,5].map(s=>sceneRow(i*5+s)).join('')}</div>`;
-
-  const epPage = `<div class="page">
-    <div class="masthead"><div class="mh-l">CAPTAIN'S LOG</div><div class="mh-r">${byline}</div></div>
-    <div class="hdr-fields">
-      <div class="hf" style="flex:0 0 1.1in"><label>Episode</label><div class="wl"></div></div>
-      <div class="hf" style="flex:1"><label>Title</label><div class="wl"></div></div>
-      <div class="hf" style="flex:0 0 1.5in"><label>Stardate</label><div class="wl"></div></div>
-    </div>
-    <div class="hdr-fields"><div class="hf" style="flex:1"><label>Directive</label><div class="wl"></div></div></div>
-    ${ACTS.map(actBlock).join('')}
-    <div class="trackers">
-      <div class="trk"><label>Momentum</label>${boxes(6)}</div>
-      <div class="trk"><label>Threat</label>${boxes(8)}</div>
-      <div class="trk"><label>Determination</label>${boxes(3)}</div>
-      <div class="trk-note">Cross off a delta &#9653; as each scene resolves — 15 scenes completes the mission.</div>
-    </div>
-  </div>`;
-
-  const notesPage = `<div class="page">
-    <div class="masthead"><div class="mh-l">MISSION NOTES</div><div class="mh-r">${byline}</div></div>
-    <div class="hdr-fields"><div class="hf" style="flex:0 0 1.1in"><label>Episode</label><div class="wl"></div></div><div class="hf" style="flex:1"></div></div>
-    <div class="ruled" style="height:${notesH};margin-top:0.1in"></div>
-  </div>`;
-
-  // ── Front matter: cover, reference pages, map pages ─────────────────────
-  const c = S.char, sh = S.ship;
-  const thumbAbs = sh.thumb ? new URL(sh.thumb, location.href).href : '';
-  const maps = collectExportMaps();
-  // Print icon: a game-icons slug becomes a black mask glyph; emoji and free
-  // text print as-is.
-  const gi = v => { v=String(v||'').trim(); if(!v) return '';
-    if(!giIsSlug(v)) return esc(v);
-    const u=talIconURL(v);
-    return '<span class="pgi" style="-webkit-mask-image:url('+u+');mask-image:url('+u+')"></span>'; };
-  const sb = (l,v)=>`<div class="sb"><div class="sbv">${v==null?'':esc(String(v))}</div><div class="sbl">${l}</div></div>`;
-  const list = arr => (arr&&arr.length) ? arr.map(x=>`<div class="ref-li">${typeof x==='string'?esc(x):`<b>${esc(x.name||'')}</b>${x.desc?`<span class="ref-desc"> — ${esc(x.desc)}</span>`:''}`}</div>`).join('') : '<div class="ref-li ref-desc" style="font-style:italic">—</div>';
-
-  const coverPage = `<div class="page cover">
-    <div class="masthead"><div class="mh-l">CAPTAIN'S LOG</div><div class="mh-r">${esc(c.era||'')}</div></div>
-    <div class="cv-mid">
-      ${thumbAbs?`<img class="cv-img" src="${esc(thumbAbs)}">`:''}
-      <div class="cv-ship">${esc(sh.name)||'U.S.S. ______________'}</div>
-      <div class="cv-sub">${esc([sh.registry, sh.className?sh.className+' Class':'', sh.scale?'Scale '+sh.scale:''].filter(Boolean).join(' · '))}</div>
-      <div class="cv-rule"></div>
-      <div class="cv-of">THE MISSION LOG OF</div>
-      <div class="cv-name">${officer||'______________________'}</div>
-    </div>
-    <div class="hdr-fields">
-      <div class="hf" style="flex:1"><label>Log begins — stardate</label><div class="wl"></div></div>
-      <div class="hf" style="flex:1"><label>Log ends — stardate</label><div class="wl"></div></div>
-    </div>
-  </div>`;
-
-  const officerRefPage = `<div class="page page-flex">
-    <div class="masthead"><div class="mh-l">OFFICER REFERENCE</div><div class="mh-r">${byline}</div></div>
-    <div class="ref-title">${officer||'Officer'}${c.species?' · '+esc(c.species):''}${c.role?' · '+esc(c.role):''}</div>
-    <div class="ref-hd">Attributes</div>
-    <div class="sb-row">${sb('Control',c.control)+sb('Daring',c.daring)+sb('Fitness',c.fitness)+sb('Insight',c.insight)+sb('Presence',c.presence)+sb('Reason',c.reason)}</div>
-    <div class="ref-hd">Disciplines</div>
-    <div class="sb-row">${sb('Command',c.command)+sb('Conn',c.conn)+sb('Security',c.security)+sb('Engineering',c.engineering)+sb('Science',c.science)+sb('Medicine',c.medicine)}</div>
-    <div class="ref-hd">Values</div>${list((c.values||[]).filter(Boolean))}
-    <div class="ref-hd">Focuses</div>${list(c.focuses)}
-    <div class="ref-hd">Talents</div>${list(c.talents)}
-    ${c.directive?`<div class="ref-hd">Directive</div><div class="ref-li">${esc(c.directive)}</div>`:''}
-  </div>`;
-
-  const shipTalList = (sh.talents&&sh.talents.length) ? sh.talents.map(t=>`<div class="ref-li"><b>${t.icon?gi(t.icon)+' ':''}${esc(t.name)}</b>${t.desc?`<span class="ref-desc"> — ${esc(t.desc)}</span>`:''}</div>`).join('') : '<div class="ref-li ref-desc" style="font-style:italic">—</div>';
-  const shipRefPage = `<div class="page page-flex">
-    <div class="masthead"><div class="mh-l">SHIP REFERENCE</div><div class="mh-r">${byline}</div></div>
-    <div class="ref-title">${esc(sh.name)||'Vessel'}${sh.registry?' · '+esc(sh.registry):''}${sh.className?' · '+esc(sh.className)+' Class':''}${sh.scale?' · Scale '+sh.scale:''}</div>
-    <div class="ref-hd">Systems</div>
-    <div class="sb-row">${sb('Comms',sh.comms)+sb('Computers',sh.computers)+sb('Engines',sh.engines)+sb('Sensors',sh.sensors)+sb('Structure',sh.structure)+sb('Weapons',sh.weapons)}</div>
-    <div class="ref-hd">Departments</div>
-    <div class="sb-row">${sb('Command',sh.command)+sb('Conn',sh.conn)+sb('Security',sh.security)+sb('Engineering',sh.engineering)+sb('Science',sh.science)+sb('Medicine',sh.medicine)}</div>
-    ${sh.trait?`<div class="ref-hd">Profile</div><div class="ref-li ref-desc">${esc(sh.trait)}</div>`:''}
-    <div class="ref-hd">Ship Talents (${(sh.talents||[]).length} / ${sh.scale||3})</div>${shipTalList}
-  </div>`;
-
-  const gridCells = (cells, curIdx, cellCls) => cells.map((cl,i)=>{
-    cl=cl||{};
-    return `<div class="gcell${cellCls?' '+cellCls:''}${cl.isVoid?' void':''}${i===curIdx?' cur':''}"><span class="gnum">${i+1}</span>${cl.isVoid?'':`<div class="gi">${gi(cl.icon)}</div><div class="gn">${esc(cl.name||'')}</div>`}</div>`;
-  }).join('');
-  const pad25 = cells => { const a=(cells||[]).slice(0,25); while(a.length<25) a.push({}); return a; };
-  const sectorPage = s => `<div class="page">
-    <div class="masthead"><div class="mh-l">SECTOR CHART</div><div class="mh-r">${byline}</div></div>
-    <div class="ref-title">${esc(s.name)}</div>
-    <div class="grid">${gridCells(s.cells, s.currentCell)}</div>
-    <div class="ref-hd" style="margin-top:0.12in">Notes</div>
-    <div class="ruled" style="height:1.26in"></div>
-  </div>`;
-  const interiorPage = `<div class="page">
-    <div class="masthead"><div class="mh-l">SHIP INTERIOR</div><div class="mh-r">${byline}</div></div>
-    <div class="ref-title">${esc(sh.name||'Vessel')} — deck layout</div>
-    <div class="grid">${gridCells(maps.intCells, -1, 'short')}</div>
-  </div>`;
-  let subZonePages = '';
-  for (let z=0; z<maps.allSubZones.length; z+=2) {
-    subZonePages += `<div class="page"><div class="masthead"><div class="mh-l">ZONE MAPS</div><div class="mh-r">${byline}</div></div>`
-      + maps.allSubZones.slice(z, z+2).map(zz=>`<div class="ref-title" style="margin-top:0.1in">${esc(zz.subZone.name||zz.cellName)} <span class="ref-desc" style="font-size:9px">${esc(zz.sectorName)} · ${esc(zz.cellName)}</span></div>
-      <div class="grid">${gridCells(pad25(zz.subZone.cells), zz.subZone.currentCell, 'sub')}</div>`).join('')
-      + '</div>';
-  }
-  const blankChart = `<div class="page">
-    <div class="masthead"><div class="mh-l">SECTOR CHART</div><div class="mh-r">${byline}</div></div>
-    <div class="hdr-fields"><div class="hf" style="flex:1"><label>Sector Name</label><div class="wl"></div></div><div class="hf" style="flex:0 0 1.5in"><label>Stardate</label><div class="wl"></div></div></div>
-    <div class="grid" style="margin-top:0.1in">${gridCells(Array.from({length:25},()=>({})), -1)}</div>
-    <div class="ref-hd" style="margin-top:0.12in">Notes</div>
-    <div class="ruled" style="height:1.2in"></div>
-  </div>`;
-
-  let pagesHTML = '';
-  if (optCover) pagesHTML += coverPage;
-  if (optRef) pagesHTML += officerRefPage + shipRefPage;
-  if (optMaps) { maps.allSectors.forEach(s => pagesHTML += sectorPage(s)); pagesHTML += interiorPage + subZonePages; }
-  for (let i=0; i<pages; i++) { pagesHTML += epPage; if (notes) pagesHTML += notesPage; }
-  if (optBlank) pagesHTML += blankChart + blankChart;
-
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<title>Captain's Log — Blank Logbook</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-@page{size:${paper==='a4'?'A4':'letter'};margin:0.5in}
-body{background:#20242a;font-family:'Arial Narrow',Arial,Helvetica,sans-serif;padding:58px 0 30px}
-#toolbar{position:fixed;top:0;left:0;right:0;background:#000;color:#FF9933;display:flex;gap:14px;align-items:center;padding:9px 16px;font-size:13px;letter-spacing:2px;z-index:5}
-#toolbar button{background:#FF9933;color:#000;border:none;border-radius:4px;padding:5px 16px;font-weight:700;letter-spacing:1px;cursor:pointer;font-family:inherit}
-#toolbar span{font-size:10px;color:#997755;letter-spacing:1px}
-.page{width:${pw};height:${ph};background:#fff;color:#111;margin:0 auto 26px;padding:0.12in 0.08in;box-shadow:0 4px 24px rgba(0,0,0,.55);page-break-after:always;break-after:page;overflow:hidden}
-.page:last-child{page-break-after:auto;break-after:auto}
-.masthead{display:flex;justify-content:space-between;align-items:center;background:#000;color:#fff;border-radius:0 10px 10px 0;padding:0.06in 0.14in;height:0.34in}
-.mh-l{font-size:15px;font-weight:700;letter-spacing:4px}
-.mh-r{font-size:10px;letter-spacing:1.5px;color:#FF9933;text-transform:uppercase}
-.hdr-fields{display:flex;gap:0.18in;margin-top:0.09in}
-.hf label{display:block;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#666}
-.hf .wl{border-bottom:1.5px solid #444;height:0.21in}
-.act{margin-top:0.09in}
-.act-hd{display:flex;align-items:baseline;gap:0.12in;border-bottom:2px solid #000;padding-bottom:2px}
-.act-hd b{font-size:11px;letter-spacing:2px;white-space:nowrap}
-.act-hd span{font-size:8.5px;color:#555;letter-spacing:0.5px;font-style:italic}
-.scene{display:flex;align-items:stretch;margin-top:0.035in}
-.delta{flex:0 0 0.34in;text-align:center;font-size:13px;color:#333;line-height:1;padding-top:0.02in}
-.delta span{display:block;font-size:7px;color:#888;letter-spacing:1px}
-.ruled{flex:1;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(0.21in - 1px),#a5c6de calc(0.21in - 1px),#a5c6de 0.21in);background-position:0 0}
-.r2{height:0.42in}
-.trackers{display:flex;gap:0.22in;align-items:center;border-top:2px solid #000;margin-top:0.12in;padding-top:0.07in;flex-wrap:wrap}
-.trk{display:flex;align-items:center;gap:4px}
-.trk label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#444;font-weight:700;margin-right:2px}
-.tick{display:inline-block;width:0.14in;height:0.14in;border:1.5px solid #333;border-radius:2px}
-.trk-note{font-size:7.5px;color:#888;letter-spacing:0.5px;margin-left:auto;font-style:italic}
-.cover{display:flex;flex-direction:column}
-.cv-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.cv-img{max-width:5.6in;max-height:3.1in;object-fit:contain;margin-bottom:0.25in}
-.cv-ship{font-size:30px;font-weight:700;letter-spacing:5px;text-transform:uppercase}
-.cv-sub{font-size:12px;letter-spacing:3px;color:#555;margin-top:0.06in;text-transform:uppercase}
-.cv-rule{width:3in;border-bottom:2px solid #000;margin:0.28in 0}
-.cv-of{font-size:10px;letter-spacing:4px;color:#666}
-.cv-name{font-size:20px;font-weight:700;letter-spacing:3px;margin-top:0.08in;text-transform:uppercase}
-.ref-title{font-size:14px;font-weight:700;letter-spacing:2px;margin-top:0.1in;text-transform:uppercase}
-.ref-hd{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;border-bottom:1.5px solid #000;margin-top:0.14in;padding-bottom:2px}
-.ref-li{font-size:10px;margin-top:0.045in;line-height:1.45}
-.ref-desc{color:#555;font-weight:400}
-.sb-row{display:flex;gap:0.08in;margin-top:0.07in}
-.sb{flex:1;border:1.5px solid #333;border-radius:4px;text-align:center;padding:0.05in 0}
-.sbv{font-size:17px;font-weight:700;min-height:0.24in}
-.sbl{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#666}
-.pgi{display:inline-block;width:0.16in;height:0.16in;vertical-align:-0.03in;background:#111;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
-.grid{display:grid;grid-template-columns:repeat(5,1fr);margin-top:0.08in;border-top:1px solid #777;border-left:1px solid #777}
-.gcell{border-right:1px solid #777;border-bottom:1px solid #777;height:0.95in;position:relative;padding:0.03in;overflow:hidden}
-.gcell.short{height:0.55in}
-.gcell.sub{height:0.64in}
-.gcell.void{background:repeating-linear-gradient(45deg,#f2f2f2 0,#f2f2f2 4px,#e2e2e2 4px,#e2e2e2 8px)}
-.gcell.cur{box-shadow:inset 0 0 0 2.5px #000}
-.gnum{position:absolute;top:2px;left:3px;font-size:6.5px;color:#999}
-.gi{text-align:center;margin-top:0.12in;font-size:13px;line-height:1}
-.gcell.short .gi,.gcell.sub .gi{margin-top:0.03in}
-.gn{text-align:center;font-size:7.5px;line-height:1.15;word-break:break-word;margin-top:0.02in}
-.gi .pgi{width:0.24in;height:0.24in}
-/* Reference pages hold data-driven lists (values, focuses, talents) — let
-   them grow past one sheet and paginate rather than clipping the overflow. */
-.page.page-flex{height:auto;min-height:${ph};overflow:visible}
-@media print{body{background:#fff;padding:0}.page{margin:0;box-shadow:none;padding:0.12in 0.08in}#toolbar{display:none}}
-</style></head><body>
-<div id="toolbar"><b>CAPTAIN'S LOG — PRINTABLE LOGBOOK</b><button onclick="window.print()">&#128424; PRINT</button><span>${pages} episode page${pages!==1?'s':''}${notes?' + notes pages':''} · print at 100% scale, ${paper==='a4'?'A4':'US Letter'}</span></div>
-${pagesHTML}
-</body></html>`;
-
-  // document.write popup (not a blob: URL) so the cover's ship image can load
-  // from disk when the app runs from file:// — same fix as the doc export.
   const w = window.open('', '_blank');
   if (!w) { alert('Pop-up blocked — please allow pop-ups for this page.'); return; }
   w.document.open();
