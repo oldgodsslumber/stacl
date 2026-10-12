@@ -1121,20 +1121,31 @@ const LOCATION_THEMES = {
   ]
 };
 
+// Fallback art by class name, for ships without their own thumb (older saves,
+// custom classes). The named PNGs were replaced by the numbered catalog
+// thumbnails; Centaur, Cheyenne and Malachowski still need art.
 const SHIP_THUMBS = {
   centaur:'shipthumbs/Centaur.png',
   cheyenne:'shipthumbs/Cheyenne.png',
-  constellation:'shipthumbs/Constellation.png',
-  constitution:'shipthumbs/Constitution.png',
-  galaxy:'shipthumbs/Galaxy.png',
+  constellation:'shipthumbs/shipthumb_21.png',
+  constitution:'shipthumbs/shipthumb_18.png',
+  galaxy:'shipthumbs/shipthumb_30.png',
   malachowski:'shipthumbs/Malachowski.png',
-  miranda:'shipthumbs/Miranda.png',
-  odyssey:'shipthumbs/Odyssey.png',
-  ross:'shipthumbs/Ross.png',
+  miranda:'shipthumbs/shipthumb_16.png',
+  odyssey:'shipthumbs/shipthumb_48.png',
+  ross:'shipthumbs/shipthumb_42.png',
   vengeance:'shipthumbs/Vengeance.png',
-  prometheus:'shipthumbs/prometheus.png',
+  prometheus:'shipthumbs/shipthumb_41.png',
   sovereign:'shipthumbs/sovereign.png',
 };
+
+// Whole-word match against SHIP_THUMBS — a plain substring test gave the
+// Crossfield class the Ross thumbnail ('crossfield'.includes('ross')).
+function matchShipThumb(className) {
+  const cls = String(className||'').toLowerCase();
+  const key = Object.keys(SHIP_THUMBS).find(k => new RegExp('(^|[^a-z])' + k + '([^a-z]|$)').test(cls));
+  return key ? SHIP_THUMBS[key] : '';
+}
 
 const YES_NO_MATRIX = {
   'Highly Probable': {yes:16, yestwist:18, notwist:19, no:20},
@@ -2865,11 +2876,10 @@ function shipIconHtml(size, style) {
   if (S.ship && S.ship.thumb) {
     return `<img src="${S.ship.thumb}" style="width:${size}px;height:${size}px;object-fit:contain;${extraStyle}" alt="ship">`;
   }
-  // 2. Fall back to name-matched SHIP_THUMBS
-  const cls = (S.ship && S.ship.className) ? S.ship.className.toLowerCase().trim() : '';
-  const key = Object.keys(SHIP_THUMBS).find(k => cls.includes(k));
-  if (!key) return '🚀';
-  return `<img src="${SHIP_THUMBS[key]}" style="width:${size}px;height:${size}px;object-fit:contain;${extraStyle}" alt="ship">`;
+  // 2. Fall back to name-matched SHIP_THUMBS (whole-word match)
+  const src = matchShipThumb(S.ship && S.ship.className);
+  if (!src) return '🚀';
+  return `<img src="${src}" style="width:${size}px;height:${size}px;object-fit:contain;${extraStyle}" alt="ship">`;
 }
 
 function eraBadgeSrc() {
@@ -4334,7 +4344,20 @@ function exportLog(startMode) {
 
   const charName = esc(S.char.name || 'Unknown Officer');
   const shipName = esc(S.ship.name || '');
-  const thumbAbs = S.ship.thumb ? new URL(S.ship.thumb, location.href).href : '';
+  // Same fallback chain as shipIconHtml(): the ship's own thumb, else a
+  // name-matched SHIP_THUMBS entry — a ship without an explicit thumb still
+  // shows its image everywhere else in the app, so the export must match.
+  const thumbRel = S.ship.thumb || matchShipThumb(S.ship.className);
+  const thumbAbs = thumbRel ? new URL(thumbRel, location.href).href : '';
+  // Absolute URLs for the same reason as thumbAbs: the popup is a written
+  // about:blank document. Zine covers are optional art dropped into zine/;
+  // a missing file falls back to a drawn cover.
+  const assetAbs = p => new URL(p, location.href).href;
+  const galaxyMaps = [
+    {name:'Milky Way Galaxy', src:assetAbs('zine/galaxy-map.png')},
+    {name:'Alpha & Beta Quadrants', src:assetAbs('zine/neighborhood-map.png')}
+  ];
+  const zineArt = {front:assetAbs('zine/cover-front.png'), back:assetAbs('zine/cover-back.png')};
 
   // --- ATTITUDE COLORS ---
   const attColor = {Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
@@ -4362,6 +4385,11 @@ function exportLog(startMode) {
         ${c.name?`<span style="font-size:8px;text-align:center;line-height:1.2;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('')}
     </div>
+  </div>`).join('');
+
+  const galaxyMapHTML = galaxyMaps.map((g, gi) => `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'galaxy-map',${gi})" style="margin-bottom:10px">
+    <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:700">${esc(g.name)}</div>
+    <img src="${esc(g.src)}" onerror="this.closest('.map-block').remove()" style="width:100%;display:block;border-radius:3px;background:#fff" alt="">
   </div>`).join('');
 
   const hasInterior = intCells.some(c => c.name || c.icon);
@@ -4447,7 +4475,7 @@ function exportLog(startMode) {
   #src-tabs{display:flex;border-bottom:2px solid var(--accent-dim);flex-shrink:0}
   .stab{flex:1;padding:7px 4px;background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:10px;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
   .stab.active{color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px}
-  #tab-crew,#tab-maps,#tab-stats{padding:10px;overflow-y:auto;flex:1}
+  #tab-crew,#tab-maps,#tab-stats,#tab-zpages{padding:10px;overflow-y:auto;flex:1}
   .src-card{background:var(--src-card-bg);border:1px solid var(--src-card-border);border-radius:4px;padding:10px;margin-bottom:8px;cursor:grab;transition:border-color 0.15s}
   .src-card:hover{border-color:var(--accent)}
   .src-card:active{cursor:grabbing;opacity:0.7}
@@ -4492,6 +4520,8 @@ function exportLog(startMode) {
   .dc-handle:hover{color:var(--accent)}
   .dc-wrap .dropped-card{border-radius:0 0 6px 6px;margin-bottom:0}
   .notes-ta{width:100%;background:transparent;border:1px solid var(--accent-dim);color:var(--text);font-family:inherit;font-size:11px;padding:8px;border-radius:4px;resize:vertical;min-height:80px;margin-top:6px}
+  .pb-card{border-style:dashed;border-color:var(--accent-dim);padding:6px 12px;text-align:center}
+  .pb-line{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
   /* ── Blank logbook mode (handwriting pages in the log column) ── */
   .blank-ep{margin-bottom:34px}
   .ep-banner .be-hline{border-bottom:1.5px solid rgba(0,0,0,0.5);height:22px;min-width:90px}
@@ -4502,14 +4532,92 @@ function exportLog(startMode) {
   .be-act-hd{display:flex;gap:10px;align-items:baseline;border-bottom:2px solid var(--accent);padding-bottom:2px}
   .be-act-hd b{font-size:12px;letter-spacing:2px;color:var(--accent);white-space:nowrap}
   .be-act-hd span{font-size:9px;color:var(--muted);font-style:italic;letter-spacing:0.5px}
-  .be-scene{display:flex;margin-top:6px}
+  .be-scene{display:flex;margin-top:5px}
   .be-delta{flex:0 0 26px;text-align:center;color:var(--sub);font-size:13px;line-height:1.1;padding-top:3px}
   .be-delta span{display:block;font-size:7px;letter-spacing:1px;color:var(--muted)}
-  .be-ruled{flex:1;height:44px;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 21px,var(--rule) 21px,var(--rule) 22px)}
+  .be-ruled{flex:1;height:48px;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 23px,var(--rule) 23px,var(--rule) 24px)}
   .be-trk{display:flex;gap:16px;align-items:center;border-top:2px solid var(--accent);margin-top:12px;padding-top:8px;flex-wrap:wrap}
   .be-trk label{font-size:8px;letter-spacing:2px;color:var(--muted);font-weight:700;margin-right:2px;text-transform:uppercase}
   .be-tick{display:inline-block;width:13px;height:13px;border:1.5px solid var(--tick);border-radius:2px;margin-right:3px;vertical-align:middle}
   .be-note{font-size:8px;color:var(--muted);font-style:italic;margin-left:auto;letter-spacing:0.5px}
+  /* ── Zine mode: saddle-stitched half-size booklet ──────────────────────────
+     Pages are laid out at their real printed size (--pw × --ph) inside
+     #zine-print, which stays offscreen on screen and is the only thing shown
+     in print. The on-screen preview is a scaled copy of the same pages. */
+  .zine-only{display:none !important}
+  body.zine-mode .zine-only{display:inline-flex !important}
+  body.zine-mode .zine-hide{display:none !important}
+  body.zine-mode #doc-area{display:none}
+  #zine-area{display:none;flex:1;min-width:0;overflow:auto;padding:16px 20px 60px}
+  body.zine-mode #zine-area{display:block}
+  #zine-ctl{align-items:center;gap:10px;font-size:11px;letter-spacing:1px;flex:1;flex-wrap:wrap}
+  #zine-ctl select{background:var(--bg);border:1px solid var(--accent-dim);color:var(--text);font-family:inherit;font-size:11px;padding:3px 6px;border-radius:4px}
+  #zine-help{border:1px solid var(--accent-dim);border-radius:6px;padding:10px 14px;font-size:11px;line-height:1.7;margin:0 auto 18px;color:var(--text);max-width:900px}
+  #zine-help b{color:var(--accent)}
+  .zs-row{display:flex;flex-direction:column;align-items:center;gap:22px}
+  .zs-lbl{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;text-align:center}
+  .zs-box{position:relative;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,0.45)}
+  .zs-inner{position:absolute;top:0;left:0;transform-origin:top left;display:flex}
+  .zp{width:var(--pw);height:var(--ph);background:var(--bg);color:var(--text);position:relative;flex-shrink:0;overflow:hidden}
+  .zs-inner .zp + .zp{box-shadow:inset 1px 0 0 var(--accent-dim)}
+  .zp-void{background:transparent}
+  .zp-body{position:absolute;top:0.4in;bottom:0.5in;overflow:hidden}
+  .zp-r .zp-body{left:0.35in;right:0.4in}
+  .zp-l .zp-body{left:0.4in;right:0.35in}
+  .zp-cover .zp-body{top:0;bottom:0;left:0;right:0}
+  .zp-fit{transform-origin:top left;display:flex;flex-direction:column;min-height:100%}
+  .zp-num{position:absolute;bottom:0.22in;font-size:9px;letter-spacing:2px;color:var(--muted)}
+  .zp-r .zp-num{right:0.4in}
+  .zp-l .zp-num{left:0.4in}
+  .zp-tools{position:absolute;top:4px;right:6px;display:flex;gap:4px;z-index:3;opacity:0;transition:opacity .15s}
+  .zp:hover .zp-tools{opacity:1}
+  .zp-tools button,.zi-rm{background:var(--bg);border:1px solid var(--accent);color:var(--accent);font-family:inherit;font-size:10px;letter-spacing:1px;padding:2px 7px;border-radius:50vh;cursor:pointer}
+  .zp.drag-over{box-shadow:inset 0 0 0 3px var(--accent)}
+  .zp.zp-over::after{content:'TOO MUCH FOR ONE PAGE — REMOVE SOMETHING';position:absolute;left:0;right:0;top:0;background:#c00;color:#fff;font-size:9px;letter-spacing:2px;text-align:center;padding:3px;z-index:2}
+  .zi{position:relative}
+  .zi + .zi{margin-top:10px}
+  .zi-rm{position:absolute;top:2px;right:2px;display:none;z-index:2}
+  .zp:hover .zi-rm{display:block}
+  .zi .dropped-card .rm-btn{display:none}
+  .zi .dropped-card{margin-bottom:0}
+  .zi-grow{flex:1;display:flex;flex-direction:column}
+  .zp-fit > .zi:first-child .ep-banner{margin-top:0}
+  #zine-print{position:absolute;left:-30000px;top:0;visibility:hidden}
+  .z-sheet{width:var(--sw);height:var(--ph);display:flex;position:relative;overflow:hidden;background:var(--bg)}
+  .z-fold{position:absolute;left:50%;width:0;height:0.16in;border-left:1px solid var(--muted)}
+  #zine-print .zp-tools,#zine-print .zi-rm{display:none !important}
+  /* Art pages (covers, maps) are drawn at 8.5×11 — a different shape from a
+     zine page — so they're fitted whole inside a 0.2in safe inset rather than
+     cropped. Cover overlays are positioned in the art's own coordinates. */
+  .zc{position:absolute;top:0.2in;left:0.2in;right:0.2in;bottom:0.2in;display:flex;align-items:center;justify-content:center}
+  .zc-frame{position:relative;width:100%;aspect-ratio:1275/1650;max-height:100%;container-type:inline-size}
+  .zc-art{width:100%;height:100%;object-fit:contain;display:block}
+  .zc-fb{display:none;position:absolute;top:0.3in;bottom:0.3in;left:0.25in;right:0.25in;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .zc.noart .zc-frame{display:none}
+  .zc.noart .zc-fb{display:flex}
+  .zco{position:absolute;display:flex;align-items:flex-end;color:#6f6f6f;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;line-height:1;white-space:nowrap;overflow:hidden;outline:none}
+  .zco:empty::before{content:attr(data-ph);color:#c9c9c9;font-weight:400}
+  #zine-print .zco:empty::before{content:none}
+  .zh{background:var(--accent);color:var(--bg);font-weight:700;letter-spacing:3px;font-size:13px;padding:4px 12px;border-radius:0 50vh 50vh 0;text-transform:uppercase;margin-bottom:6px}
+  .zf{display:flex;align-items:flex-end;gap:6px;margin-top:5px}
+  .zf label{font-size:7.5px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;flex-shrink:0;padding-bottom:2px}
+  .zf div{flex:1;border-bottom:1.2px solid var(--accent-dim);min-height:17px;font-size:12px;padding:0 2px 1px;color:var(--text);line-height:1.25}
+  .zsec{font-size:8px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;font-weight:700;border-bottom:1.5px solid var(--accent);margin:9px 0 5px;padding-bottom:1px}
+  .zcols{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+  .zst{display:flex;align-items:center;justify-content:space-between;font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+  .zst b{width:26px;height:19px;border:1.5px solid var(--tick);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .zl{border-bottom:1.2px solid var(--accent-dim);min-height:17px;font-size:11px;padding:0 2px 1px;line-height:1.25}
+  /* Ruled areas use real bordered lines: gradient rulings print unevenly
+     (lines thicken or vanish) in Chromium's print output. Extra lines are
+     clipped, so an area can stretch to any height. */
+  .zrule{flex:1 1 0;min-height:0.8in;overflow:hidden}
+  .zrule i,.zsr i{display:block;height:24px;border-bottom:1px solid var(--rule)}
+  .zsr{flex:1;overflow:hidden}
+  .zi-grow .be-act{display:flex;flex-direction:column;flex:1 1 auto}
+  .zi-grow .be-scene{flex:1 1 48px;min-height:48px;overflow:hidden}
+  .zlbl{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:8px}
+  .zed{outline:none;min-height:18px;font-size:11px;line-height:1.6;white-space:pre-wrap}
+  .zed:empty::before{content:attr(data-ph);color:var(--muted)}
   @media print {
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     html,body{overflow:visible;height:auto}
@@ -4521,18 +4629,52 @@ function exportLog(startMode) {
     #topbar{display:none}
     #src-panel{display:none}
     .lcars-divider{display:none}
+    .lcars-strip{display:none}
+    /* Chrome clips the final fragment of a fragmented flex container — the
+       last printed page came out blank (losing whatever fell on it). Nothing
+       in print depends on #main being flex (panel + divider are hidden). */
+    #main{display:block}
     #doc-area{grid-template-columns:38% 1fr}
     #doc-left{border-right:1px solid var(--accent-dim)}
     #drop-zone{display:none}
     #doc-left,#doc-right{overflow:visible;height:auto}
     .log-card,.dropped-card,.ep-banner,.col-hdr{page-break-inside:avoid}
-    .blank-ep{page-break-after:always;page-break-inside:avoid}
-    .blank-ep:last-child{page-break-after:auto}
+    /* Each blank episode STARTS a fresh page (an episode is ~a full page, so
+       break-inside:avoid on it is unsatisfiable and creates orphan blank
+       pages); splits may only fall between acts. */
+    .blank-ep{break-before:page;page-break-before:always}
+    .blank-ep:first-child{break-before:auto;page-break-before:auto}
+    .be-act,.be-trk{break-inside:avoid;page-break-inside:avoid}
+    .blank-ep{margin-bottom:0}
+    /* Reclaim vertical budget so one episode fits one sheet at FULL 48px
+       ruling — trim inter-block gaps, never the writing space. Measured at
+       US Letter / default margins: episode was ~35px over, page 1 carries
+       ~22px more (strip + first-fragment padding). */
+    .blank-ep .ep-banner{padding:6px 12px;margin:0 0 6px}
+    .be-field{margin:6px 0 0}
+    .be-scene{margin-top:2px}
+    .be-act{margin-top:9px}
+    .be-trk{margin-top:8px;padding-top:5px}
+    .be-ruled{height:46px;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 22px,var(--rule) 22px,var(--rule) 23px)}
+    body.blank-mode .col-hdr-log{display:none}
+    body.blank-mode #doc-right{padding-top:0}
+    .pb-card{border:none !important;height:0;padding:0 !important;overflow:hidden;page-break-after:always;break-after:page}
+    .pb-card .pb-line{display:none}
     .dc-handle{display:none}
     .dc-wrap .dropped-card{border-radius:6px}
     .rm-btn{display:none}
     .notes-ta{border:none;resize:none;padding:0;min-height:unset}
     .notes-label-input{border:none !important;padding-bottom:0 !important}
+    /* Zine: print only the imposed sheets. The @page size/margin rule is
+       injected by JS only while zine mode is on, so the regular export
+       keeps printing exactly as before. */
+    body.zine-mode #main{display:none !important}
+    body.zine-mode #zine-print{position:static;left:auto;visibility:visible}
+    body.zine-mode,body.zine-mode html{background:var(--bg) !important}
+    .z-sheet{break-after:page;page-break-after:always}
+    .z-sheet.z-last{break-after:auto;page-break-after:auto}
+    .z-sheet.z-skip{display:none}
+    .z-sheet .be-act,.z-sheet .be-trk{break-inside:auto}
   }
 </style>
 </head>
@@ -4540,13 +4682,22 @@ function exportLog(startMode) {
 
 <div id="topbar">
   <div id="tb-title">AFTER ACTION REPORT // ${charName}</div>
-  <div id="ep-selector">${epChecks}</div>
-  <span id="blank-ctl" style="display:none;font-size:11px;letter-spacing:1px;align-items:center;gap:6px;flex:1">BLANK EPISODES
+  <div id="ep-selector" class="zine-hide">${epChecks}</div>
+  <span id="blank-ctl" class="zine-hide" style="display:none;font-size:11px;letter-spacing:1px;align-items:center;gap:6px;flex:1">BLANK EPISODES
     <select id="blank-count" onchange="renderLogOutput()" style="background:var(--bg);border:1px solid var(--accent-dim);color:var(--text);font-family:inherit;font-size:11px;padding:3px 6px;border-radius:4px">
       ${[1,3,5,10,15,20,25].map(n=>`<option${n===10?' selected':''}>${n}</option>`).join('')}
     </select>
   </span>
-  <button class="tb-btn" id="mode-btn" onclick="toggleDocMode()">✎ BLANK LOGBOOK</button>
+  <span id="zine-ctl" class="zine-only">
+    <label>PAGES <select id="zine-n" onchange="zineSetCount(this.value)"><option>12</option><option>16</option><option selected>20</option></select></label>
+    <label>PAPER <select id="zine-paper" onchange="zineSet('paper',this.value)"><option value="letter">US Letter</option><option value="a4">A4</option></select></label>
+    <label>VIEW <select id="zine-view" onchange="zineSet('view',this.value)"><option value="spread">Reading order</option><option value="sheet">Print sheets</option></select></label>
+    <label>PRINT <select id="zine-side" onchange="zineSet('side',this.value)"><option value="both">Both sides</option><option value="front">Fronts only</option><option value="back">Backs only</option></select></label>
+    <button class="tb-btn" onclick="zineReset()">↺ RESET LAYOUT</button>
+    <button class="tb-btn" onclick="zineToggleHelp()">? HOW TO PRINT</button>
+  </span>
+  <button class="tb-btn zine-hide" id="mode-btn" onclick="toggleDocMode()">✎ BLANK LOGBOOK</button>
+  <button class="tb-btn" id="zine-btn" onclick="toggleZine()">📖 ZINE</button>
   <button class="tb-btn" id="theme-btn" onclick="toggleTheme()">◑ PRINT MODE</button>
   <button class="tb-btn" onclick="window.print()">🖨 PRINT</button>
 </div>
@@ -4559,14 +4710,38 @@ function exportLog(startMode) {
       <button class="stab active" id="stab-stats" onclick="showSTab('stats')">STATS</button>
       <button class="stab" id="stab-crew" onclick="showSTab('crew')">NPCs</button>
       <button class="stab" id="stab-maps" onclick="showSTab('maps')">MAPS</button>
+      <button class="stab zine-only" id="stab-zpages" onclick="showSTab('zpages')" style="justify-content:center">PAGES</button>
     </div>
-    <div id="tab-crew" style="display:none">${npcCardsHTML}</div>
-    <div id="tab-maps" style="display:none">${secGridHTML}${intGridHTML}${subZoneHTML}
-      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'blank-chart',0)" style="margin-top:10px">
+    <div id="tab-zpages" style="display:none">
+      <div style="font-size:10px;color:var(--muted);line-height:1.5;margin-bottom:10px">Drag any card onto a zine page. Full-page cards replace what's there; smaller cards stack on the page.</div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-front',0)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent)">FRONT COVER</div></div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-back',0)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent)">BACK COVER</div></div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-char',0)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-lavender)">CHARACTER SHEET</div><div style="font-size:10px;color:var(--muted)">Filled in — ${charName}</div></div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-char-blank',0)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-lavender)">CHARACTER SHEET — BLANK</div><div style="font-size:10px;color:var(--muted)">Write-in</div></div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-ship',0)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-ltblue)">SHIP SHEET</div><div style="font-size:10px;color:var(--muted)">Filled in — ${shipName}</div></div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-ship-blank',0)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-ltblue)">SHIP SHEET — BLANK</div><div style="font-size:10px;color:var(--muted)">Write-in</div></div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-ep-a',0)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent)">BLANK EPISODE — LEFT PAGE</div><div style="font-size:10px;color:var(--muted)">Title, stardate, directive, Acts I–II</div></div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-ep-b',0)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent)">BLANK EPISODE — RIGHT PAGE</div><div style="font-size:10px;color:var(--muted)">Act III, trackers, mission notes</div></div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'z-lines',0)" style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-gold)">LINED NOTES</div><div style="font-size:10px;color:var(--muted)">Ruled lines that fill the rest of the page</div></div>
+      <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Your logged episodes</div>
+      ${episodes.length ? episodes.map((ep,i) => `<div class="src-card" draggable="true" ondragstart="srcDragStart(event,'log-ep',${i})"><div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text)">${esc(ep.label)}</div><div style="font-size:10px;color:var(--muted)">${ep.entries.length} entr${ep.entries.length===1?'y':'ies'} — flows onto following pages if long</div></div>`).join('') : '<div style="font-size:11px;color:var(--muted);padding:6px 0">No log entries yet.</div>'}
+    </div>
+    <div id="tab-crew" style="display:none">
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'blank-npc',0)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-lavender);margin-bottom:4px">EMPTY NPC DOSSIER</div>
+        <div style="font-size:10px;color:var(--muted)">Write-in contact sheet — name, faction, goal, notes</div>
+      </div>
+    ${npcCardsHTML}</div>
+    <div id="tab-maps" style="display:none">
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'blank-chart',0)">
         <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:4px">BLANK SECTOR CHART</div>
         <div style="font-size:10px;color:var(--muted)">Empty 5×5 grid — map new space by hand</div>
       </div>
-    </div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'blank-zone',0)" style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--lcars-ltblue);margin-bottom:4px">BLANK ZONE MAP</div>
+        <div style="font-size:10px;color:var(--muted)">Empty 5×5 grid for a planet, station, or ship zone</div>
+      </div>
+    ${galaxyMapHTML}${secGridHTML}${intGridHTML}${subZoneHTML}</div>
     <div id="tab-stats">
       <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'cover',0)">
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:4px">COVER PAGE</div>
@@ -4588,6 +4763,10 @@ function exportLog(startMode) {
         <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--lcars-gold);margin-bottom:4px">NOTES BLOCK</div>
         <div style="font-size:10px;color:var(--muted)">Freeform editable text</div>
       </div>
+      <div class="src-card" draggable="true" ondragstart="srcDragStart(event,'page-break',0)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:4px">PAGE BREAK</div>
+        <div style="font-size:10px;color:var(--muted)">Following annexes start a new printed page</div>
+      </div>
     </div>
   </div>
   <div class="lcars-divider"></div>
@@ -4605,7 +4784,12 @@ function exportLog(startMode) {
       <div id="log-output"></div>
     </div>
   </div>
+  <div id="zine-area">
+    <div id="zine-help" style="display:none"></div>
+    <div id="zine-preview" class="zs-row"></div>
+  </div>
 </div>
+<div id="zine-print"></div>
 
 <script>
 var EPISODES = ${J(episodes)};
@@ -4619,6 +4803,9 @@ var ALL_SUBZONES = ${J(allSubZones)};
 var INT_CELLS = ${J(intCells)};
 var SHIP_NAME = ${J(S.ship.name||'Ship Interior')};
 var DOC_MODE = ${J(startMode==='blank'?'blank':'log')};
+var GALAXY_MAPS = ${J(galaxyMaps)};
+var ZINE_ART = ${J(zineArt)};
+var ZINE_SLOT = ${J(ACTIVE_SLOT)};
 
 var _srcDragItem = null;
 var _reorderIdx = null;
@@ -4627,7 +4814,7 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 var ATT_COLOR={Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
 
 function showSTab(t) {
-  ['crew','maps','stats'].forEach(function(n) {
+  ['crew','maps','stats','zpages'].forEach(function(n) {
     document.getElementById('tab-'+n).style.display = n===t ? '' : 'none';
     document.getElementById('stab-'+n).className = 'stab' + (n===t ? ' active' : '');
   });
@@ -4652,6 +4839,7 @@ function toggleDocMode() {
 }
 function syncModeUI() {
   var blank = DOC_MODE === 'blank';
+  document.body.classList.toggle('blank-mode', blank);
   document.getElementById('mode-btn').textContent = blank ? '📓 MISSION LOG' : '✎ BLANK LOGBOOK';
   document.getElementById('blank-ctl').style.display = blank ? 'inline-flex' : 'none';
   document.getElementById('ep-selector').style.display = blank ? 'none' : 'flex';
@@ -4704,8 +4892,14 @@ function statRow(lbl, val) {
   return '<div class="stat-row"><span class="stat-lbl">'+esc(lbl)+'</span><span class="stat-val">'+esc(String(val||0))+'</span></div>';
 }
 
-function renderDroppedCard(item, idx) {
-  var rm = '<button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>';
+// rmOverride: the zine renders these same cards with its own remove control.
+function renderDroppedCard(item, idx, rmOverride) {
+  var rm = rmOverride != null ? rmOverride : '<button class="rm-btn" onclick="removeDropped('+idx+')">✕</button>';
+  if (item.kind === 'galaxy-map') {
+    var gm = item.data || {};
+    return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(gm.name||'Galaxy Map')+'</div>'
+      +'<img src="'+esc(gm.src||'')+'" style="width:100%;display:block;background:#fff;border-radius:3px" alt=""></div>';
+  }
   if (item.kind === 'npc') {
     var n = item.data;
     return '<div class="dropped-card">'+rm
@@ -4798,7 +4992,7 @@ function renderDroppedCard(item, idx) {
   if (item.kind === 'ship-pic') {
     var sp = SRC_SHIP;
     var h3 = '<div class="dropped-card" style="border-color:var(--lcars-ltblue);text-align:center">'+rm;
-    if (sp.thumb) { h3 += '<img src="'+esc(sp.thumb)+'" style="max-width:100%;max-height:180px;object-fit:contain;margin-bottom:8px" alt="'+esc(sp.name||'Ship')+'">'; }
+    if (sp.thumb) { h3 += '<img src="'+esc(sp.thumb)+'" onerror="this.remove()" style="max-width:100%;max-height:180px;object-fit:contain;margin-bottom:8px" alt="'+esc(sp.name||'Ship')+'">'; }
     h3 += '<div style="font-size:16px;font-weight:700;color:var(--lcars-ltblue);letter-spacing:2px">'+esc(sp.name||'Vessel')+'</div>';
     if (sp.registry) { h3 += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px">'+esc(sp.registry)+'</div>'; }
     h3 += '<div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-align:left">'+esc(sp.className||'')+(sp.scale?' · Scale '+sp.scale:'')+'</div>';
@@ -4809,7 +5003,7 @@ function renderDroppedCard(item, idx) {
     var cv = SRC_SHIP, co = SRC_CHAR || {};
     var cname = ((co.rank||'')+' '+(co.name||'')).trim();
     var h4 = '<div class="dropped-card" style="border-color:var(--accent);text-align:center;padding:24px 12px">'+rm;
-    if (SRC_SHIP_THUMB) h4 += '<img src="'+esc(SRC_SHIP_THUMB)+'" style="max-width:100%;max-height:160px;object-fit:contain;margin-bottom:12px" alt="">';
+    if (SRC_SHIP_THUMB) h4 += '<img src="'+esc(SRC_SHIP_THUMB)+'" onerror="this.remove()" style="max-width:100%;max-height:160px;object-fit:contain;margin-bottom:12px" alt="">';
     h4 += '<div style="font-size:22px;font-weight:700;letter-spacing:4px;color:var(--accent);text-transform:uppercase">'+(esc(cv.name)||'U.S.S. ______________')+'</div>';
     var cvsub = [cv.registry, cv.className?cv.className+' Class':'', cv.scale?'Scale '+cv.scale:''].filter(Boolean).join(' · ');
     if (cvsub) h4 += '<div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;text-transform:uppercase">'+esc(cvsub)+'</div>';
@@ -4823,14 +5017,27 @@ function renderDroppedCard(item, idx) {
       + '</div>';
     return h4+'</div>';
   }
-  if (item.kind === 'blank-chart') {
+  if (item.kind === 'blank-chart' || item.kind === 'blank-zone') {
+    var isZone = item.kind === 'blank-zone';
     var bcells = '';
     for (var bi=1;bi<=25;bi++) bcells += '<div style="aspect-ratio:1;background:var(--empty-cell);border:1px solid var(--cell-border);border-radius:2px;position:relative"><span style="position:absolute;top:2px;left:4px;font-size:7px;color:var(--cell-text)">'+bi+'</span></div>';
-    return '<div class="dropped-card">'+rm
-      + '<div class="dropped-map-title">SECTOR CHART</div>'
-      + '<div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:8px"><span style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">Sector Name</span><div style="flex:1;border-bottom:1.5px solid var(--accent-dim);height:16px"></div></div>'
+    return '<div class="dropped-card"'+(isZone?' style="border-color:var(--lcars-ltblue)"':'')+'>'+rm
+      + '<div class="dropped-map-title">'+(isZone?'ZONE MAP':'SECTOR CHART')+'</div>'
+      + '<div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:8px"><span style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">'+(isZone?'Zone Name':'Sector Name')+'</span><div style="flex:1;border-bottom:1.5px solid var(--accent-dim);height:16px"></div></div>'
       + '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px">'+bcells+'</div>'
       + '</div>';
+  }
+  if (item.kind === 'blank-npc') {
+    var bnf = function(l){ return '<div style="display:flex;align-items:flex-end;gap:8px;margin-top:8px"><span style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;flex-shrink:0;padding-bottom:2px">'+l+'</span><div style="border-bottom:1.5px solid var(--accent-dim);height:16px;flex:1"></div></div>'; };
+    return '<div class="dropped-card" style="border-color:var(--lcars-lavender)">'+rm
+      + '<div class="dropped-npc-name">NEW CONTACT</div>'
+      + bnf('Name') + bnf('Faction / Role') + bnf('Attitude') + bnf('Goal')
+      + '<div style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:10px">Notes</div>'
+      + '<div style="margin-top:2px;height:72px;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 23px,var(--rule) 23px,var(--rule) 24px)"></div>'
+      + '</div>';
+  }
+  if (item.kind === 'page-break') {
+    return '<div class="dropped-card pb-card">'+rm+'<div class="pb-line">— Page Break —</div></div>';
   }
   if (item.kind === 'notes') {
     var nlabel = esc(item.label || 'NOTES');
@@ -4887,6 +5094,19 @@ function cdDrop(e, idx) {
 }
 function cdEnd() { _reorderIdx = null; document.querySelectorAll('.dc-wrap').forEach(function(el){ el.classList.remove('drag-over-top'); }); }
 
+function logCardHTML(e) {
+  var isMajor = e.type==='log'; var isAlert = e.type==='alert'; var isSupp = e.type==='supplemental';
+  var cls = isAlert?'log-card alert':isSupp?'log-card supplemental':isMajor?'log-card':'log-card base';
+  return '<div class="'+cls+'">'
+    +'<div class="log-card-header">'
+    +'<span style="font-size:'+(isMajor?'20':'16')+'px">'+esc(e.emoji||'📋')+'</span>'
+    +'<div><div class="log-card-title">'+esc(e.title||e.type||'Log')+'</div>'
+    +'<div class="log-card-meta">'+esc(e.date||'')+'</div></div>'
+    +'</div>'
+    +(e.body?'<div class="log-card-body">'+esc(e.body)+'</div>':'')
+    +'</div>';
+}
+
 function renderLogOutput() {
   if (DOC_MODE === 'blank') {
     document.getElementById('log-output').innerHTML = renderBlankLogbook();
@@ -4898,25 +5118,15 @@ function renderLogOutput() {
   selectedIdxs.forEach(function(epIdx) {
     var ep = EPISODES[epIdx]; if (!ep) return;
     html += '<div class="ep-banner"><div><div class="ep-banner-label">Episode</div><div class="ep-banner-title">'+esc(ep.label)+'</div></div></div>';
-    ep.entries.forEach(function(e) {
-      var isMajor = e.type==='log'; var isAlert = e.type==='alert'; var isSupp = e.type==='supplemental';
-      var cls = isAlert?'log-card alert':isSupp?'log-card supplemental':isMajor?'log-card':'log-card base';
-      html += '<div class="'+cls+'">'
-        +'<div class="log-card-header">'
-        +'<span style="font-size:'+(isMajor?'20':'16')+'px">'+esc(e.emoji||'📋')+'</span>'
-        +'<div><div class="log-card-title">'+esc(e.title||e.type||'Log')+'</div>'
-        +'<div class="log-card-meta">'+esc(e.date||'')+'</div></div>'
-        +'</div>'
-        +(e.body?'<div class="log-card-body">'+esc(e.body)+'</div>':'')
-        +'</div>';
-    });
+    ep.entries.forEach(function(e) { html += logCardHTML(e); });
   });
   document.getElementById('log-output').innerHTML = html || '<div style="font-size:12px;color:var(--muted);padding:20px">No episodes selected.</div>';
 }
 
 function srcDragStart(e, kind, idx) {
-  var data = kind==='npc' ? SRC_NPCS[idx] : kind==='map-sector' ? ALL_SECTORS[idx] : kind==='map-subzone' ? ALL_SUBZONES[idx] : null;
+  var data = kind==='npc' ? SRC_NPCS[idx] : kind==='map-sector' ? ALL_SECTORS[idx] : kind==='map-subzone' ? ALL_SUBZONES[idx] : kind==='galaxy-map' ? GALAXY_MAPS[idx] : null;
   _srcDragItem = {kind:kind, data:data, notes:''};
+  if (kind === 'log-ep') _srcDragItem.ep = idx;
   _reorderIdx = null;
   e.dataTransfer.effectAllowed = 'copy';
   e.dataTransfer.setData('text/plain', kind);
@@ -4945,6 +5155,507 @@ function removeDropped(idx) {
   DROPPED.splice(idx, 1);
   renderDroppedItems();
 }
+
+// ── Zine mode ───────────────────────────────────────────────────────────────
+// A saddle-stitched booklet: N half-size pages (N = 12/16/20 — a multiple of 4,
+// because each folded sheet carries four pages), imposed onto N/4 landscape
+// sheets printed double-sided (flip on short edge), folded and stapled.
+// Sheet k (0-based) carries pages [N-2k, 2k+1] on its front and
+// [2k+2, N-2k-1] on its back (1-based page numbers).
+// The layout (ZINE.pages: one item list per page) is saved per mission slot.
+var ZINE = null;
+var ZINE_FIT = {};
+var ZINE_PAPER = {
+  letter: {pw:'5.5in', ph:'8.5in', sw:'11in', page:'11in 8.5in', px:[528,816], name:'US Letter'},
+  a4:     {pw:'148.5mm', ph:'210mm', sw:'297mm', page:'297mm 210mm', px:[561,794], name:'A4'}
+};
+// Full-page items replace a page's contents; everything else stacks.
+var ZFULL = {'galaxy-map':1,'z-front':1,'z-back':1,'z-char':1,'z-char-blank':1,'z-ship':1,'z-ship-blank':1,'z-ep-a':1,'z-ep-b':1};
+// Items whose last child (a ruled block) stretches to fill the page.
+var ZART = {'z-front':1,'z-back':1,'galaxy-map':1};   // full-bleed art pages
+var ZGROW = {'z-lines':1,'z-ep-a':1,'z-ep-b':1,'z-char':1,'z-char-blank':1,'z-ship':1,'z-ship-blank':1};
+var _zPrevPrintMode = null;
+var ZRULE_LINES = new Array(41).join('<i></i>');   // 40 ruled lines, clipped to fit
+var ZSCENE_LINES = new Array(7).join('<i></i>');
+var _zPrintTimer = null, _zFitTimer = null, _zResizeTimer = null;
+
+function zinePaper() { return ZINE_PAPER[ZINE && ZINE.paper] || ZINE_PAPER.letter; }
+function zineKey() { return 'stcl_zine_' + ZINE_SLOT; }
+function zineSave() { try { localStorage.setItem(zineKey(), JSON.stringify(ZINE)); } catch(e) {} }
+function zineLoad() {
+  try {
+    var z = JSON.parse(localStorage.getItem(zineKey()) || 'null');
+    if (z && z.pages && z.pages.length === z.n && [12,16,20].indexOf(z.n) >= 0) return z;
+  } catch(e) {}
+  return null;
+}
+
+function zineDefaultPages(n) {
+  var p = [], i;
+  for (i = 0; i < n; i++) p.push([]);
+  p[0] = [{kind:'z-front'}];
+  p[1] = [{kind: SRC_CHAR.name ? 'z-char' : 'z-char-blank'}];
+  p[2] = [{kind: SRC_SHIP.name ? 'z-ship' : 'z-ship-blank'}];
+  // The 20-page zine gives up one episode for the two maps as a spread.
+  var maps = n >= 20 && GALAXY_MAPS.length >= 2 ? 2 : 0;
+  var end = n - 3 - maps;
+  // Episode spreads start on an even page so both halves face each other.
+  for (i = 3; i < end; i += 2) { p[i] = [{kind:'z-ep-a'}]; p[i+1] = [{kind:'z-ep-b'}]; }
+  p[end] = [{kind:'blank-npc'},{kind:'blank-npc'}];
+  p[end+1] = [{kind:'blank-chart'},{kind:'z-lines', label:'Notes'}];
+  if (maps) { p[n-3] = [{kind:'galaxy-map', data:GALAXY_MAPS[1]}]; p[n-2] = [{kind:'galaxy-map', data:GALAXY_MAPS[0]}]; }
+  p[n-1] = [{kind:'z-back'}];
+  return p;
+}
+
+function toggleZine() {
+  var on = !document.body.classList.contains('zine-mode');
+  document.body.classList.toggle('zine-mode', on);
+  document.getElementById('zine-btn').textContent = on ? '✕ CLOSE ZINE' : '📖 ZINE';
+  var pm = document.body.classList.contains('print-mode');
+  if (on) {
+    // Zines default to the white print theme — black pages eat home-printer ink.
+    _zPrevPrintMode = pm;
+    if (!pm) toggleTheme();
+    var fresh = !ZINE;
+    if (fresh) {
+      ZINE = zineLoad();
+      if (!ZINE) ZINE = {n:20, paper:'letter', view:'spread', side:'both', custom:false, pages:zineDefaultPages(20), _new:true};
+      document.getElementById('zine-n').value = ZINE.n;
+      document.getElementById('zine-paper').value = ZINE.paper;
+      document.getElementById('zine-view').value = ZINE.view;
+      document.getElementById('zine-side').value = ZINE.side;
+    }
+    showSTab('zpages');
+    zineApplyPaper();
+    if (ZINE._new) { delete ZINE._new; zineToggleHelp(true); }
+    renderZine();
+  } else {
+    if (_zPrevPrintMode === false && pm) toggleTheme();
+    showSTab('stats');
+    zinePageStyle(false);
+  }
+}
+
+// The @page rule exists only while zine mode is on, so the regular export
+// prints exactly as it always has.
+function zinePageStyle(on) {
+  var el = document.getElementById('zine-page-css');
+  if (!on) { if (el) el.parentNode.removeChild(el); return; }
+  if (!el) { el = document.createElement('style'); el.id = 'zine-page-css'; document.head.appendChild(el); }
+  el.textContent = '@page{size:' + zinePaper().page + ';margin:0}';
+}
+function zineApplyPaper() {
+  var P = zinePaper(), st = document.body.style;
+  st.setProperty('--pw', P.pw); st.setProperty('--ph', P.ph); st.setProperty('--sw', P.sw);
+  zinePageStyle(true);
+}
+
+function zineSet(key, val) {
+  ZINE[key] = val; zineSave();
+  if (key === 'paper') { zineApplyPaper(); zineHelpHTML(); }
+  renderZine();
+}
+function zineSetCount(v) {
+  var n = parseInt(v, 10);
+  if (ZINE.custom && !confirm('Changing the page count resets the zine to the default layout for ' + n + ' pages. Continue?')) {
+    document.getElementById('zine-n').value = ZINE.n; return;
+  }
+  ZINE.n = n; ZINE.pages = zineDefaultPages(n); ZINE.custom = false;
+  zineSave(); renderZine();
+}
+function zineReset() {
+  if (ZINE.custom && !confirm('Reset every page to the default layout?')) return;
+  ZINE.pages = zineDefaultPages(ZINE.n); ZINE.custom = false;
+  zineSave(); renderZine();
+}
+function zineRestorePage(p) {
+  ZINE.pages[p] = zineDefaultPages(ZINE.n)[p];
+  zineSave(); renderZine();
+}
+function zineRemove(p, j) {
+  ZINE.pages[p].splice(j, 1); ZINE.custom = true;
+  zineSave(); renderZine();
+}
+
+function zineHelpHTML() {
+  var P = zinePaper();
+  document.getElementById('zine-help').innerHTML =
+    '<b>PRINTER SETTINGS</b> — Paper: <b>' + P.name + '</b> · Two-sided: <b>Flip on short edge</b> · Scale: <b>100% / Default</b> (never “Fit to page”) · Margins: <b>None</b> · Background graphics: <b>on</b>. Landscape is set automatically.<br>'
+    + '<b>NO TWO-SIDED PRINTER?</b> Set PRINT to <b>Fronts only</b> and print. Put the printed stack back in the tray, set <b>Backs only</b>, and print again. Printers differ in which way the paper has to go back in, so try it with one sheet first.<br>'
+    + '<b>ASSEMBLE</b> — Keep the sheets in the order they came out, fold the stack in half along the short edge, and staple twice along the fold.<br>'
+    + '<b>EDIT</b> — Drag cards from the left onto any page. Hover a page for <b>✕</b> (remove) and <b>↺</b> (restore default). Your layout is saved for this mission slot.';
+}
+function zineToggleHelp(force) {
+  var el = document.getElementById('zine-help');
+  var show = force === true ? true : el.style.display === 'none';
+  zineHelpHTML();
+  el.style.display = show ? '' : 'none';
+}
+
+// ── Page content ──
+function zineEpNums() {
+  var nums = [], k = 0;
+  ZINE.pages.forEach(function(items, p) {
+    nums[p] = 0;
+    items.forEach(function(it) {
+      if (it.kind === 'z-ep-a') { k++; nums[p] = k; }
+      else if (it.kind === 'z-ep-b' && !nums[p]) nums[p] = Math.max(k, 1);
+    });
+  });
+  return nums;
+}
+function zF(label, val) { return '<div class="zf"><label>' + label + '</label><div>' + (val || '') + '</div></div>'; }
+function zSt(label, val) { return '<div class="zst"><span>' + label + '</span><b>' + (val == null ? '' : esc(String(val))) + '</b></div>'; }
+function zLines(arr, count) {
+  var out = (arr || []).slice();
+  while (out.length < count) out.push('');
+  return out.map(function(x) { return '<div class="zl">' + esc(x) + '</div>'; }).join('');
+}
+function zAct(a) {
+  var h = '<div class="be-act"><div class="be-act-hd"><b>' + BE_ACTS[a][0] + '</b></div>'
+    + '<div style="font-size:8px;color:var(--muted);font-style:italic;margin-top:2px;letter-spacing:0.5px">' + BE_ACTS[a][1] + '</div>';
+  for (var s = 1; s <= 5; s++) h += '<div class="be-scene"><div class="be-delta">&#9653;<span>' + (a*5+s) + '</span></div><div class="zsr">' + ZSCENE_LINES + '</div></div>';
+  return h + '</div>';
+}
+function zEpA(num) {
+  return '<div class="ep-banner"><div style="flex:1"><div class="ep-banner-label">Episode ' + (num || '') + ' — Title</div><div class="be-hline"></div></div>'
+    + '<div style="width:90px"><div class="ep-banner-label">Stardate</div><div class="be-hline" style="min-width:0"></div></div></div>'
+    + '<div class="be-field"><span class="be-lbl">Directive</span><div class="be-line"></div></div>'
+    + zAct(0) + zAct(1);
+}
+function zEpB(num) {
+  return '<div class="ep-banner" style="padding:6px 14px"><div class="ep-banner-label">Episode ' + (num || '') + ' — continued</div></div>'
+    + zAct(2)
+    + '<div class="be-trk"><div><label>Momentum</label>' + beTicks(6) + '</div><div><label>Threat</label>' + beTicks(8) + '</div><div><label>Determination</label>' + beTicks(3) + '</div></div>'
+    + '<div class="zlbl">Mission notes</div><div class="zrule">' + ZRULE_LINES + '</div>';
+}
+function zChar(blank) {
+  var c = blank ? {} : SRC_CHAR, a = c.attributes || {}, d = c.disciplines || {};
+  var v = function(x) { return blank ? '' : esc(x == null ? '' : String(x)); };
+  var stat = function(obj, k) { return blank ? '' : obj[k.toLowerCase()]; };
+  var talents = (c.talents || []).map(function(t) { return t && t.name ? t.name : String(t || ''); });
+  var focuses = c.focuses || [], half = Math.max(3, Math.ceil(focuses.length / 2));
+  return '<div class="zh">Officer Service Record</div>'
+    + zF('Name', v(c.name))
+    + '<div class="zcols">' + zF('Rank', v(c.rank)) + zF('Species', v(c.species)) + '</div>'
+    + '<div class="zcols">' + zF('Role', v(c.role)) + zF('Era', v(c.era)) + '</div>'
+    + '<div class="zcols"><div><div class="zsec">Attributes</div>'
+    + ['Control','Fitness','Presence','Daring','Insight','Reason'].map(function(k) { return zSt(k, stat(a, k)); }).join('')
+    + '</div><div><div class="zsec">Disciplines</div>'
+    + ['Command','Conn','Security','Engineering','Science','Medicine'].map(function(k) { return zSt(k, stat(d, k)); }).join('')
+    + '</div></div>'
+    + '<div class="zsec">Values</div>' + zLines(c.values, 4)
+    + '<div class="zsec">Focuses</div><div class="zcols"><div>' + zLines(focuses.slice(0, half), 3) + '</div><div>' + zLines(focuses.slice(half), 3) + '</div></div>'
+    + '<div class="zsec">Talents</div>' + zLines(talents, 3)
+    + '<div class="zsec">Traits</div>' + zLines(c.traits ? [c.traits] : [], 1)
+    + '<div class="zcols"><div><div class="zsec">Stress</div>' + beTicks(3) + '</div><div><div class="zsec">Determination</div>' + beTicks(3) + '</div></div>'
+    + '<div class="zlbl">Notes</div><div class="zrule">' + ZRULE_LINES + '</div>';
+}
+function zShip(blank) {
+  var sh = blank ? {} : SRC_SHIP, sy = sh.systems || {}, dp = sh.departments || {};
+  var v = function(x) { return blank ? '' : esc(x == null ? '' : String(x)); };
+  var stat = function(obj, k) { return blank ? '' : obj[k.toLowerCase()]; };
+  var talents = (sh.talents || []).map(function(t) { return t && t.name ? t.name : String(t || ''); });
+  var pic = (!blank && sh.thumb) ? '<div style="text-align:center;margin:2px 0 4px"><img src="' + esc(sh.thumb) + '" onerror="this.parentNode.removeChild(this)" style="max-width:100%;max-height:1.5in;object-fit:contain" alt=""></div>' : '';
+  return '<div class="zh">Starship Registry</div>' + pic
+    + zF('Name', v(sh.name))
+    + '<div class="zcols">' + zF('Registry', v(sh.registry)) + zF('Class', v(sh.className)) + '</div>'
+    + '<div class="zcols">' + zF('Scale', v(sh.scale)) + zF('Traits', v(sh.traits)) + '</div>'
+    + '<div class="zcols"><div><div class="zsec">Systems</div>'
+    + ['Comms','Computers','Engines','Sensors','Structure','Weapons'].map(function(k) { return zSt(k, stat(sy, k)); }).join('')
+    + '</div><div><div class="zsec">Departments</div>'
+    + ['Command','Conn','Security','Engineering','Science','Medicine'].map(function(k) { return zSt(k, stat(dp, k)); }).join('')
+    + '</div></div>'
+    + '<div class="zsec">Talents</div>' + zLines(talents, 3)
+    + '<div class="zlbl">Damage, repairs &amp; refits</div><div class="zrule">' + ZRULE_LINES + '</div>';
+}
+function zLogEp(it) {
+  var ep = EPISODES[it.ep]; if (!ep) return '';
+  var h = '<div class="ep-banner"><div><div class="ep-banner-label">' + (it.from > 0 ? 'Episode — continued' : 'Episode') + '</div>'
+    + '<div class="ep-banner-title" style="font-size:15px">' + esc(ep.label) + '</div></div></div>';
+  ep.entries.slice(it.from || 0, it.to == null ? ep.entries.length : it.to).forEach(function(e) { h += logCardHTML(e); });
+  return h;
+}
+// Blanks on the front-cover art, in % of the 1275×1650 artwork.
+var ZCOVER_FIELDS = [
+  {k:'title',   ph:'Record title',   css:'left:14%;top:9.5%;width:72%;height:9.5%;justify-content:center;align-items:center;text-align:center;white-space:normal;line-height:1.05', fs:'5.4cqw'},
+  {k:'year',    ph:'Year',           css:'left:46%;top:19%;width:20%;height:2.6%;justify-content:center', fs:'3.2cqw'},
+  {k:'vessel',  ph:'Vessel',         css:'left:45.5%;top:75.6%;width:46%;height:3.6%', fs:'4.4cqw'},
+  {k:'captain', ph:'Captain',        css:'left:45.5%;top:80.4%;width:46%;height:3.6%', fs:'4.4cqw'}
+];
+function zineCoverDefaults() {
+  var co = SRC_CHAR || {}, cv = SRC_SHIP || {};
+  return {title:'', year:'', vessel:[cv.name, cv.registry].filter(Boolean).join(' · '), captain:((co.rank || '') + ' ' + (co.name || '')).trim()};
+}
+function zineCoverEdit(el, k) {
+  if (!ZINE.cover) ZINE.cover = {};
+  ZINE.cover[k] = el.innerText;
+  ZINE.custom = true; zineSave();
+  clearTimeout(_zPrintTimer);
+  _zPrintTimer = setTimeout(function() { zineRenderPrint(); zineFitAll(); }, 400);
+}
+function zineArtHTML(src, overlay) {
+  return '<div class="zc"><div class="zc-frame"><img class="zc-art" src="' + esc(src) + '" onerror="this.closest(&#39;.zc&#39;).classList.add(&#39;noart&#39;)" alt="">' + (overlay || '') + '</div>';
+}
+function zineCoverHTML(kind, item, preview) {
+  if (kind === 'galaxy-map') {
+    var g = (item && item.data) || {};
+    return zineArtHTML(g.src || '') + '<div class="zc-fb"><div style="font-size:12px;letter-spacing:3px;color:var(--muted)">MAP IMAGE NOT FOUND</div></div></div>';
+  }
+  var front = kind === 'z-front', fb;
+  if (front) {
+    var co = SRC_CHAR || {}, cv = SRC_SHIP || {};
+    var cname = ((co.rank || '') + ' ' + (co.name || '')).trim();
+    var sub = [cv.registry, cv.className ? cv.className + ' Class' : ''].filter(Boolean).join(' · ');
+    fb = '<div style="font-size:30px;font-weight:700;letter-spacing:6px;color:var(--accent)">CAPTAIN&#39;S LOG</div>'
+      + '<div style="width:140px;border-bottom:2px solid var(--accent);margin:14px auto 22px"></div>'
+      + (SRC_SHIP_THUMB ? '<img src="' + esc(SRC_SHIP_THUMB) + '" onerror="this.parentNode.removeChild(this)" style="max-width:100%;max-height:2.4in;object-fit:contain;margin-bottom:16px" alt="">' : '')
+      + '<div style="font-size:20px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--text)">' + (esc(cv.name) || 'U.S.S. ______________') + '</div>'
+      + (sub ? '<div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;text-transform:uppercase">' + esc(sub) + '</div>' : '')
+      + '<div style="font-size:9px;letter-spacing:3px;color:var(--muted);margin-top:26px">THE MISSION LOG OF</div>'
+      + '<div style="font-size:15px;font-weight:700;letter-spacing:2px;margin-top:4px;text-transform:uppercase">' + (esc(cname) || '______________________') + '</div>';
+  } else {
+    fb = '<div style="font-size:9px;letter-spacing:4px;color:var(--muted)">STARFLEET RECORDS DIVISION</div>'
+      + '<div style="font-size:22px;font-weight:700;letter-spacing:5px;color:var(--accent);margin-top:8px">CAPTAIN&#39;S LOG</div>'
+      + '<div style="width:100px;border-bottom:2px solid var(--accent);margin:14px auto"></div>'
+      + '<div style="font-size:9px;letter-spacing:2px;color:var(--muted)">END OF RECORD</div>';
+  }
+  var overlay = '';
+  if (front) {
+    var vals = zineCoverDefaults(), saved = ZINE.cover || {};
+    overlay = ZCOVER_FIELDS.map(function(f) {
+      var v = saved[f.k] != null ? saved[f.k] : vals[f.k];
+      return '<div class="zco"' + (preview ? ' contenteditable="true" oninput="zineCoverEdit(this,&#39;' + f.k + '&#39;)"' : '')
+        + ' data-ph="' + f.ph + '" data-fs="' + f.fs + '" style="' + f.css + ';font-size:' + f.fs + '">' + esc(v) + '</div>';
+    }).join('');
+  }
+  return zineArtHTML(front ? ZINE_ART.front : ZINE_ART.back, overlay) + '<div class="zc-fb">' + fb + '</div></div>';
+}
+function zineItemHTML(it, p, j, epNum, preview) {
+  switch (it.kind) {
+    case 'z-ep-a': return zEpA(epNum);
+    case 'z-ep-b': return zEpB(epNum);
+    case 'z-char': return zChar(false);
+    case 'z-char-blank': return zChar(true);
+    case 'z-ship': return zShip(false);
+    case 'z-ship-blank': return zShip(true);
+    case 'log-ep': return zLogEp(it);
+    case 'z-lines':
+      var ed = preview ? ' contenteditable="true"' : '';
+      return '<div class="zsec zed"' + ed + ' data-ph="NOTES" oninput="zineEdit(this,' + p + ',' + j + ',0)">' + esc(it.label == null ? 'Notes' : it.label) + '</div>'
+        + '<div class="zed"' + ed + ' data-ph="' + (preview ? 'Type here, or leave blank to write by hand…' : '') + '" oninput="zineEdit(this,' + p + ',' + j + ',1)">' + esc(it.text || '') + '</div>'
+        + '<div class="zrule">' + ZRULE_LINES + '</div>';
+    default: return renderDroppedCard(it, -1, '');
+  }
+}
+function zinePageHTML(p, nums, preview) {
+  var items = ZINE.pages[p] || [];
+  var side = (p % 2 === 0) ? 'zp-r' : 'zp-l';   // odd page numbers are right-hand pages
+  var cover = items.length === 1 && !!ZART[items[0].kind];
+  var h = '<div class="zp ' + side + (cover ? ' zp-cover' : '') + '" data-p="' + p + '"'
+    + (preview ? ' ondragover="zpOver(event,this)" ondragleave="zpLeave(event,this)" ondrop="zpDrop(event,' + p + ')"' : '') + '>';
+  if (preview) h += '<div class="zp-tools"><button onclick="zineRestorePage(' + p + ')" title="Restore this page to its default">↺</button></div>';
+  if (cover) {
+    h += '<div class="zp-body">' + zineCoverHTML(items[0].kind, items[0], preview)
+      + (preview ? '<button class="zi-rm" style="top:6px;left:6px;right:auto" onclick="zineRemove(' + p + ',0)">✕</button>' : '') + '</div>';
+  } else {
+    h += '<div class="zp-body"><div class="zp-fit">';
+    items.forEach(function(it, j) {
+      h += '<div class="zi' + (ZGROW[it.kind] ? ' zi-grow' : '') + '">'
+        + (preview ? '<button class="zi-rm" onclick="zineRemove(' + p + ',' + j + ')">✕</button>' : '')
+        + zineItemHTML(it, p, j, nums[p], preview) + '</div>';
+    });
+    if (!items.length && preview) h += '<div style="margin:auto;font-size:10px;letter-spacing:3px;color:var(--muted)">DROP CARDS HERE</div>';
+    h += '</div></div><div class="zp-num">' + (p + 1) + '</div>';
+  }
+  return h + '</div>';
+}
+function zineSheets() {
+  var n = ZINE.n, out = [];
+  for (var k = 0; k < n / 4; k++) {
+    out.push({k:k, face:'front', pages:[n-1-2*k, 2*k]});
+    out.push({k:k, face:'back', pages:[2*k+1, n-2-2*k]});
+  }
+  return out;
+}
+
+// ── Rendering ──
+// #zine-print always holds every sheet at real size (it is also where pages
+// are measured); sheets excluded by the PRINT option are hidden only in print.
+function zineRenderPrint() {
+  var nums = zineEpNums(), h = '';
+  var sheets = zineSheets(), last = -1;
+  sheets.forEach(function(s, i) { if (ZINE.side === 'both' || ZINE.side === s.face) last = i; });
+  sheets.forEach(function(s, i) {
+    var skip = !(ZINE.side === 'both' || ZINE.side === s.face);
+    h += '<div class="z-sheet' + (skip ? ' z-skip' : '') + (i === last ? ' z-last' : '') + '">'
+      + zinePageHTML(s.pages[0], nums, false) + zinePageHTML(s.pages[1], nums, false)
+      + '<div class="z-fold" style="top:0"></div><div class="z-fold" style="bottom:0"></div></div>';
+  });
+  document.getElementById('zine-print').innerHTML = h;
+}
+function zineRenderPreview() {
+  var nums = zineEpNums(), n = ZINE.n, P = zinePaper();
+  var area = document.getElementById('zine-area');
+  var sc = Math.min(1, Math.max(0.3, (area.clientWidth - 48) / (2 * P.px[0])));
+  var groups = [];
+  if (ZINE.view === 'sheet') {
+    zineSheets().forEach(function(s) {
+      var skip = !(ZINE.side === 'both' || ZINE.side === s.face);
+      groups.push({label:'Sheet ' + (s.k + 1) + ' — ' + s.face + ' (pages ' + (s.pages[0] + 1) + ' & ' + (s.pages[1] + 1) + ')' + (skip ? ' — not printed with current setting' : ''), pages:s.pages});
+    });
+  } else {
+    groups.push({label:'Front cover', pages:[-1, 0]});
+    for (var p = 1; p < n - 1; p += 2) groups.push({label:'Pages ' + (p + 1) + '–' + (p + 2), pages:[p, p + 1]});
+    groups.push({label:'Back cover', pages:[n - 1, -1]});
+  }
+  var h = '';
+  groups.forEach(function(g) {
+    h += '<div><div class="zs-lbl">' + g.label + '</div>'
+      + '<div class="zs-box" style="width:' + Math.round(2 * P.px[0] * sc) + 'px;height:' + Math.round(P.px[1] * sc) + 'px">'
+      + '<div class="zs-inner" style="transform:scale(' + sc + ')">'
+      + g.pages.map(function(pg) { return pg < 0 ? '<div class="zp zp-void"></div>' : zinePageHTML(pg, nums, true); }).join('')
+      + '</div></div></div>';
+  });
+  document.getElementById('zine-preview').innerHTML = h;
+}
+function renderZine() {
+  if (!ZINE) return;
+  zineRenderPrint();
+  zineRenderPreview();
+  zineFitAll();
+}
+
+// ── Fit-to-page ──
+// A page whose content runs long is scaled down to fit (measured at real
+// size in #zine-print, then applied to the preview copy too). Past ~72% the
+// text gets too small to read, so the preview flags the page instead.
+function zNatH(fit, s) {
+  fit.style.transform = ''; fit.style.minHeight = '0';
+  fit.style.width = s < 1 ? (100 / s) + '%' : '';
+  return fit.offsetHeight;
+}
+function zApplyFit(fit, s) {
+  if (!s || s >= 1) { fit.style.transform = ''; fit.style.width = ''; fit.style.minHeight = ''; return; }
+  fit.style.transform = 'scale(' + s + ')'; fit.style.width = (100 / s) + '%'; fit.style.minHeight = (100 / s) + '%';
+}
+function zFitScale(pg) {
+  var fit = pg.querySelector('.zp-fit'); if (!fit) return 1;
+  var H = pg.querySelector('.zp-body').clientHeight;
+  var h = zNatH(fit, 1);
+  if (h <= H + 1) { zApplyFit(fit, 1); return 1; }
+  // Widening the column while shrinking shortens the content, so H/h is a
+  // safe lower bound; bisect up toward 1 for the largest scale that fits.
+  var lo = H / h, hi = 1;
+  for (var i = 0; i < 7; i++) {
+    var mid = (lo + hi) / 2;
+    if (zNatH(fit, mid) * mid <= H + 1) lo = mid; else hi = mid;
+  }
+  zApplyFit(fit, lo);
+  return lo;
+}
+// Cover blanks shrink their text until it fits the space on the artwork.
+function zFitText(el) {
+  el.style.fontSize = el.getAttribute('data-fs') || '';
+  var fs = parseFloat(getComputedStyle(el).fontSize);
+  while ((el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) && fs > 5) {
+    fs -= 0.5; el.style.fontSize = fs + 'px';
+  }
+}
+function zineFitAll() {
+  document.querySelectorAll('#zine-print .zco, #zine-preview .zco').forEach(zFitText);
+  ZINE_FIT = {};
+  document.querySelectorAll('#zine-print .zp').forEach(function(pg) {
+    var s = zFitScale(pg);
+    if (s < 1) ZINE_FIT[pg.getAttribute('data-p')] = s;
+  });
+  document.querySelectorAll('#zine-preview .zp').forEach(function(pg) {
+    var p = pg.getAttribute('data-p'), fit = pg.querySelector('.zp-fit');
+    if (fit) zApplyFit(fit, ZINE_FIT[p] || 1);
+    pg.classList.toggle('zp-over', (ZINE_FIT[p] || 1) < 0.72);
+  });
+}
+function zineScheduleFit() {
+  clearTimeout(_zFitTimer);
+  _zFitTimer = setTimeout(function() { if (ZINE && document.body.classList.contains('zine-mode')) zineFitAll(); }, 120);
+}
+// Does page p fit at full size? Measured on a throwaway copy of that page.
+function zinePageFits(p) {
+  var tmp = document.createElement('div');
+  tmp.className = 'z-sheet';
+  tmp.innerHTML = zinePageHTML(p, zineEpNums(), false);
+  document.getElementById('zine-print').appendChild(tmp);
+  var pg = tmp.querySelector('.zp'), fit = pg.querySelector('.zp-fit');
+  var ok = !fit || zNatH(fit, 1) <= pg.querySelector('.zp-body').clientHeight + 1;
+  tmp.parentNode.removeChild(tmp);
+  return ok;
+}
+
+// ── Editing ──
+function zineEdit(el, p, j, f) {
+  var it = ZINE.pages[p] && ZINE.pages[p][j]; if (!it) return;
+  it[f ? 'text' : 'label'] = el.innerText;
+  ZINE.custom = true; zineSave();
+  // Rebuild only the hidden print copy — re-rendering the preview would
+  // yank the caret out of the field being typed in.
+  clearTimeout(_zPrintTimer);
+  _zPrintTimer = setTimeout(function() { zineRenderPrint(); zineFitAll(); }, 400);
+}
+function zinePlace(p, item, atTop) {
+  var cur = ZINE.pages[p];
+  if (ZFULL[item.kind] || cur.some(function(i) { return ZFULL[i.kind]; })) ZINE.pages[p] = [item];
+  else if (atTop) cur.unshift(item);
+  else cur.push(item);
+}
+// A logged episode fills page p at full size, and whatever doesn't fit
+// continues at the top of the next page — up to (not over) the back cover.
+function zineFlowEpisode(p, epIdx) {
+  var ep = EPISODES[epIdx]; if (!ep) return;
+  var total = ep.entries.length, from = 0, first = true;
+  while (p < ZINE.n - 1) {
+    var item = {kind:'log-ep', ep:epIdx, from:from, to:total};
+    zinePlace(p, item, !first);
+    first = false;
+    if (zinePageFits(p) || p >= ZINE.n - 2 || total - from <= 1) break;
+    // Largest number of entries that fits on this page (at least one).
+    var lo = from + 1, hi = total - 1;
+    while (lo < hi) {
+      var mid = Math.ceil((lo + hi) / 2);
+      item.to = mid;
+      if (zinePageFits(p)) lo = mid; else hi = mid - 1;
+    }
+    item.to = lo;
+    from = lo; p++;
+  }
+}
+function zpOver(e, el) {
+  if (!_srcDragItem) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+  el.classList.add('drag-over');
+}
+function zpLeave(e, el) { if (!el.contains(e.relatedTarget)) el.classList.remove('drag-over'); }
+function zpDrop(e, p) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  var it = _srcDragItem; _srcDragItem = null;
+  if (!it || it.kind === 'page-break') return;
+  ZINE.custom = true;
+  if (it.kind === 'log-ep') zineFlowEpisode(p, it.ep);
+  else if (it.kind === 'notes') zinePlace(p, {kind:'z-lines', label:'Notes'});
+  else { var o = {kind:it.kind}; if (it.data) o.data = it.data; zinePlace(p, o); }
+  zineSave(); renderZine();
+}
+
+// Images and web fonts change page heights after the first layout.
+document.getElementById('zine-print').addEventListener('load', zineScheduleFit, true);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(zineScheduleFit);
+window.addEventListener('resize', function() {
+  clearTimeout(_zResizeTimer);
+  _zResizeTimer = setTimeout(function() {
+    if (ZINE && document.body.classList.contains('zine-mode')) { zineRenderPreview(); zineFitAll(); }
+  }, 150);
+});
 
 window.addEventListener('DOMContentLoaded', function(){ syncModeUI(); renderLogOutput(); });
 ${'<'+'/script>'}
@@ -6606,7 +7317,9 @@ function hudBroadcast(extra) {
       rank: c.rank || '',
     } : null,
     ship: {
-      name: sh.name, className: sh.className, scale: sh.scale, thumb: sh.thumb||'',
+      name: sh.name, className: sh.className, scale: sh.scale,
+      // Same fallback chain as shipIconHtml(): own thumb, else the class art.
+      thumb: (sh.thumb || matchShipThumb(sh.className)) ? new URL(sh.thumb || matchShipThumb(sh.className), location.href).href : '',
       comms: sh.comms, computers: sh.computers, engines: sh.engines,
       sensors: sh.sensors, structure: sh.structure, weapons: sh.weapons,
       command: sh.command, conn: sh.conn, security: sh.security,
@@ -6701,6 +7414,9 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 #p-spotlight{bottom:20px;right:285px;width:255px}
 /* Center bottom — dice */
 #p-dice{bottom:20px;left:50%;transform:translateX(-50%);min-width:300px}
+/* On the fixed 1280px stage a centred Last Roll runs under the NPC spotlight,
+   so while the spotlight is up it sits 10px to the spotlight's left. */
+body.spot-on #p-dice{left:auto;right:550px;transform:none}
 .die-box{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border:3px solid #FF9933;border-radius:8px;font-size:22px;font-weight:700}
 .die-box.suc{border-color:#FF9933;color:#FF9933;background:rgba(255,153,51,.12)}
 .die-box.crit{border-color:#66CC66;color:#66CC66;background:rgba(102,204,102,.12)}
@@ -6730,6 +7446,9 @@ body{background:#000;color:#FFCC99;font-family:'Antonio','Arial Narrow',Arial,sa
 .hbtn.rec-on{background:#CD6363;border-color:#FF0000;color:#fff;animation:recPulse 1.4s infinite}
 @keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(205,99,99,.6)}50%{box-shadow:0 0 0 8px rgba(205,99,99,0)}}
 #rec-timer{font-size:11px;color:#FF4444;min-width:44px}
+/* The recording captures this window, so the REC controls hide while it runs.
+   Stop from the main app's Rec button or the browser's "Stop sharing" bar. */
+body.recording #p-controls{display:none}
 /* Webcam + setup */
 #webcam-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;overflow:hidden}
 #webcam-video{max-width:100%;max-height:100%;object-fit:contain}
@@ -7171,7 +7890,7 @@ function applyState(d){
   setHTML('h-enc-content',playerRow+(allOpps.length?'<div class="sec-div" style="margin:4px 0"></div>'+oppRows:''));
 }
 
-function show(id,v){var el=document.getElementById(id);if(el)el.style.display=v?'':'none';}
+function show(id,v){var el=document.getElementById(id);if(el)el.style.display=v?'':'none';if(id==='p-spotlight')document.body.classList.toggle('spot-on',!!v);}
 function setText(id,v){var el=document.getElementById(id);if(el)el.textContent=v||'';}
 function setHTML(id,v){var el=document.getElementById(id);if(el)el.innerHTML=v||'';}
 
@@ -7258,6 +7977,7 @@ function startRec(){
     _rec.onstop=function(){screenStream.getTracks().forEach(function(t){t.stop();});saveRec();};
     _rec.start(100);
     var btn=document.getElementById('rec-btn');if(btn){btn.textContent='\u23F9 STOP';btn.classList.add('rec-on');}
+    document.body.classList.add('recording');
     _timer=setInterval(function(){_secs++;var mm=String(Math.floor(_secs/60)).padStart(2,'0'),ss=String(_secs%60).padStart(2,'0');var t=document.getElementById('rec-timer');if(t)t.textContent=mm+':'+ss;},1000);
   }).catch(function(){
     if(_hdStream){_hdStream.getTracks().forEach(function(t){t.stop();});_hdStream=null;}
@@ -7268,6 +7988,7 @@ function startRec(){
 function stopRec(){
   if(_rec&&_rec.state!=='inactive')_rec.stop();
   clearInterval(_timer);_rec=null;
+  document.body.classList.remove('recording');
   var btn=document.getElementById('rec-btn');if(btn){btn.textContent='\u25CF REC SCREEN';btn.classList.remove('rec-on');}
   var t=document.getElementById('rec-timer');if(t)t.textContent='';
   if(_hdStream){
