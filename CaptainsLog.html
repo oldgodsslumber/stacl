@@ -378,48 +378,21 @@ const NPC_ATTITUDE_COLOR = {Hostile:'var(--danger)', Cautious:'var(--warning)', 
 const RANKS = ['Cadet','Ensign','Lieutenant Junior Grade','Lieutenant','Lieutenant Commander','Commander','Captain','Fleet Captain','Commodore','Rear Admiral','Admiral'];
 const RANK_ALIASES = {'Lieutenant JG':'Lieutenant Junior Grade', 'Lt. JG':'Lieutenant Junior Grade'};
 
-const SPECIES_LIST = [
-  {name:'Human',          attrBonus:'Any two Attributes +1',                       disBonus:'Any two Disciplines +1',
-    _attr:{}, _attrFree:1, _discOpts:[], _discFree:1},
-  {name:'Vulcan',         attrBonus:'Control +1, Insight +1, + one more +1',       disBonus:'Science or Command +1',
-    _attr:{control:1,insight:1}, _attrFree:1, _discOpts:['science','command'], _discFree:0},
-  {name:'Andorian',       attrBonus:'Control +1, Daring +1, + one more +1',        disBonus:'Security or Command +1',
-    _attr:{control:1,daring:1}, _attrFree:1, _discOpts:['security','command'], _discFree:0},
-  {name:'Bajoran',        attrBonus:'Insight +1, Presence +1, + one more +1',      disBonus:'Science or Medicine +1',
-    _attr:{insight:1,presence:1}, _attrFree:1, _discOpts:['science','medicine'], _discFree:0},
-  {name:'Betazoid',       attrBonus:'Insight +1, Presence +1, + one more +1',      disBonus:'Medicine or Conn +1',
-    _attr:{insight:1,presence:1}, _attrFree:1, _discOpts:['medicine','conn'], _discFree:0},
-  {name:'Bolian',         attrBonus:'Presence +1, Daring +1, + one more +1',       disBonus:'Medicine or Engineering +1',
-    _attr:{presence:1,daring:1}, _attrFree:1, _discOpts:['medicine','engineering'], _discFree:0},
-  {name:'Caitian',        attrBonus:'Fitness +1, Daring +1, + one more +1',        disBonus:'Security or Medicine +1',
-    _attr:{fitness:1,daring:1}, _attrFree:1, _discOpts:['security','medicine'], _discFree:0},
-  {name:'Denobulan',      attrBonus:'Fitness +1, Insight +1, + one more +1',       disBonus:'Science or Medicine +1',
-    _attr:{fitness:1,insight:1}, _attrFree:1, _discOpts:['science','medicine'], _discFree:0},
-  {name:'El-Aurian',      attrBonus:'Insight +1, Presence +1, + one more +1',      disBonus:'Medicine or Command +1',
-    _attr:{insight:1,presence:1}, _attrFree:1, _discOpts:['medicine','command'], _discFree:0},
-  {name:'Ferengi',        attrBonus:'Insight +1, Presence +1, + one more +1',      disBonus:'Engineering or Conn +1',
-    _attr:{insight:1,presence:1}, _attrFree:1, _discOpts:['engineering','conn'], _discFree:0},
-  {name:'Joined Trill',   attrBonus:'Control +1, Reason +1, + one more +1',        disBonus:'Science or Medicine +1',
-    _attr:{control:1,reason:1}, _attrFree:1, _discOpts:['science','medicine'], _discFree:0},
-  {name:'Klingon',        attrBonus:'Fitness +1, Daring +1, + one more +1',        disBonus:'Security or Command +1',
-    _attr:{fitness:1,daring:1}, _attrFree:1, _discOpts:['security','command'], _discFree:0},
-  {name:'Orion',          attrBonus:'Control +1, Presence +1, + one more +1',      disBonus:'Medicine or Engineering +1',
-    _attr:{control:1,presence:1}, _attrFree:1, _discOpts:['medicine','engineering'], _discFree:0},
-  {name:'Pakled',         attrBonus:'Fitness +1, Presence +1, + one more +1',      disBonus:'Engineering or Security +1',
-    _attr:{fitness:1,presence:1}, _attrFree:1, _discOpts:['engineering','security'], _discFree:0},
-  {name:'Rigellian',      attrBonus:'Fitness +1, Insight +1, + one more +1',       disBonus:'Medicine or Science +1',
-    _attr:{fitness:1,insight:1}, _attrFree:1, _discOpts:['medicine','science'], _discFree:0},
-  {name:'Romulan',        attrBonus:'Control +1, Daring +1, + one more +1',        disBonus:'Command or Conn +1',
-    _attr:{control:1,daring:1}, _attrFree:1, _discOpts:['command','conn'], _discFree:0},
-  {name:'Unjoined Trill', attrBonus:'Control +1, Insight +1, + one more +1',       disBonus:'Science or Medicine +1',
-    _attr:{control:1,insight:1}, _attrFree:1, _discOpts:['science','medicine'], _discFree:0},
-  {name:'Zakdorn',        attrBonus:'Control +1, Reason +1, + one more +1',        disBonus:'Command or Security +1',
-    _attr:{control:1,reason:1}, _attrFree:1, _discOpts:['command','security'], _discFree:0},
-  {name:'Tellarite',      attrBonus:'Insight +1, Presence +1, + one more +1',      disBonus:'Engineering or Command +1',
-    _attr:{insight:1,presence:1}, _attrFree:1, _discOpts:['engineering','command'], _discFree:0},
-  {name:'Other/Custom',   attrBonus:'Choose any two Attributes +1 (total +3 over creation)', disBonus:'Choose any Discipline +1',
-    _attr:{}, _attrFree:3, _discOpts:[], _discFree:1},
-];
+// ── Character creation lifepath — STA Captain's Log Solo RPG v1.3, Chapter 03.20 ──
+// Generated from a transcription of the book (pp. 91–132) and checked against it;
+// edit the book data, not the wizard, if a rule turns out wrong.
+const LP_SPECIES = [{"name":"Aenar","attrs":["insight","control","presence"],"any":0,"eras":["ENT"],"page":"94","desc":"The Aenar were a subspecies of Andorians who were on the verge of extinction by the mid-22nd century. They had two antennae and no skin or hair pigmentation."},{"name":"Andorian","attrs":["control","daring","presence"],"any":0,"eras":["ENT"],"page":"94","desc":"An aggressive, passionate people from a frozen moon. Founding member of the Federation. Blue-skinned, pale-haired in appearance, with antennae."},{"name":"Arbazan","attrs":["control","insight","presence"],"any":0,"eras":["ENT"],"page":"94","desc":"Like many Humanoid species within the Federation, the Arbazan are physically similar to Humans, though the forward portion of their skulls have slightly raised plates that reinforce their brows."},{"name":"Ardanan","attrs":["fitness","presence","reason"],"any":0,"eras":["TOS"],"page":"94","desc":"Ardana natives are hardy individuals, whose duality of art and culture, and resource mining and management, make them excellent all-rounders. The Ardanans are a people of both stout endurance and cultural excellence."},{"name":"Aurelian","attrs":["daring","fitness","insight"],"any":0,"eras":["TOS"],"page":"94","desc":"An avian people encountered early in Federation history. Renowned for their study of history and science, they occasionally surmount their claustrophobia to serve on Starfleet vessels."},{"name":"Bajoran","attrs":["control","daring","insight"],"any":0,"eras":["TNG"],"page":"95","desc":"A spiritual, dauntless people who suffered under Cardassian occupation. They worship celestial beings residing in the Bajoran wormhole."},{"name":"Barzan","attrs":["daring","fitness","presence"],"any":0,"eras":["TOS"],"page":"95","desc":"A diligent, determined people from a resource-poor world. Joined the Federation in the 25th century, though individuals were known to serve in Starfleet prior."},{"name":"Benzite","attrs":["control","insight","reason"],"any":0,"eras":["TNG"],"page":"95","desc":"Benzite physiology gives this species' skin a hairless blue-to-green complexion. The Benzite skull has a thick protrusion that extends over the brow and nose, with two facial tendrils above the lip."},{"name":"Betazoid","attrs":["insight","presence","reason"],"any":0,"eras":["TOS"],"page":"96","desc":"Betazoids appear almost identical to Humans, but differ in one major way: they are naturally telepathic, developing mental abilities during adolescence."},{"name":"Bolian","attrs":["control","insight","presence"],"any":0,"eras":["TOS"],"page":"96","desc":"Identified by a cartilaginous ridge that extends vertically down their head, past the center of the face to the chest, with skin color ranging from light blues to dark greens and muted purples with darker banding across the head."},{"name":"Bynar","attrs":["control","insight","reason"],"any":0,"eras":["TNG"],"page":"96","desc":"Over time their interconnection with their world's master computer has grown to the point that their language and thought patterns have become as close to binary as is possible for organic beings."},{"name":"Caitian","attrs":["daring","fitness","insight"],"any":0,"eras":["TOS"],"page":"96","desc":"A catlike people equally devoted to martial as well as artistic and philosophical pursuits. Solidly established within the Federation, with extensive representation at all levels of Starfleet."},{"name":"Cardassian","attrs":["control","presence","reason"],"any":0,"eras":["TNG"],"page":"96","desc":"A much-feared people known for devotion to their state and a sense of superiority."},{"name":"Changeling","attrs":["control","fitness","presence"],"any":0,"eras":["TNG"],"page":"96","desc":"A Changeling is naturally a gelatinous, morphogenic, orange-brown fluid, which can adopt the form and structure of any solid object, including other living creatures and diffuse substances like fog."},{"name":"Cybernetically Enhanced","attrs":["control","fitness","reason"],"any":0,"eras":["TOS"],"page":"97","desc":"First, select a species for your character and apply those traits. Though most cyborgs still consider themselves to be members of their original species, there are some who cannot help but face the reality that every day they are…"},{"name":"Deltan","attrs":["control","insight","presence"],"any":0,"eras":["TOS"],"page":"97","desc":"Deltans are beautiful individuals, with powerful empathic abilities and heightened sensuality."},{"name":"Denobulan","attrs":["fitness","insight","reason"],"any":0,"eras":["ENT"],"page":"97","desc":"A gregarious, inquisitive people allied with humanity since the 2130s. Often at ease encountering new cultures and collaborating within large social groups. Robust physiology, similar to Humans in appearance, with facial ridges."},{"name":"Doopler","attrs":["fitness","presence","insight"],"any":0,"eras":["TNG"],"page":"97","desc":"A humanoid species known for involuntarily duplicating themselves (dooplercating) as a defense mechanism against uncomfortable emotions such as embarrassment."},{"name":"Edosian","attrs":["fitness","insight","reason"],"any":0,"eras":["TOS"],"page":"97","desc":"A long-lived, meticulous, and reflective people. Loosely allied with the Federation, with service in Starfleet rare but not unknown."},{"name":"Efrosian","attrs":["fitness","presence","reason"],"any":0,"eras":["TOS"],"page":"97","desc":"A musical people from a frozen world devoted to history. Often sought as helm officers and navigators, as well as translators and communications officers thanks to their emphasis on linguistics and oral tradition."},{"name":"Ferengi","attrs":["control","insight","presence"],"any":0,"eras":["ENT"],"page":"97","desc":"An enterprising people devoted to applying their considerable technology toward the acquisition of wealth."},{"name":"Gorn","attrs":["daring","fitness","reason"],"any":0,"eras":["ENT"],"page":"97","desc":"Gorn are large and powerfully-built, even more so than other famously-mighty species such as the Klingons or Nausicaans."},{"name":"Hologram","attrs":[],"any":3,"eras":["TNG"],"page":"98","desc":"Holograms can be programmed to any specification, though the nature of their holomatrix means that they are essentially impervious to direct physical harm - they can allow energy and objects to pass through them at will."},{"name":"Horta","attrs":["presence","fitness","reason"],"any":0,"eras":["TOS"],"page":"98","desc":"The Horta is a highly intelligent, silicon-based species capable of tunneling through solid rock."},{"name":"Human","attrs":[],"any":3,"eras":["ENT","TOS","TNG"],"page":"98","desc":"A resilient, diverse, and adaptable species. From warring nations on the brink of mutual annihilation, developed an allied and peaceful society engaged with the wider Galaxy. Founding member of the Federation."},{"name":"Illyrian","attrs":["daring","fitness","reason"],"any":0,"eras":["ENT"],"page":"98","desc":"A spacefaring humanoid species that utilizes genetic engineering to adapt their bodies to the new planets they settle, rather than changing the planet to suit themselves."},{"name":"Jem'Hadar","attrs":["daring","fitness","insight"],"any":0,"eras":["TNG"],"page":"98","desc":"Individual Jem'Hadar are physically powerful, and far stronger and more resilient than Humans. They also have exceptionally keen eyesight, and act utterly without fear or hesitation in battle."},{"name":"Kazon","attrs":["daring","fitness","presence"],"any":0,"eras":["TNG"],"page":"98","desc":"An aggressive warrior species from the Delta Quadrant divided into eighteen different sects that war over resources. They have intricate head ridges and thick, coral-shaped hair."},{"name":"Kelpien","attrs":["control","fitness","insight"],"any":0,"eras":["TOS"],"page":"98","desc":"An empathetic people kept in check by the technologically advanced Ba'ul who share their homeworld."},{"name":"Klingon","attrs":["daring","fitness","presence"],"any":0,"eras":["ENT"],"page":"98","desc":"A proud, warrior species centered in the Beta Quadrant. There is a great redundancy in Klingon organs, with two livers, multiple stomachs, three lungs, and an eight-chambered heart."},{"name":"Kzinti","attrs":["daring","fitness","control"],"any":0,"eras":["TOS"],"page":"99","desc":"A species of aggressive, cat-like humanoids with orange fur, yellow eyes, pronounced fangs, ears resembling bat wings, four-fingered hands, and long tails, Kzinti are native to the Alpha Quadrant planet Kzin."},{"name":"Liberated Borg","attrs":["control","fitness","reason"],"any":0,"eras":["TNG"],"page":"96","desc":"Individuals who broke free from the Borg Collective became referred to as liberated Borg or \"xBs\" by the late 2390s. xBs came from a wide variety of formerly assimilated species found in the Alpha, Beta, and Delta Quadrants."},{"name":"Lurian","attrs":["control","fitness","presence"],"any":0,"eras":["TNG"],"page":"99","desc":"Lurians have multiple hearts, lungs, and two stomachs, and are thus more resistant to injury than other species. They can withstand many poisons and toxins."},{"name":"Ocampa","attrs":["control","insight","presence"],"any":0,"eras":["TNG"],"page":"99","desc":"A short-lived people from the Delta Quadrant with latent psychic abilities emerging from a history of natural disaster and the cautious oversight of an alien Caretaker."},{"name":"Orion","attrs":["daring","fitness","presence"],"any":0,"eras":["ENT"],"page":"99","desc":"A people whose advanced civilization has spawned a vast intergalactic criminal organization."},{"name":"Osnullus","attrs":["daring","fitness","reason"],"any":0,"eras":["TOS"],"page":"99","desc":"The Osnullus hail from a homeworld that has only recently begun to shed their caste-based society."},{"name":"Pakled","attrs":["daring","fitness","insight"],"any":0,"eras":["TNG"],"page":"99","desc":"A stocky humanoid species capable of surviving the vacuum of space for a limited amount of time. They have a rudimentary class system where an individual's status was indicated by the size of their helmet."},{"name":"Paradan","attrs":["fitness","insight","presence"],"any":0,"eras":["TNG"],"page":"99","desc":"This Gamma Quadrant species relies upon their olfactory glands to help determine the mood of whomever they are speaking with, and they possess scent glands around their bodies that release potent odors."},{"name":"Reman","attrs":["daring","fitness","insight"],"any":0,"eras":["ENT"],"page":"100","desc":"Remans are tall, powerfully built beings, stronger and more durable even than Romulans. Their nocturnal nature means that they cannot easily tolerate bright light."},{"name":"Risian","attrs":["control","insight","presence"],"any":0,"eras":["ENT"],"page":"100","desc":"Risians appear much like Humans, save for a decorative gold emblem in the center of the forehead. They have open and adventurous personalities but also have a great patience with others."},{"name":"Romulan","attrs":["control","fitness","reason"],"any":0,"eras":["ENT"],"page":"100","desc":"Romulan physiology is not meaningfully different from that of Vulcans, though a portion of the Romulan species exhibits a V-shaped forehead ridge not evident in Vulcans."},{"name":"Saurian","attrs":["daring","fitness","reason"],"any":0,"eras":["TOS"],"page":"100","desc":"Saurians possess enhanced senses that are often superior to their colleagues. With six nasal canals, they can pick up scents from kilometers away and their sharp fangs and claws make them imposing."},{"name":"Sikarian","attrs":["control","reason","presence"],"any":0,"eras":["TNG"],"page":"101","desc":"Physically, Sikarians are very similar to Humans and other near-Human species. They are of similar height and mass, with a similar range of skin tones and hair colors."},{"name":"Soong-type Android","attrs":["control","fitness","reason"],"any":0,"eras":["TNG"],"page":"101","desc":"The physical and mental capabilities of a Soong- type android are superior to that of most organic or cybernetic life-forms, allowing them to ignore or resist effects like hard vacuum, disease, radiation, oxygen deprivation,…"},{"name":"Suliban","attrs":["control","daring","fitness"],"any":0,"eras":["ENT"],"page":"101","desc":"The Sulibans' distinguishing physical characteristic is their mottled, greenish-tinted skin. Most of them are nomadic."},{"name":"Talaxian","attrs":["control","presence","insight"],"any":0,"eras":["TNG"],"page":"101","desc":"While humanoid in most respects, Talaxians do have several interesting biological adaptations."},{"name":"Tamarian","attrs":["daring","presence","reason"],"any":0,"eras":["TNG"],"page":"101","desc":"Tamarians are humanoid, with a rich culture and a language built around metaphor. Their large craniums have two long slitted nostrils and no visible auricles."},{"name":"Tellarite","attrs":["control","fitness","insight"],"any":0,"eras":["ENT"],"page":"101","desc":"An argumentative, honest, and skeptical people. Founding member of the Federation. Sturdy and hirsute in physique, vaguely porcine in appearance."},{"name":"Tholian","attrs":["control","daring","fitness"],"any":0,"eras":["TOS"],"page":"101","desc":"A highly advanced, sentient, six-legged, crystalline species, non-Humanoid in appearance. Their exoskeletons allow them to withstand the rigors of space for extended, though not unlimited, amounts of time."},{"name":"Trill","attrs":["control","presence","reason"],"any":0,"eras":["TOS"],"page":"102","desc":"The Trill species appear almost identical to Humans, except for rows of spots running down the sides of their bodies."},{"name":"Vulcan","attrs":["control","fitness","reason"],"any":0,"eras":["ENT"],"page":"102","desc":"The Vulcans are a stoic, rational people. Widely claimed to be emotionless, in truth the Vulcans feel deeply and intensely, to their own detriment."},{"name":"Xahean","attrs":["control","insight","reason"],"any":0,"eras":["TOS"],"page":"102","desc":"The Xaheans are technologically gifted as a species, to the point that they often appear smug in the face of technological advancements by other species."},{"name":"Xindi Arboreal","attrs":["control","insight","reason"],"any":0,"eras":["ENT"],"page":"102","desc":"Covered in hair, and with distinctive ridges on their nose and cheekbones, the Arboreals are evolved from creatures like that of the Earth sloth. They possess sharp claws and have slightly longer arms than the average humanoid."},{"name":"Xindi Insectoid","attrs":["control","insight","reason"],"any":0,"eras":["ENT"],"page":"103","desc":"Xindi reproduction is asexual with a single adult laying a clutch of eggs. Life expectancy is very short compared to other species, with 12 years as the average."},{"name":"Xindi Primate","attrs":["fitness","insight","presence"],"any":0,"eras":["ENT"],"page":"103","desc":"With a similar physiology to Humans, Primates share their characteristic internal organ structure and metabolism, as well as their sensory perceptions."},{"name":"Xindi Reptilian","attrs":["daring","fitness","reason"],"any":0,"eras":["ENT"],"page":"103","desc":"These are cold blooded individuals who prefer hotter climates. Scales, ridges, and spikes cover their body and they have vertical slit eyes, for adapting to low light conditions and judging depth."},{"name":"Zakdorn","attrs":["control","insight","reason"],"any":0,"eras":["TNG"],"page":"103","desc":"Seen as easily the best tactical minds in the Galaxy, the Zakdorn excel at complex strategic thinking."},{"name":"Zaranite","attrs":["control","fitness","reason"],"any":0,"eras":["TOS"],"page":"103","desc":"Zaranites are hardy and immune to toxic gases and complications due to bright lighting, and can survive the extremes conditions of the vacuum of space, so long as their respirator tanks last."}];
+// d20 species matrices by era (book pp. 93–94); random era: 1–6 ENT, 7–12 TOS, 13–18 TNG, 19–20 roll again.
+const LP_SPECIES_TABLES = {"ENT":["Aenar","Andorian","Arbazan","Denobulan","Ferengi","Gorn","Human","Illyrian","Klingon","Orion","Reman","Risian","Romulan","Suliban","Tellarite","Vulcan","Xindi Arboreal","Xindi Insectoid","Xindi Primate","Xindi Reptilian"],"TOS":["Ardanan","Aurelian","Barzan","Betazoid","Bolian","Caitian","Cybernetically Enhanced","Deltan","Edosian","Efrosian","Horta","Human","Kelpien","Kzinti","Osnullus","Saurian","Tholian","Trill","Xahean","Zaranite"],"TNG":["Bajoran","Benzite","Bynar","Cardassian","Changeling","Doopler","Hologram","Human","Jem'Hadar","Kazon","Liberated Borg","Lurian","Ocampa","Pakled","Paradan","Sikarian","Soong-type Android","Talaxian","Tamarian","Zakdorn"]};
+// Step Two — pick ONE matrix. attrs: list, 'SPECIES_ATTRIBUTES' or 'OTHER_SPECIES_ATTRIBUTES'; discs: list or ['any'].
+const LP_ENVIRONMENTS = {"settings":[{"roll":"1-4","name":"Homeworld","attrs":"SPECIES_ATTRIBUTES","discs":["command","security","science"],"text":"Comes from the world that birthed their civilization."},{"roll":"5-8","name":"Busy Colony","attrs":["daring","presence"],"discs":["command","security","science"],"text":"One of their culture's oldest or most prosperous colonies."},{"roll":"9-12","name":"Isolated Colony","attrs":["reason","insight"],"discs":["engineering","science","medicine"],"text":"A colony isolated from broader galactic society."},{"roll":"13-15","name":"Frontier Colony","attrs":["control","fitness"],"discs":["conn","security","medicine"],"text":"A colony on the fringes of known space."},{"roll":"16-18","name":"Starship or Starbase","attrs":["control","insight"],"discs":["command","conn","engineering"],"text":"Grew up in space aboard a starship, station, or starbase."},{"roll":"19-20","name":"Another Species' World","attrs":"OTHER_SPECIES_ATTRIBUTES","discs":["any"],"text":"Grew up among another species."}],"conditions":[{"roll":"1-4","name":"Utopian Paradise","attrs":["control","reason","presence"],"discs":["any"],"text":"Raised in peace, prosperity, and abundance."},{"roll":"5-8","name":"Cosmopolitan","attrs":["daring","insight","presence"],"discs":["command","conn","science"],"text":"Raised amid trade or diplomacy and many cultures."},{"roll":"9-12","name":"Rigorous Discipline","attrs":["control","fitness","reason"],"discs":["command","security","medicine"],"text":"A strict childhood of duty and purpose."},{"roll":"13-15","name":"Asceticism and Introspection","attrs":["control","insight","reason"],"discs":["science","engineering","medicine"],"text":"A simple life, by choice, lacking luxuries."},{"roll":"16-18","name":"Struggle and Hardship","attrs":["control","daring","insight"],"discs":["conn","engineering","science"],"text":"A world with few available resources."},{"roll":"19-20","name":"Occupation or War","attrs":["daring","fitness","presence"],"discs":["command","security","medicine"],"text":"A world ravaged by war or occupied by a hostile nation."}]};
+// Step Three — Early Outlook. yes = accepted/pursued, no = rebelled/abandoned. 19–20: pick one or reroll.
+const LP_OUTLOOKS = {"upbringing":[{"roll":"1-3","name":"Starfleet","yes":{"control":2,"fitness":1},"no":{"daring":2,"insight":1},"discs":["any"],"focusEx":["Astronavigation","Composure","Extra-Vehicular Activity","Hand-to-Hand Combat","Hand Phasers","History","Small Craft","Starfleet Protocol","Starship Recognition"]},{"roll":"4-6","name":"Business or Trade","yes":{"daring":1,"presence":2},"no":{"insight":2,"reason":1},"discs":["command","engineering","science"],"focusEx":["Finances","Geology","Linguistics","Manufacturing","Metallurgy","Negotiation","Survey"]},{"roll":"7-9","name":"Agriculture or Rural","yes":{"control":1,"fitness":2},"no":{"presence":1,"reason":2},"discs":["conn","security","medicine"],"focusEx":["Animal Handling","Athletics","Emergency Medicine","Endurance","Ground Vehicles","Infectious Diseases","Navigation","Survival Training","Toxicology"]},{"roll":"10-12","name":"Science and Technology","yes":{"control":2,"reason":1},"no":{"daring":1,"insight":2},"discs":["conn","engineering","science","medicine"],"focusEx":["Astronavigation","Astrophysics","Computers","Cybernetics","Genetics","Physics","Power Systems","Quantum Mechanics","Subspace Communications","Surgery","Warp Field Dynamics","Xenobiology"]},{"roll":"13-15","name":"Artistic and Creative","yes":{"insight":1,"presence":2},"no":{"daring":1,"fitness":2},"discs":["command","engineering","science"],"focusEx":["Botany","Cultural Studies","Holoprogramming","Linguistics","Music","Observation","Persuasion","Psychology"]},{"roll":"16-18","name":"Diplomacy and Politics","yes":{"control":1,"presence":2},"no":{"fitness":1,"reason":2},"discs":["command","conn","security"],"focusEx":["Composure","Debate","Diplomacy","Espionage","Interrogation","Law","Philosophy","Starfleet Protocol"]}],"caste":[{"roll":"1-3","name":"Warrior","yes":{"daring":2,"fitness":1},"no":{"reason":2,"insight":1},"discs":["command","conn","security"],"focusEx":["Composure","Disruptors","Hand-to-Hand Combat","Intimidation","Military History","Small Craft","Starship Recognition","Survival"]},{"roll":"4-6","name":"Merchant","yes":{"daring":1,"presence":2},"no":{"reason":1,"insight":2},"discs":["command","engineering","science"],"focusEx":["Finances","Geology","Linguistics","Manufacturing","Metallurgy","Negotiation","Survey"]},{"roll":"7-9","name":"Agriculture","yes":{"control":1,"fitness":2},"no":{"presence":1,"reason":2},"discs":["conn","security","medicine"],"focusEx":["Animal Handling","Athletics","Emergency Medicine","Endurance","Ground Vehicles","Infectious Diseases","Navigation","Toxicology","Survival Training"]},{"roll":"10-12","name":"Scientific","yes":{"control":2,"reason":1},"no":{"daring":1,"insight":2},"discs":["engineering","science","medicine"],"focusEx":["Astronavigation","Astrophysics","Computers","Cybernetics","Genetics","Physics","Power Systems","Quantum Mechanics","Subspace Communications","Surgery","Temporal Mechanics","Warp Field Dynamics","Xenobiology"]},{"roll":"13-15","name":"Artistic","yes":{"insight":1,"presence":2},"no":{"daring":1,"fitness":2},"discs":["command","engineering","science"],"focusEx":["Botany","Cultural Studies","History","Holoprogramming","Linguistics","Music","Observation","Persuasion","Psychology"]},{"roll":"16-18","name":"Academic","yes":{"control":1,"reason":2},"no":{"fitness":1,"insight":2},"discs":["command","security","science"],"focusEx":["Composure","Debate","Diplomacy","Espionage","Etiquette","Interrogation","Law","Philosophy"]}],"aspiration":[{"roll":"1-3","name":"To Explore","yes":{"presence":2,"fitness":1},"no":{"reason":2,"control":1},"discs":["command","science"],"focusEx":["Astronavigation","Composure","Diplomacy","Linguistics","Starship Recognition","Team Dynamics","Wilderness Survival"]},{"roll":"4-6","name":"To Fly","yes":{"control":2,"daring":1},"no":{"insight":2,"reason":1},"discs":["conn","engineering"],"focusEx":["Astronavigation","Helm Operations","Propulsion Systems","Small Craft","Starship Recognition"]},{"roll":"7-9","name":"To Create","yes":{"insight":2,"presence":1},"no":{"daring":2,"control":1},"discs":["command","engineering"],"focusEx":["Art","Computers","Cybernetics","Holoprogramming","Literature","Structural Engineering","Theatre","Transporters & Replicators","Warp Field Dynamics"]},{"roll":"10-12","name":"To Discover","yes":{"reason":2,"presence":1},"no":{"fitness":2,"insight":1},"discs":["science","medicine"],"focusEx":["Anthropology","Astrophysics","Botany","Genetics","Linguistics","Psychology","Quantum Mechanics","Xenobiology"]},{"roll":"13-15","name":"To Protect","yes":{"daring":2,"fitness":1},"no":{"control":2,"reason":1},"discs":["security","medicine"],"focusEx":["Emergency Medicine","Hand-to-Hand Combat","Hand Phasers","Survival","Threat Awareness","Triage"]},{"roll":"16-18","name":"To Prosper","yes":{"presence":2,"daring":1},"no":{"fitness":2,"insight":1},"discs":["any"],"focusEx":["Computers","Genetics","Holoprogramming","Music","Persuasion","Philosophy","Politics","Trade & Finance"]}]};
+// Step Four — Education. 3 attribute points (+1/+1/+1 or +2/+1); discipline +2 (major) and two others +1.
+const LP_EDUCATION = [{"cat":"Starfleet Academy","roll":"1-5","tracks":[{"roll":"1-6","name":"Command Track","major":["command","conn"],"mode":"standard","cap4":true,"swap":false,"attrReq":[],"focusEx":["Astronavigation","Composure","Diplomacy","Evasive Action","Extra-Vehicular Activity","Helm Operations","Inspiration","Persuasion","Small Craft","Starfleet Protocols","Starship Recognition","Team Dynamics"],"discRule":"Increase either Command or Conn by +2. Then, select two other disciplines to increase by +1 each. You may not increase any discipline above 4 at this stage."},{"roll":"7-13","name":"Operations Track","major":["security","engineering"],"mode":"standard","cap4":true,"swap":false,"attrReq":[],"focusEx":["Computers","Cybernetics","Electro-Plasma Power Systems","Espionage","Hand Phasers","Hand-to-Hand Combat","Infiltration","Interrogation","Shipboard Tactical Systems","Survival","Transporters & Replicators","Warp Field Dynamics"],"discRule":"Increase either Security or Engineering by +2. Then select two other disciplines to increase by +1 each. You may not increase any discipline above 4 at this stage."},{"roll":"14-20","name":"Sciences Track","major":["science","medicine"],"mode":"standard","cap4":true,"swap":false,"attrReq":[],"focusEx":["Anthropology","Astrophysics","Botany","Computers","Cybernetics","Emergency Medicine","Exotectonics","Genetics","Geology","Infectious Diseases","Linguistics","Physics","Psychiatry","Quantum Mechanics","Trauma Surgery","Virology","Warp Field Dynamics","Xenobiology"],"discRule":"Increase either Science or Medicine by +2. Then, select two other disciplines to increase by +1 each. You may not increase any discipline above 4 at this stage."}]},{"cat":"Allied Military Training","roll":"6-10","tracks":[{"roll":"1-5","name":"Rank and File","major":["security"],"mode":"standard","cap4":false,"swap":false,"attrReq":["fitness"],"focusEx":["Composure","Demolitions","Disruptors","Extra-Vehicular Activity","Hand-to-Hand Combat","Hand Phasers","Infiltration","Military Protocol","Small Craft","Survival"],"discRule":"You increase your Security by 2, and two other disciplines by 1."},{"roll":"6-10","name":"Officer Training","major":["command","security"],"mode":"officer","cap4":false,"swap":false,"attrReq":[],"focusEx":["Diplomacy","Disruptors","Hand-to-Hand Combat","Hand Phasers","History","Inspiration","Military Protocol","Politics","Shipboard Tactical Systems","Strategy & Tactics"],"discRule":"You increase both Command and Security: increase one by 2, and the other by 1. Then, choose one of Conn, Engineering, Science, or Medicine, and increase that by 1 as well."},{"roll":"11-15","name":"Intelligence Training","major":["any"],"mode":"intel","cap4":false,"swap":false,"attrReq":["insight","reason"],"focusEx":["Computers","Espionage","Infiltration","Interrogation","Linguistics","Persuasion","Threat Analysis"],"discRule":"Increase a single discipline by 2, and two others by 1 each. You must select Security for one of your choices."},{"roll":"16-20","name":"Militia and Guerillas","major":["security"],"mode":"standard","cap4":false,"swap":false,"attrReq":["daring","fitness"],"focusEx":["Composure","Demolition","Disguise","Disruptors","Hand-to-Hand Combat","Hand Phasers","Infiltration","Inspiration","Interrogation","Psychological Warfare"],"discRule":"Increase Security by 2, and two other disciplines by 1 each."}]},{"cat":"Diplomatic Training","roll":"11-15","tracks":[{"roll":"1-10","name":"Diplomatic Corps","major":["command"],"mode":"standard","cap4":false,"swap":false,"attrReq":["reason","insight"],"focusEx":["Diplomacy","Espionage","History","Linguistics","Philosophy","Politics","Xenoanthropology"],"discRule":"You increase your Command by 2, and two other disciplines by 1."},{"roll":"11-20","name":"Honorary Status","major":["command"],"mode":"standard","cap4":false,"swap":false,"attrReq":[],"focusEx":["Diplomacy","Espionage","History","Leadership","Philosophy","Politics","Strategy and Tactics","Xenoanthropology"],"discRule":"You increase your Command by 2, and two other disciplines by 1."}]},{"cat":"Civilian Training","roll":"16-20","tracks":[{"roll":"1-3","name":"Freight and Transport","major":["conn","engineering"],"mode":"standard","cap4":false,"swap":true,"attrReq":[],"focusEx":["Astronavigation","Bureaucracy","Emergency Repairs","Extra-Vehicular Activity","Helm Operations","Logistics","Propulsion Systems","Small Craft","Starship Recognition","Transporters & Replicators"],"discRule":"You increase your Conn or Engineering by 2, and two other disciplines by 1 each. In addition, you may reduce one of your other disciplines by 1 and add that point to any discipline not already increased."},{"roll":"4-6","name":"Law Enforcement","major":["command","security"],"mode":"standard","cap4":false,"swap":true,"attrReq":[],"focusEx":["Hand-to-Hand Combat","Interrogation","Intimidation","Law","Phasers","Small Craft"],"discRule":"You increase your Command or Security by 2, and two other disciplines by 1 each. In addition, you may reduce one of your other disciplines by 1 and add that point to any discipline not already increased."},{"roll":"7-9","name":"Physician","major":["medicine"],"mode":"standard","cap4":false,"swap":true,"attrReq":[],"focusEx":["Cybernetics","Emergency Medicine","Genetics","Psychiatry","Surgery","Virology","Xenobiology"],"discRule":"You increase your Medicine by 2, and two other disciplines by 1 each. In addition, you may reduce one of your other disciplines by 1 and add that point to any discipline not already increased."},{"roll":"10-12","name":"Politician or Bureaucrat","major":["command"],"mode":"standard","cap4":false,"swap":true,"attrReq":["insight","presence"],"focusEx":["Bureaucracy","Diplomacy","History","Linguistics","Philosophy","Politics","(or something related to your role in public service)"],"discRule":"You increase your Command by 2, and two other disciplines by 1 each. In addition, you may reduce one of your other disciplines by 1 and add that point to any discipline not already increased."},{"roll":"13-15","name":"Scientific or Technical Expert","major":["science","engineering"],"mode":"standard","cap4":false,"swap":true,"attrReq":["reason"],"focusEx":["Astrophysics","Botany","Cybernetics","Exotectonics","Genetics","Quantum Mechanics","Subspace Mechanics","Temporal Mechanics","Transporters and Replicators","Warp Field Dynamics"],"discRule":"You increase your Science or Engineering by 2, and two other disciplines by 1 each. In addition, you may reduce one of your other disciplines by 1 and add that point to any discipline not already increased."},{"roll":"16-18","name":"Trader or Merchant","major":["command"],"mode":"standard","cap4":false,"swap":true,"attrReq":["insight","presence"],"focusEx":["Art","Cooking","Disruptors","Economics","Logistics","Persuasion","Psychology","Tailoring"],"discRule":"You increase your Command by 2, and two other disciplines by 1 each. In addition, you may reduce one of your other disciplines by 1 and add that point to any discipline not already increased."}]}];
+const LP_CAREER_LENGTH = [{"roll":"1-6","name":"Novice","value":"Add a value, reflecting their inexperience and naivete in some way."},{"roll":"7-13","name":"Experienced","value":"Add a value, chosen freely."},{"roll":"14-20","name":"Veteran","value":"Add a value, reflecting their years of experience and the beliefs they've formed over their long career."}];
+// Step Six — two events; each +1 attr, +1 disc, one focus ('any' = player's choice).
+const LP_CAREER_EVENTS = [{"roll":1,"name":"Ship Destroyed","attr":"daring","disc":"security","focusEx":["Extra-Vehicular Operations","Small Craft","Survival"],"text":"Ship lost; character one of few survivors."},{"roll":2,"name":"Death of a Friend","attr":"insight","disc":"medicine","focusEx":[],"text":"A friend was killed in action during an important mission."},{"roll":3,"name":"Lauded by Another Culture","attr":"presence","disc":"science","focusEx":["X Culture"],"text":"Earned official praise of a non-allied culture."},{"roll":4,"name":"Negotiated a Treaty","attr":"control","disc":"command","focusEx":["Diplomacy","Galactic Politics","Negotiation"],"text":"Part of a delegation negotiating a treaty/alliance."},{"roll":5,"name":"Required to Take Command","attr":"daring","disc":"command","focusEx":["Composure","Inspiration","Leading by Example"],"text":"Had to take command when the mission leader was incapacitated."},{"roll":6,"name":"Encounter with a Truly Alien Being","attr":"reason","disc":"science","focusEx":["Empathy","Philosophy","Xenobiology"],"text":"Encountered a life-form that was truly alien."},{"roll":7,"name":"Serious Injury","attr":"fitness","disc":"medicine","focusEx":["Art","Athletics","Philosophy"],"text":"Seriously hurt; long recovery."},{"roll":8,"name":"Conflict with a Hostile Culture","attr":"fitness","disc":"security","focusEx":["Hand Phasers","Hand-to-Hand Combat","Shipboard Tactical Systems"],"text":"Involved in a major battle with a hostile force."},{"roll":9,"name":"Mentored","attr":"any","disc":"conn","focusEx":["Composure","Etiquette","(any focus reflecting the mentor's specialties)"],"text":"A respected individual mentored the character; served as their pilot and aide."},{"roll":10,"name":"Transporter Accident","attr":"control","disc":"conn","focusEx":["Quantum Mechanics","Small Craft","Transporters & Replicators"],"text":"Suffered a strange transporter accident."},{"roll":11,"name":"Dealing with a Plague","attr":"insight","disc":"medicine","focusEx":["Emergency Medicine","Infectious Diseases","Triage"],"text":"Ship gave aid to a world facing an epidemic."},{"roll":12,"name":"Betrayed Ideals for a Superior","attr":"presence","disc":"command","focusEx":["Inspiration","Investigation","Persuasion"],"text":"Chose a trusted superior over their own ideals."},{"roll":13,"name":"Called Out a Superior","attr":"reason","disc":"conn","focusEx":["History","Starfleet Protocol","Uniform Code of Justice"],"text":"Chose their ideals over a trusted superior."},{"roll":14,"name":"New Battle Strategy","attr":"daring","disc":"security","focusEx":["Combat Tactics","Hazard Awareness","Leading by Example"],"text":"Devised a new strategy or tactic in combat."},{"roll":15,"name":"Learned Unique Language","attr":"insight","disc":"science","focusEx":["Cultural Studies","Linguistics","Negotiations"],"text":"Learned to communicate with a species with an unusual form of communication."},{"roll":16,"name":"Discovered an Artifact","attr":"reason","disc":"engineering","focusEx":["Ancient Technology","Computers","Reverse Engineering"],"text":"Discovered technology from an ancient civilization on a survey mission."},{"roll":17,"name":"Special Commendation","attr":"fitness","disc":"any","focusEx":["Athletics","Emergency Medicine","Survival"],"text":"Saved several colleagues' lives during a crisis."},{"roll":18,"name":"Solved an Engineering Crisis","attr":"control","disc":"engineering","focusEx":["Electro-Plasma Power Systems","Fusion Reactors","Warp Engines"],"text":"Ended a crisis caused by malfunctioning technology."},{"roll":19,"name":"Breakthrough or Invention","attr":"any","disc":"engineering","focusEx":["Experimental Technology","Improvisation","Invention"],"text":"Made an important technological discovery or invention."},{"roll":20,"name":"First Contact","attr":"presence","disc":"any","focusEx":["Cultural Studies","Diplomacy","Infiltration"],"text":"Involved in a first contact mission."}];
 
 const ERAS = ['Enterprise Era (22nd C.)','Discovery Era (Early 23rd C.)','Original Series (23rd C.)','Golden Age (2280s–2350s)','Next Generation (24th C.)','Deep Space Nine / Voyager','Picard Era (25th C.)','Star Trek Online (2409-2411)','26th Century','32nd Century'];
 
@@ -833,73 +806,6 @@ function shipTalentOptions(selectedKeys) {
     + `<optgroup label="Standard Talents">${SHIP_TALENTS.map(opt).join('')}</optgroup>`
     + `<optgroup label="Class-Specific Technology">${SHIP_TALENTS_EXTRA.map(opt).join('')}</optgroup>`;
 }
-
-const ENVIRONMENTS = [
-  {name:'Cosmopolitan City', bonus:'Insight +1 or Presence +1', _attrOpts:['insight','presence']},
-  {name:'Busy Colony',       bonus:'Daring +1 or Fitness +1',   _attrOpts:['daring','fitness']},
-  {name:'Frontier Colony',   bonus:'Daring +1 or Fitness +1',   _attrOpts:['daring','fitness']},
-  {name:'Isolated Colony',   bonus:'Control +1 or Reason +1',   _attrOpts:['control','reason']},
-  {name:'Homeworld',         bonus:'Insight +1 or Presence +1', _attrOpts:['insight','presence']},
-  {name:'Starship',          bonus:'Control +1 or Daring +1',   _attrOpts:['control','daring']},
-];
-
-const UPBRINGINGS = [
-  {d:'1–3',   name:'Starfleet Family', attrBonus:'Control or Fitness +1', disBonus:'Command or Security +1',   _attrOpts:['control','fitness'],   _discOpts:['command','security']},
-  {d:'4–6',   name:'Business/Trade',   attrBonus:'Presence or Reason +1', disBonus:'Engineering or Conn +1',   _attrOpts:['presence','reason'],   _discOpts:['engineering','conn']},
-  {d:'7–9',   name:'Agriculture',      attrBonus:'Fitness or Insight +1', disBonus:'Medicine or Science +1',   _attrOpts:['fitness','insight'],   _discOpts:['medicine','science']},
-  {d:'10–12', name:'Scientific',       attrBonus:'Control or Reason +1',  disBonus:'Science or Engineering +1',_attrOpts:['control','reason'],    _discOpts:['science','engineering']},
-  {d:'13–15', name:'Artistic',         attrBonus:'Daring or Presence +1', disBonus:'Command or Conn +1',       _attrOpts:['daring','presence'],   _discOpts:['command','conn']},
-  {d:'16–18', name:'Diplomacy',        attrBonus:'Insight or Presence +1',disBonus:'Command or Medicine +1',   _attrOpts:['insight','presence'],  _discOpts:['command','medicine']},
-  {d:'19–20', name:'Military',         attrBonus:'Daring or Fitness +1',  disBonus:'Security or Command +1',   _attrOpts:['daring','fitness'],    _discOpts:['security','command']},
-];
-
-const ACADEMY_TRACKS = [
-  {name:'Command',        disBonus:'Command +2, Conn +1, Security +1',       focus:'Leadership, Starship Tactics, or Diplomacy',
-    _disc:{command:2,conn:1,security:1}, _discFreeMode:''},
-  {name:'Conn',           disBonus:'Conn +2, Engineering +1, Science +1',    focus:'Astronavigation, Helm Operations, or Warp Field Theory',
-    _disc:{conn:2,engineering:1,science:1}, _discFreeMode:''},
-  {name:'Security',       disBonus:'Security +2, Command +1, Engineering +1',focus:'Phasers, Unarmed Combat, or Starship Weapons',
-    _disc:{security:2,command:1,engineering:1}, _discFreeMode:''},
-  {name:'Engineering',    disBonus:'Engineering +2, Conn +1, Science +1',    focus:'Warp Engines, Electro-Plasma Systems, or Jury-Rigging',
-    _disc:{engineering:2,conn:1,science:1}, _discFreeMode:''},
-  {name:'Science',        disBonus:'Science +2, Medicine +1, Engineering +1',focus:'Exobiology, Quantum Mechanics, or Astrometrics',
-    _disc:{science:2,medicine:1,engineering:1}, _discFreeMode:''},
-  {name:'Medicine',       disBonus:'Medicine +2, Science +1, Command +1',    focus:'Emergency Medicine, Pathology, or Xenobiology',
-    _disc:{medicine:2,science:1,command:1}, _discFreeMode:''},
-  {name:'Allied Military',disBonus:'Any two Disciplines +2, one +1',         focus:'Per background',
-    _disc:{}, _discFreeMode:'allied'},
-  {name:'Diplomatic Corps',disBonus:'Command +1, Conn +1, any two +1',       focus:'Diplomacy, Alien Culture, or Law',
-    _disc:{command:1,conn:1}, _discFreeMode:'diplomatic', _discFree:2},
-];
-
-const CAREER_EVENTS = [
-  {d:1,  name:'First Contact',       desc:'You were part of a First Contact mission with an unknown species. Gain a Focus in Diplomacy or Alien Contact.'},
-  {d:2,  name:'Battle Survivor',     desc:'You survived a major combat engagement. Gain a Value about duty or survival.'},
-  {d:3,  name:'Diplomatic Mission',  desc:'A pivotal diplomatic assignment shaped your outlook. Gain a Focus in Persuasion or Negotiation.'},
-  {d:4,  name:'Scientific Discovery',desc:'You made a significant scientific discovery. Gain a Focus in your Science specialty.'},
-  {d:5,  name:'Medical Crisis',      desc:'A medical emergency forced you to make life-or-death decisions. Gain a Focus in Emergency Medicine.'},
-  {d:6,  name:'Technical Breakthrough',desc:'You solved an engineering problem no one else could. Gain a Focus in a relevant Engineering specialty.'},
-  {d:7,  name:'Undercover Operation',desc:'You operated behind enemy lines or under cover. Gain a Focus in Infiltration or Deception.'},
-  {d:8,  name:'Survival Situation',  desc:'You survived alone or with minimal support in a hostile environment. Gain a Focus in Survival.'},
-  {d:9,  name:'Cross-Cultural Exchange',desc:'A deep cultural exchange changed your understanding of another species. Gain an Attribute +1.'},
-  {d:10, name:'Personal Loss',       desc:'A great personal loss has shaped who you are. Gain a Value connected to that loss.'},
-  {d:11, name:'Mentor Relationship', desc:'A wise and respected officer mentored you. Add Discipline +1 in their area of expertise.'},
-  {d:12, name:'Moral Dilemma',       desc:'A difficult moral choice haunts you still. Gain a Value reflecting that decision.'},
-  {d:13, name:'Unexpected Command',  desc:'You took command in a crisis. Gain Command +1 or Security +1.'},
-  {d:14, name:'Time Anomaly',        desc:'You experienced a temporal displacement. Gain a Focus in Temporal Mechanics.'},
-  {d:15, name:'Alien Life Form',     desc:'An unusual encounter with an alien life form left a lasting impression. Gain a Focus in Exobiology.'},
-  {d:16, name:'Cited for Bravery',   desc:'Your courage was recognized by Starfleet Command. Gain Attribute +1 of your choice.'},
-  {d:17, name:'Early Bridge Post',   desc:'You earned a bridge assignment ahead of schedule. Gain a Discipline +1 in your primary area.'},
-  {d:18, name:'Decorated for Service',desc:'A commendation for an outstanding mission. Gain a Value or Focus of your choice.'},
-  {d:19, name:'Controversial Action',desc:'An action you took sparked debate. Gain a Value about your guiding principle.'},
-  {d:20, name:'Life-Changing Event', desc:'Something profound changed your path. Gain an Attribute +1 and a new Value.'},
-];
-
-const CAREER_LENGTH = [
-  {range:'1–6',   label:'Novice',      desc:'Early in your career. Still finding your footing among the stars.'},
-  {range:'7–13',  label:'Experienced', desc:'Seasoned and sure. Years of service have sharpened your instincts.'},
-  {range:'14–20', label:'Veteran',     desc:'A long record of service. You have seen things most officers never will.'},
-];
 
 const DIRECTIVE_TABLE = [
   {d:1,  name:'Seek Out New Life',    desc:'Explore an uncharted region and make contact with whatever you find.'},
@@ -1571,14 +1477,14 @@ const LOG_TYPES = [
   {key:'away',         label:'Travel Log',       emoji:'🛸', placeholder:'Travel log, Stardate…',                    desc:'Journeys, transits, and movement between locations.',              prompt:'Record the journey. Where were you headed, what happened along the way, what awaited you?'},
 ];
 
+// The first six steps are the book's lifepath (Chapter 03.20, Steps One–Seven).
 const CREATION_STEPS = [
-  {title:'Species & Era',        sub:'Choose your species and mission era'},
-  {title:'Environment',          sub:'Where you grew up and your upbringing'},
-  {title:'Academy Track',        sub:'Your Starfleet training path'},
-  {title:'Career',               sub:'Years of service and the event that defined your career'},
-  {title:'Attributes',           sub:'Distribute attribute points (base 7 each, +14 total)'},
-  {title:'Disciplines',          sub:'Set discipline ranks (base 1 each, +10 total)'},
-  {title:'Values & Focuses',     sub:'What you believe and what you know'},
+  {title:'Species & Era',        sub:'Step One — your species, and the era you’ll play in'},
+  {title:'Environment',          sub:'Step Two — where you grew up'},
+  {title:'Early Outlook',        sub:'Step Three — upbringing, caste, or aspiration'},
+  {title:'Education',            sub:'Step Four — Starfleet Academy or other training'},
+  {title:'Career',               sub:'Steps Five & Six — career length and two defining events'},
+  {title:'Finishing Touches',    sub:'Step Seven — final additions and the limits check'},
   {title:'Officer Details',      sub:'Name, rank, directive, and background'},
   {title:'Your Ship',            sub:'Select your vessel or build a custom one'},
 ];
@@ -1596,10 +1502,10 @@ function defaultChar() {
     ...discs,
     stress:0,
     determination:3,
-    values:['','','','','',''],
-    valuesUsed:[false,false,false,false,false,false],
-    valuesChallenged:[false,false,false,false,false,false],
-    valuesDetGranted:[false,false,false,false,false,false],
+    values:['','','',''],   // the lifepath grants four (book p. 129)
+    valuesUsed:[false,false,false,false],
+    valuesChallenged:[false,false,false,false],
+    valuesDetGranted:[false,false,false,false],
     focuses:[],
     traits:[],
     gear:[],
@@ -1612,12 +1518,7 @@ function defaultChar() {
     // creation-only
     _selectedSpecies:'', _selectedEra:'', _selectedEnv:'', _selectedUpbringing:'',
     _selectedTrack:'',
-    _lp:{
-      speciesAttrFree:[], speciesDiscChoice:'', speciesDiscFree:[],
-      envAttr:'',
-      upbrAttr:'', upbrDisc:'',
-      trackDiscFree2:[], trackDiscFree1:'', trackDiscFree:[],
-    },
+    _lp: lpDefault(),
   };
 }
 
@@ -1774,6 +1675,20 @@ function migrateState() {
   if (S.char) {
     const r = RANK_ALIASES[S.char.rank];
     if (r) S.char.rank = r;
+    // A character still in creation under the old wizard (point-buy, made-up
+    // species bonuses) restarts the lifepath; finished characters are untouched.
+    const c = S.char;
+    if (!c.creationComplete && (!c._lp || c._lp.v !== 2)) {
+      ATTRIBUTES.forEach(a => c[a.key] = 7);
+      DISCIPLINES.forEach(d => c[d.key] = 1);
+      const old = Array.isArray(c.values) ? c.values : [];
+      c.values = [old[1] || '', old[3] || '', old[4] || '', old[5] || ''];   // env, education, career, final
+      c.valuesUsed = [false,false,false,false]; c.valuesChallenged = [false,false,false,false]; c.valuesDetGranted = [false,false,false,false];
+      c.focuses = []; c._lp = lpDefault();
+      c._selectedSpecies = ''; c._selectedEnv = ''; c._selectedUpbringing = ''; c._selectedTrack = '';
+      c.careerLength = ''; c.careerEvent = ''; c.careerEvent2 = '';
+      c.creationStep = 0;
+    }
   }
   // Geometry: never leave the map tab with a grid it cannot render, and
   // never leave activeSector pointing at nothing (that hid the sector
@@ -2172,15 +2087,14 @@ function renderCreation() {
 
   let body = '';
   switch(step) {
-    case 0: body = renderCS0(); break;
-    case 1: body = renderCS1(); break;
-    case 2: body = renderCS2(); break;
-    case 3: body = renderCS3(); break;
-    case 4: body = renderCS4(); break;
-    case 5: body = renderCS5(); break;
-    case 6: body = renderCS6(); break;
-    case 7: body = renderCS7(); break;
-    case 8: body = renderCS8(); break;
+    case 0: body = renderLP0(); break;
+    case 1: body = renderLP1(); break;
+    case 2: body = renderLP2(); break;
+    case 3: body = renderLP3(); break;
+    case 4: body = renderLP4(); break;
+    case 5: body = renderLP5(); break;
+    case 6: body = renderCS7(); break;
+    case 7: body = renderCS8(); break;
   }
 
   return `<div class="card">
@@ -2193,503 +2107,6 @@ function renderCreation() {
       ${step>0?'<button class="btn" onclick="creationBack()">← Back</button>':''}
       <button class="btn btn-accent" style="margin-left:auto" onclick="creationNext()">${step<CREATION_STEPS.length-1?'Next →':'Finish!'}</button>
     </div>
-  </div>`;
-}
-
-function renderCS0() {
-  const c = S.char;
-  const lp = c._lp || {};
-  const eraOpts = ERAS.map(e=>`<option${c._selectedEra===e?' selected':''}>${e}</option>`).join('');
-  let speciesRows = SPECIES_LIST.map(sp => {
-    const sel = c._selectedSpecies === sp.name;
-    return `<tr onclick="setCreationSpecies('${escQ(sp.name)}')" class="${sel?'selected':''}">
-      <td><strong${sel?' style="color:var(--accent)"':''}>${sp.name}</strong></td>
-      <td style="color:var(--muted);font-size:10px">${sp.attrBonus}</td>
-      <td style="color:var(--muted);font-size:10px">${sp.disBonus}</td>
-    </tr>`;
-  }).join('');
-
-  let bonusPicker = '';
-  const sp = SPECIES_LIST.find(s => s.name === c._selectedSpecies);
-  if (sp) {
-    bonusPicker = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:8px">
-      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Species Bonuses — ${escH(sp.name)}</div>`;
-    const fixed = Object.entries(sp._attr||{});
-    if (fixed.length > 0) {
-      bonusPicker += `<div style="font-size:11px;color:var(--muted);margin-bottom:6px">Auto-applied: ${fixed.map(([k,v])=>`<strong style="color:var(--accent)">${k} +${v}</strong>`).join(', ')}</div>`;
-    }
-    for (let i = 0; i < (sp._attrFree||0); i++) {
-      const chosen = (lp.speciesAttrFree||[])[i];
-      bonusPicker += `<div style="margin-bottom:6px;font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="color:var(--muted);min-width:120px">Free Attr +1 (${i+1}/${sp._attrFree}):</span>`;
-      ATTRIBUTES.forEach(a => {
-        bonusPicker += `<button class="btn btn-xs${chosen===a.key?' btn-accent':''}" onclick="setLPSpeciesAttrFree('${a.key}',${i})">${a.abbr}</button>`;
-      });
-      if (!chosen) bonusPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-      bonusPicker += `</div>`;
-    }
-    if (sp._discOpts && sp._discOpts.length > 0) {
-      const chosen = lp.speciesDiscChoice;
-      bonusPicker += `<div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="color:var(--muted);min-width:120px">Discipline +1:</span>`;
-      sp._discOpts.forEach(k => {
-        const d = DISCIPLINES.find(d => d.key === k);
-        bonusPicker += `<button class="btn btn-xs${chosen===k?' btn-accent':''}" onclick="setLPSpeciesDisc('${k}')">${d?d.abbr:k}</button>`;
-      });
-      if (!chosen) bonusPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-      bonusPicker += `</div>`;
-    } else if ((sp._discFree||0) > 0) {
-      for (let i = 0; i < sp._discFree; i++) {
-        const chosen = (lp.speciesDiscFree||[])[i];
-        bonusPicker += `<div style="margin-bottom:6px;font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <span style="color:var(--muted);min-width:120px">Free Disc +1 (${i+1}/${sp._discFree}):</span>`;
-        DISCIPLINES.forEach(d => {
-          bonusPicker += `<button class="btn btn-xs${chosen===d.key?' btn-accent':''}" onclick="setLPSpeciesDiscFree('${d.key}',${i})">${d.abbr}</button>`;
-        });
-        if (!chosen) bonusPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-        bonusPicker += `</div>`;
-      }
-    }
-    bonusPicker += `</div>`;
-  }
-
-  const selEra = c._selectedEra || '';
-  const eraBadge = ERA_BADGES.find(e => e.keys.some(k => selEra.includes(k)));
-  const eraBadgeHTML = eraBadge ? `<img src="${eraBadge.src}" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 0 6px var(--accent));flex-shrink:0" onerror="this.style.display='none'">` : `<div style="width:48px;height:48px;border:2px dashed var(--accent-dim);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:var(--accent-dim)">?</div>`;
-  return `
-  <div style="background:var(--accent-glow);border:2px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:14px">
-    <div style="display:flex;align-items:center;gap:12px">
-      ${eraBadgeHTML}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Step 1 — Choose Your Era</div>
-        <select style="width:100%;background:#000;border:2px solid ${selEra?'var(--accent)':'var(--danger)'};color:var(--text);padding:7px 10px;border-radius:4px;font-size:13px;font-family:var(--font)" onchange="saveCharField('_selectedEra',this.value);renderCurrentTab()"><option value="">— Select Era —</option>${eraOpts}</select>
-        ${!selEra ? `<div style="font-size:10px;color:var(--danger);margin-top:4px;letter-spacing:0.5px">⚠ Era affects available ships and content — select one to begin.</div>` : `<div style="font-size:10px;color:var(--muted);margin-top:4px">${escH(selEra)}</div>`}
-      </div>
-    </div>
-  </div>
-  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Click a species to select it, then assign your bonuses below.</p>
-  ${c._selectedSpecies?`<div style="color:var(--accent);font-size:12px;margin-bottom:8px">Selected: <strong>${escH(c._selectedSpecies)}</strong></div>`:''}
-  <div style="max-height:280px;overflow-y:auto;margin-bottom:4px">
-    <table class="roll-table">
-      <thead><tr><th>Species</th><th>Attribute Bonus</th><th>Discipline Bonus</th></tr></thead>
-      <tbody>${speciesRows}</tbody>
-    </table>
-  </div>
-  ${bonusPicker}
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:10px">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-      <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase">Species Value</div>
-      <button class="btn btn-xs" onclick="suggestValue(0)">🎲 Suggest</button>
-    </div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">A belief or principle that defines your species' identity or your personal connection to it.</div>
-    <input value="${escH((c.values||[])[0]||'')}" placeholder="e.g. Infinite Diversity in Infinite Combinations…" style="width:100%;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(0,this.value)">
-  </div>`;
-}
-
-function renderCS1() {
-  const c = S.char;
-  const lp = c._lp || {};
-  let envRows = ENVIRONMENTS.map(e=>{
-    const sel=c._selectedEnv===e.name;
-    return `<tr onclick="setCreationEnv('${escQ(e.name)}')">
-      <td><strong${sel?' style="color:var(--accent)"':''}>${e.name}</strong></td>
-      <td style="color:var(--muted);font-size:10px">${e.bonus}</td>
-    </tr>`;
-  }).join('');
-  let upRows = UPBRINGINGS.map(u=>{
-    const sel=c._selectedUpbringing===u.name;
-    return `<tr onclick="setCreationUpbringing('${escQ(u.name)}')">
-      <td style="color:var(--muted)">${u.d}</td>
-      <td><strong${sel?' style="color:var(--accent)"':''}>${u.name}</strong></td>
-      <td style="color:var(--muted);font-size:10px">${u.attrBonus}</td>
-      <td style="color:var(--muted);font-size:10px">${u.disBonus}</td>
-    </tr>`;
-  }).join('');
-
-  let envPicker = '';
-  const env = ENVIRONMENTS.find(e => e.name === c._selectedEnv);
-  if (env) {
-    const chosen = lp.envAttr;
-    envPicker = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px">
-      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Environment Bonus — ${escH(env.name)}</div>
-      <div style="margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-          <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase">Environment Value</div>
-          <button class="btn btn-xs" onclick="suggestValue(1)">🎲 Suggest</button>
-        </div>
-        <input value="${escH((c.values||[])[1]||'')}" placeholder="e.g. Home is wherever you find family…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[1]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(1,this.value)">
-      </div>
-      <div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="color:var(--muted)">Attribute +1:</span>`;
-    env._attrOpts.forEach(k => {
-      const a = ATTRIBUTES.find(a => a.key === k);
-      envPicker += `<button class="btn btn-xs${chosen===k?' btn-accent':''}" onclick="setLPEnvAttr('${k}')">${a?a.abbr:k}</button>`;
-    });
-    if (!chosen) envPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-    envPicker += `</div>`;
-    envPicker += `</div>`;
-  }
-
-  let upbrPicker = '';
-  const upbr = UPBRINGINGS.find(u => u.name === c._selectedUpbringing);
-  if (upbr) {
-    const chosenAttr = lp.upbrAttr;
-    const chosenDisc = lp.upbrDisc;
-    upbrPicker = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px;margin-top:6px">
-      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Upbringing Bonus — ${escH(upbr.name)}</div>
-      <div style="margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-          <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase">Upbringing Value</div>
-          <button class="btn btn-xs" onclick="suggestValue(2)">🎲 Suggest</button>
-        </div>
-        <input value="${escH((c.values||[])[2]||'')}" placeholder="e.g. Discipline is the foundation of excellence…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[2]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(2,this.value)">
-      </div>
-      <div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-        <span style="color:var(--muted);min-width:90px">Attribute +1:</span>`;
-    upbr._attrOpts.forEach(k => {
-      const a = ATTRIBUTES.find(a => a.key === k);
-      upbrPicker += `<button class="btn btn-xs${chosenAttr===k?' btn-accent':''}" onclick="setLPUpbrAttr('${k}')">${a?a.abbr:k}</button>`;
-    });
-    if (!chosenAttr) upbrPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-    upbrPicker += `</div><div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="color:var(--muted);min-width:90px">Discipline +1:</span>`;
-    upbr._discOpts.forEach(k => {
-      const d = DISCIPLINES.find(d => d.key === k);
-      upbrPicker += `<button class="btn btn-xs${chosenDisc===k?' btn-accent':''}" onclick="setLPUpbrDisc('${k}')">${d?d.abbr:k}</button>`;
-    });
-    if (!chosenDisc) upbrPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-    upbrPicker += `</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:4px">Upbringing Focus — gain 1 focus related to your upbringing</div>
-      <div style="display:flex;gap:6px">
-        ${(()=>{const _d=_focusDrafts['focus-upbr-in']||'';const _c=_d&&S.char.focuses.includes(_d);return`<input id="focus-upbr-in" value="${escH(_d)}" placeholder="Enter upbringing focus…" ${_c?'readonly':''} oninput="_focusDrafts['focus-upbr-in']=this.value" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px;${_c?'opacity:0.55;cursor:default;':''}"><button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-upbr-in')" ${_c?'disabled':''}>${_c?'✓':'ADD FOCUS'}</button>`;})()}
-      </div>`;
-    if ((c.focuses||[]).length > 0) {
-      upbrPicker += `<div style="font-size:10px;color:var(--muted);margin-top:5px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>`;
-    }
-    upbrPicker += `</div>`;
-  }
-
-  return `
-  <p style="font-size:11px;color:var(--muted);margin-bottom:6px">Choose your childhood environment, then roll or pick an upbringing. Assign bonuses below.</p>
-  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Environment</div>
-  <table class="roll-table" style="margin-bottom:4px">
-    <thead><tr><th>Environment</th><th>Bonus</th></tr></thead>
-    <tbody>${envRows}</tbody>
-  </table>
-  ${envPicker}
-  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;margin-top:10px">Upbringing</div>
-  <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
-    <button class="btn btn-accent btn-sm" onclick="rollUpbringing()">Roll Upbringing (d20)</button>
-    ${c._selectedUpbringing?`<span style="color:var(--accent);font-size:12px"><strong>${escH(c._selectedUpbringing)}</strong></span>`:''}
-  </div>
-  <div style="max-height:180px;overflow-y:auto">
-    <table class="roll-table">
-      <thead><tr><th>d20</th><th>Upbringing</th><th>Attr</th><th>Disc</th></tr></thead>
-      <tbody>${upRows}</tbody>
-    </table>
-  </div>
-  ${upbrPicker}`;
-}
-
-function renderCS2() {
-  const c = S.char;
-  const lp = c._lp || {};
-  let trackRows = ACADEMY_TRACKS.map(t=>{
-    const sel=c._selectedTrack===t.name;
-    return `<tr onclick="setCreationTrack('${escQ(t.name)}')">
-      <td><strong${sel?' style="color:var(--accent)"':''}>${t.name}</strong></td>
-      <td style="color:var(--muted);font-size:10px">${t.disBonus}</td>
-      <td style="color:var(--muted);font-size:10px">${t.focus}</td>
-    </tr>`;
-  }).join('');
-  let trackPicker = '';
-  const tr = ACADEMY_TRACKS.find(t => t.name === c._selectedTrack);
-  if (tr) {
-    trackPicker = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:10px">
-      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Track Bonuses — ${escH(tr.name)}</div>`;
-    const fixed = Object.entries(tr._disc||{});
-    if (fixed.length > 0) {
-      trackPicker += `<div style="font-size:11px;color:var(--muted);margin-bottom:6px">Auto-applied: ${fixed.map(([k,v])=>`<strong style="color:var(--accent)">${k} +${v}</strong>`).join(', ')}</div>`;
-    }
-    if (tr._discFreeMode === 'allied') {
-      for (let i = 0; i < 2; i++) {
-        const chosen = (lp.trackDiscFree2||[])[i];
-        trackPicker += `<div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-          <span style="color:var(--muted);min-width:120px">Discipline +2 (${i+1}/2):</span>`;
-        DISCIPLINES.forEach(d => {
-          const other = (lp.trackDiscFree2||[]).filter((_,j)=>j!==i)[0];
-          const disabled = other === d.key;
-          trackPicker += `<button class="btn btn-xs${chosen===d.key?' btn-accent':''}${disabled?' btn-danger':''}" onclick="setLPTrackDiscFree2('${d.key}',${i})">${d.abbr}</button>`;
-        });
-        if (!chosen) trackPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-        trackPicker += `</div>`;
-      }
-      const chosen1 = lp.trackDiscFree1;
-      trackPicker += `<div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="color:var(--muted);min-width:120px">Discipline +1:</span>`;
-      DISCIPLINES.forEach(d => {
-        trackPicker += `<button class="btn btn-xs${chosen1===d.key?' btn-accent':''}" onclick="setLPTrackDiscFree1('${d.key}')">${d.abbr}</button>`;
-      });
-      if (!chosen1) trackPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-      trackPicker += `</div>`;
-    } else if (tr._discFreeMode === 'diplomatic') {
-      for (let i = 0; i < (tr._discFree||0); i++) {
-        const chosen = (lp.trackDiscFree||[])[i];
-        trackPicker += `<div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-          <span style="color:var(--muted);min-width:120px">Free Disc +1 (${i+1}/${tr._discFree}):</span>`;
-        DISCIPLINES.forEach(d => {
-          const alreadyFixed = (tr._disc||{})[d.key];
-          trackPicker += `<button class="btn btn-xs${chosen===d.key?' btn-accent':''}" onclick="setLPTrackDiscFree('${d.key}',${i})">${d.abbr}</button>`;
-        });
-        if (!chosen) trackPicker += `<span style="color:var(--danger);font-size:10px">← choose one</span>`;
-        trackPicker += `</div>`;
-      }
-    }
-    // Focus input for this track
-    const focusInputRow = function(id, label, placeholder) {
-      const draft = _focusDrafts[id]||'';
-      const committed = draft && S.char.focuses.includes(draft);
-      const lockedStyle = committed ? 'opacity:0.55;cursor:default;' : '';
-      const addLabel = committed ? '✓' : 'ADD';
-      const addDisabled = committed ? 'disabled' : '';
-      return `<div style="font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:4px">${label}</div>
-        <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input id="${id}" value="${escH(draft)}" placeholder="${placeholder}" ${committed?'readonly':''} oninput="_focusDrafts['${id}']=this.value" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px;${lockedStyle}">
-          <button class="btn btn-sm btn-accent" onclick="addFocusFrom('${id}')" ${addDisabled}>${addLabel}</button>
-        </div>`;
-    }
-    trackPicker += focusInputRow('focus-edu-1', `Focus 1 — Track: <em>${escH(tr.focus)}</em>`, 'Enter track focus…');
-    trackPicker += focusInputRow('focus-edu-2', 'Focus 2 — Academic study (free choice)', 'e.g. Astrophysics, Xenobiology, Tactical Analysis…');
-    trackPicker += focusInputRow('focus-edu-3', 'Focus 3 — Academic study (free choice)', 'e.g. Leadership, Warp Theory, Emergency Medicine…');
-    if ((c.focuses||[]).length > 0) {
-      trackPicker += `<div style="font-size:10px;color:var(--muted);margin-top:6px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>`;
-    }
-    trackPicker += `</div>`;
-  }
-
-  return `
-  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Choose your Academy track, assign discipline bonuses, and add your focuses.</p>
-  ${c._selectedTrack?`<div style="color:var(--accent);font-size:12px;margin-bottom:6px">Track: <strong>${escH(c._selectedTrack)}</strong></div>`:''}
-  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">Academy Track</div>
-  <table class="roll-table" style="margin-bottom:6px">
-    <thead><tr><th>Track</th><th>Discipline Bonuses</th><th>Focus Suggestion</th></tr></thead>
-    <tbody>${trackRows}</tbody>
-  </table>
-  ${trackPicker}
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-top:10px">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-      <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase">Education Value</div>
-      <button class="btn btn-xs" onclick="suggestValue(3)">🎲 Suggest</button>
-    </div>
-    <div style="font-size:10px;color:var(--muted);margin-bottom:6px">A value forged by your Starfleet training.</div>
-    <input value="${escH((c.values||[])[3]||'')}" placeholder="e.g. No obstacle is too great for a Starfleet crew…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[3]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(3,this.value)">
-  </div>
-  `;
-}
-
-function renderCS3() {
-  const c = S.char; const lp = c._lp||{};
-  function eventPickerHTML(idx, selectedName, eventAttrKey, eventDiscKey) {
-    const rows = CAREER_EVENTS.map(e=>{
-      const sel = selectedName === e.name;
-      return `<tr onclick="${idx===1?'selectCareerEvent':'selectCareerEvent2'}('${escQ(e.name)}')" class="${sel?'selected':''}">
-        <td style="color:var(--muted)">${e.d}</td>
-        <td><strong${sel?' style="color:var(--accent)"':''}>${e.name}</strong><br><span style="color:var(--muted)">${e.desc}</span></td>
-      </tr>`;
-    }).join('');
-    const attrSel = selectedName ? `
-      <div style="margin-top:8px">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Attribute +1 from this event</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">
-          ${ATTRIBUTES.map(a=>`<button class="btn btn-xs${eventAttrKey===a.key?' btn-accent':''}" onclick="setLPEventAttr(${idx},'${a.key}')">${a.abbr}</button>`).join('')}
-        </div>
-      </div>` : '';
-    const discSel = selectedName ? `
-      <div style="margin-top:6px">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Discipline +1 from this event</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">
-          ${DISCIPLINES.map(d=>`<button class="btn btn-xs${eventDiscKey===d.key?' btn-accent':''}" onclick="setLPEventDisc(${idx},'${d.key}')">${d.abbr}</button>`).join('')}
-        </div>
-      </div>` : '';
-    return `
-    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Career Event ${idx}</div>
-    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
-      <button class="btn btn-accent btn-sm" onclick="${idx===1?'rollCareerEvent':'rollCareerEvent2'}()">Roll d20</button>
-      ${selectedName?`<span style="color:var(--accent);font-size:11px"><strong>${escH(selectedName)}</strong></span>`:''}
-    </div>
-    <div style="max-height:180px;overflow-y:auto;margin-bottom:4px">
-      <table class="roll-table">
-        <thead><tr><th>d20</th><th>Event</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    ${attrSel}${discSel}`;
-  }
-  return `
-  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Determine your career length and choose two career events that shaped your service. Each event grants +1 to an Attribute and +1 to a Discipline.</p>
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px">
-    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Career Length</div>
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-      <button class="btn btn-accent btn-sm" onclick="rollCareerLength()">Roll d20</button>
-      ${c.careerLength?`<span style="color:var(--accent);font-size:13px"><strong>${escH(c.careerLength)}</strong></span>`:'<span style="font-size:11px;color:var(--muted)">Roll to determine your tier of service</span>'}
-    </div>
-    <div style="margin-bottom:8px">
-      ${CAREER_LENGTH.map(cl=>`<div onclick="saveCharField('careerLength','${escQ(cl.label)}');renderCurrentTab()" style="padding:7px 10px;border-radius:4px;border:1px solid ${c.careerLength===cl.label?'var(--accent)':'var(--border)'};background:${c.careerLength===cl.label?'var(--surface3)':'transparent'};cursor:pointer;margin-bottom:4px">
-        <div style="display:flex;align-items:baseline;gap:8px">
-          <strong style="color:${c.careerLength===cl.label?'var(--accent)':'var(--text)'};font-size:13px">${cl.label}</strong>
-          <span style="color:var(--muted);font-size:10px">d20 ${cl.range}</span>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${cl.desc}</div>
-      </div>`).join('')}
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-      <div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase">Career Length Value</div>
-      <button class="btn btn-xs" onclick="suggestValue(4)">🎲 Suggest</button>
-    </div>
-    <input value="${escH((c.values||[])[4]||'')}" placeholder="e.g. Every year of service has made me stronger…" style="width:100%;background:var(--surface3);border:1px solid ${(c.values||[])[4]?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(4,this.value)">
-  </div>
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px">
-    ${eventPickerHTML(1, c.careerEvent||'', lp.event1Attr||'', lp.event1Disc||'')}
-  </div>
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px">
-    ${eventPickerHTML(2, c.careerEvent2||'', lp.event2Attr||'', lp.event2Disc||'')}
-  </div>
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:8px">
-    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Career Event Focus</div>
-    <div style="display:flex;gap:6px">
-      ${(()=>{const _d=_focusDrafts['focus-event-in']||'';const _c=_d&&S.char.focuses.includes(_d);return`<input id="focus-event-in" value="${escH(_d)}" placeholder="Enter career event focus…" ${_c?'readonly':''} oninput="_focusDrafts['focus-event-in']=this.value" style="flex:1;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px;${_c?'opacity:0.55;cursor:default;':''}"><button class="btn btn-sm btn-accent" onclick="addFocusFrom('focus-event-in')" ${_c?'disabled':''}>${_c?'✓':'ADD FOCUS'}</button>`;})()}
-    </div>
-    ${(c.focuses||[]).length > 0 ? `<div style="font-size:10px;color:var(--muted);margin-top:5px">Focuses so far: ${(c.focuses).map(f=>`<strong>${escH(f)}</strong>`).join(', ')}</div>` : ''}
-  </div>`;
-}
-
-function renderCS4() {
-  const c = S.char;
-  const base = 7; const pool = 14;
-  const lpA = lpAttrBonuses();
-  const current = ATTRIBUTES.reduce((s,a)=>s+(c[a.key]-base),0);
-  const remaining = pool - current;
-  const lpTotal = Object.values(lpA).reduce((s,v)=>s+v,0);
-  let lpSummary = '';
-  if (lpTotal > 0) {
-    const parts = ATTRIBUTES.filter(a=>lpA[a.key]>0).map(a=>`${a.abbr} +${lpA[a.key]}`);
-    lpSummary = `<div style="font-size:11px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;margin-bottom:8px;color:var(--muted)">
-      Lifepath bonuses (applied on finish): <strong style="color:var(--accent)">${parts.join(', ')}</strong></div>`;
-  } else {
-    lpSummary = `<div style="font-size:11px;color:var(--muted);margin-bottom:8px">No lifepath attribute bonuses selected yet. Return to earlier steps to assign them.</div>`;
-  }
-  let attrHTML = '<div class="attr-grid">';
-  ATTRIBUTES.forEach(a => {
-    const lpB = lpA[a.key]||0;
-    const finalVal = c[a.key] + lpB;
-    const overMax = finalVal > 12;
-    attrHTML += `<div class="attr-box">
-      <div class="attr-abbr">${a.abbr}</div>
-      <div class="attr-val">${c[a.key]}</div>
-      ${lpB>0?`<div style="font-size:9px;color:var(--accent)">+${lpB} lp</div><div style="font-size:10px;color:${overMax?'var(--danger)':'var(--muted)'}">= ${finalVal}${overMax?' ⚠':''}  </div>`:''}
-      <div style="display:flex;gap:4px;justify-content:center;margin-top:2px">
-        <button class="res-btn" data-symbol="-" onclick="creationAdjAttr('${a.key}',-1)"></button>
-        <button class="res-btn" data-symbol="+" onclick="creationAdjAttr('${a.key}',1)"></button>
-      </div>
-      <div class="attr-full">${a.full}</div>
-    </div>`;
-  });
-  attrHTML += '</div>';
-  return `
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-    <p style="font-size:11px;color:var(--muted);margin:0">Each attribute starts at 7. Distribute <strong>14</strong> additional points. Max 12. Lifepath bonuses added on finish.</p>
-    <button class="btn btn-sm btn-accent" style="margin-left:auto" onclick="randomizeAttrs()">🎲 Randomize</button>
-  </div>
-  <div style="font-size:13px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;margin-bottom:8px">
-    Free points remaining: <strong style="color:${remaining<0?'var(--danger)':remaining===0?'var(--success)':'var(--text)'}">${remaining}</strong>
-    ${remaining<0?'<span style="color:var(--danger);margin-left:8px">Too many points!</span>':''}
-  </div>
-  ${lpSummary}
-  ${attrHTML}`;
-}
-
-function renderCS5() {
-  const c = S.char;
-  const base = 1; const pool = 10;
-  const lpD = lpDiscBonuses();
-  const current = DISCIPLINES.reduce((s,d)=>s+(c[d.key]-base),0);
-  const remaining = pool - current;
-  const lpTotal = Object.values(lpD).reduce((s,v)=>s+v,0);
-  let lpSummary = '';
-  if (lpTotal > 0) {
-    const parts = DISCIPLINES.filter(d=>lpD[d.key]>0).map(d=>`${d.abbr} +${lpD[d.key]}`);
-    lpSummary = `<div style="font-size:11px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;margin-bottom:8px;color:var(--muted)">
-      Lifepath bonuses (applied on finish): <strong style="color:var(--accent)">${parts.join(', ')}</strong></div>`;
-  }
-  let discHTML = '<div class="disc-grid">';
-  DISCIPLINES.forEach(d=>{
-    const rank=c[d.key]||1;
-    const lpB=lpD[d.key]||0;
-    const finalRank=rank+lpB;
-    const overMax=finalRank>5;
-    let dots='<div class="disc-dots">';
-    for(let i=1;i<=5;i++) dots+=`<div class="dot${i<=rank?' filled':''}" onclick="creationSetDisc('${d.key}',${i})" ondblclick="creationSetDisc('${d.key}',1)"></div>`;
-    dots+='</div>';
-    discHTML+=`<div class="disc-row">
-      <span style="font-size:9px;color:var(--muted);min-width:28px">${d.abbr}</span>
-      <span class="disc-name">${d.full}</span>
-      ${dots}
-      <span style="font-size:11px;color:var(--accent);min-width:16px">${rank}</span>
-      ${lpB>0?`<span style="font-size:9px;color:${overMax?'var(--danger)':'var(--muted)'};flex-shrink:0">(+${lpB}) = ${finalRank}${overMax?' \u26a0':''}</span>`:''}
-    </div>`;
-  });
-  discHTML+='</div>';
-  return `
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-    <p style="font-size:11px;color:var(--muted);margin:0">Disciplines start at 1. Distribute <strong>10</strong> additional points. Max 5. Lifepath bonuses added on finish.</p>
-    <button class="btn btn-sm btn-accent" style="margin-left:auto" onclick="randomizeDiscs()">🎲 Randomize</button>
-  </div>
-  <div style="font-size:13px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;margin-bottom:8px">
-    Free points remaining: <strong style="color:${remaining<0?'var(--danger)':remaining===0?'var(--success)':'var(--text)'}">${remaining}</strong>
-    ${remaining<0?'<span style="color:var(--danger);margin-left:8px">Too many points!</span>':''}
-  </div>
-  ${lpSummary}
-  ${discHTML}`;
-}
-
-function renderCS6() {
-  const c = S.char;
-  const vals = c.values || ['','','','','',''];
-  const phases = ['Species','Environment','Upbringing','Education','Career Length','Final'];
-  const placeholders = [
-    'e.g. Infinite Diversity in Infinite Combinations…',
-    'e.g. Home is wherever you find family…',
-    'e.g. Discipline is the foundation of excellence…',
-    'e.g. No obstacle is too great for a Starfleet crew…',
-    'e.g. Every year of service has made me stronger…',
-    'e.g. There is always a peaceful solution…'
-  ];
-  let valHTML = phases.map((label, i) => {
-    const v = vals[i] || '';
-    const isPrev = i < 5;
-    return `<div style="margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-        <div style="font-size:9px;color:var(--accent);letter-spacing:1px;text-transform:uppercase">${label} Value${isPrev && !v ? ' <span style="color:var(--danger)">← not yet set</span>' : ''}</div>
-        <button class="btn btn-xs" onclick="suggestValue(${i})">🎲</button>
-      </div>
-      <input value="${escH(v)}" placeholder="${placeholders[i]}" style="width:100%;background:var(--surface2);border:1px solid ${v?'var(--border)':'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(${i},this.value)">
-    </div>`;
-  }).join('');
-  let focHTML = (c.focuses||[]).map((f,i)=>`<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
-    <input value="${escH(f)}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px" onchange="updateFocus(${i},this.value)">
-    <button class="btn btn-xs btn-danger" onclick="removeFocus(${i})">✕</button>
-  </div>`).join('');
-  const defined = vals.filter(v=>v).length;
-  return `
-  <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Each phase of your life gave you one Value. Review and complete any you missed, then add at least 6 Focuses.</p>
-  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">VALUES (${defined}/6 defined)</div>
-  ${valHTML}
-  <button class="btn btn-sm" onclick="addValue()" style="margin-bottom:14px">+ Extra Value</button>
-  <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">FOCUSES (${(c.focuses||[]).length} defined)</div>
-  ${focHTML}
-  <div style="display:flex;gap:6px;margin-top:4px">
-    <input id="focus-in" placeholder="Add a Focus…" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px">
-    <button class="btn btn-sm btn-accent" onclick="addFocus()">ADD</button>
   </div>`;
 }
 
@@ -6176,58 +5593,7 @@ function adjAttr(key,d) {
   S.char[key]=Math.max(7,Math.min(12,S.char[key]+d));
   saveSlot(); renderCurrentTab();
 }
-function creationAdjAttr(key,d) {
-  const c=S.char; const base=7; const pool=14;
-  const current=ATTRIBUTES.reduce((s,a)=>s+(c[a.key]-base),0);
-  if(d>0&&current>=pool) return;
-  if(d>0&&c[key]>=12) return;
-  // Lifepath bonuses land on Finish and used to be silently clamped away,
-  // so the wizard let you spend points it then threw out. Cap the spend.
-  if(d>0&&c[key]+(lpAttrBonuses()[key]||0)>=12) return;
-  if(d>0&&c[key]===11&&ATTRIBUTES.some(a=>a.key!==key&&c[a.key]>=12)) return;
-  if(d<0&&c[key]<=base) return;
-  c[key]+=d; saveSlot(); renderCurrentTab();
-}
 function setDisc(key,v) { S.char[key]=v; saveSlot(); renderCurrentTab(); }
-function creationSetDisc(key,v) {
-  const c=S.char; const base=1; const pool=10;
-  const currentOthers=DISCIPLINES.reduce((s,d)=>d.key===key?s:s+(c[d.key]-base),0);
-  const maxVal=Math.min(5,base+pool-currentOthers);
-  const otherAt5=DISCIPLINES.some(d=>d.key!==key&&c[d.key]>=5);
-  let effectiveMax=otherAt5?Math.min(4,maxVal):maxVal;
-  // Same reason as creationAdjAttr: don't let the player buy ranks that
-  // Finish will clamp away without saying so.
-  effectiveMax=Math.min(effectiveMax, 5-(lpDiscBonuses()[key]||0));
-  c[key]=Math.max(base,Math.min(effectiveMax,v)); saveSlot(); renderCurrentTab();
-}
-function randomizeAttrs() {
-  const c = S.char;
-  ATTRIBUTES.forEach(a => c[a.key] = 7);
-  let rem = 14;
-  while (rem > 0) {
-    const maxHit = ATTRIBUTES.some(a => c[a.key] >= 12);
-    const ceiling = maxHit ? 11 : 12;
-    const eligible = ATTRIBUTES.filter(a => c[a.key] < ceiling);
-    if (!eligible.length) break;
-    const a = eligible[Math.floor(Math.random() * eligible.length)];
-    c[a.key]++; rem--;
-  }
-  saveSlot(); renderCurrentTab();
-}
-function randomizeDiscs() {
-  const c = S.char;
-  DISCIPLINES.forEach(d => c[d.key] = 1);
-  let rem = 10;
-  while (rem > 0) {
-    const maxHit = DISCIPLINES.some(d => c[d.key] >= 5);
-    const ceiling = maxHit ? 4 : 5;
-    const eligible = DISCIPLINES.filter(d => c[d.key] < ceiling);
-    if (!eligible.length) break;
-    const d = eligible[Math.floor(Math.random() * eligible.length)];
-    c[d.key]++; rem--;
-  }
-  saveSlot(); renderCurrentTab();
-}
 function toggleDet(i) {
   const cur=S.char.determination;
   S.char.determination= i<cur ? i : i+1; saveSlot(); renderCurrentTab();
@@ -6278,8 +5644,9 @@ const VALUE_SUGGESTIONS = [
   // 5: Final
   ['There is always a peaceful solution','The future is what we make it','I will not compromise what I believe','Every sentient life has equal worth','Hope is not naive, it is necessary','I fight so others do not have to','The best of us is still ahead','I choose to believe in people','The Federation represents something worth protecting','My convictions are not a weakness','Change is the only constant worth trusting','Love, in all its forms, is worth protecting','The darkness cannot extinguish the light','I am more than my past','Every ending is a new beginning','I will leave this universe better than I found it','Courage is acting despite the fear','We are only as strong as our most vulnerable','The truth, even when it hurts, sets us free','First, do no harm']
 ];
-function suggestValue(idx) {
-  const list = VALUE_SUGGESTIONS[idx];
+// slot: which value to fill; list: which VALUE_SUGGESTIONS phase to draw from.
+function suggestValue(idx, listIdx) {
+  const list = VALUE_SUGGESTIONS[listIdx === undefined ? idx : listIdx];
   if (!list) return;
   const v = list[Math.floor(Math.random() * list.length)];
   setValueText(idx, v);
@@ -6396,175 +5763,689 @@ function startNewChar() {
   confirmNewChar();
 }
 
-// ── Lifepath bonus helpers ──
-function lpAttrBonuses() {
-  const c = S.char; const lp = c._lp||{};
-  const b = {}; ATTRIBUTES.forEach(a => b[a.key]=0);
-  const sp = SPECIES_LIST.find(s => s.name === c._selectedSpecies);
-  if (sp) {
-    Object.entries(sp._attr||{}).forEach(([k,v]) => { if(b[k]!==undefined) b[k]+=v; });
-    (lp.speciesAttrFree||[]).forEach(k => { if(b[k]!==undefined) b[k]++; });
-  }
-  if (lp.envAttr && b[lp.envAttr]!==undefined) b[lp.envAttr]++;
-  if (lp.upbrAttr && b[lp.upbrAttr]!==undefined) b[lp.upbrAttr]++;
-  if (lp.event1Attr && b[lp.event1Attr]!==undefined) b[lp.event1Attr]++;
-  if (lp.event2Attr && b[lp.event2Attr]!==undefined) b[lp.event2Attr]++;
-  return b;
+// ============================================================
+// LIFEPATH WIZARD — book Chapter 03.20, Steps One–Seven
+// Every attribute starts at 7 and every discipline at 1; the lifepath alone
+// takes them to the book's totals (56 / 16). Choices live in S.char._lp and
+// the chosen names in the _selected*/career* fields the HUD and sheet read.
+// Scores are only written to the character on Finish.
+// ============================================================
+const LP_CUSTOM = {name:'New Species / Unique', attrs:[], any:3, eras:[], page:'92, 102',
+  desc:'A unique individual or a species not in the matrixes: +1 to any three different attributes (sidebars, pp. 92 and 102). Name the species below — it becomes your species trait.'};
+const LP_ERA_LABEL = {ENT:'Enterprise Era', TOS:'Original Series Era', TNG:'Next Generation Era'};
+// The book has matrixes for three eras; the app's other eras use the nearest one.
+function lpEraTable(era) {
+  if (!era) return '';
+  if (/Enterprise/.test(era)) return 'ENT';
+  if (/Discovery|Original|Golden/.test(era)) return 'TOS';
+  return 'TNG';
 }
-function lpDiscBonuses() {
-  const c = S.char; const lp = c._lp||{};
-  const b = {}; DISCIPLINES.forEach(d => b[d.key]=0);
-  const sp = SPECIES_LIST.find(s => s.name === c._selectedSpecies);
-  if (sp) {
-    if (sp._discOpts && sp._discOpts.length > 0) {
-      if (lp.speciesDiscChoice && b[lp.speciesDiscChoice]!==undefined) b[lp.speciesDiscChoice]++;
-    } else if ((sp._discFree||0) > 0) {
-      (lp.speciesDiscFree||[]).forEach(k => { if(b[k]!==undefined) b[k]++; });
-    }
-  }
-  if (lp.upbrDisc && b[lp.upbrDisc]!==undefined) b[lp.upbrDisc]++;
-  if (lp.event1Disc && b[lp.event1Disc]!==undefined) b[lp.event1Disc]++;
-  if (lp.event2Disc && b[lp.event2Disc]!==undefined) b[lp.event2Disc]++;
-  const tr = ACADEMY_TRACKS.find(t => t.name === c._selectedTrack);
-  if (tr) {
-    Object.entries(tr._disc||{}).forEach(([k,v]) => { if(b[k]!==undefined) b[k]+=v; });
-    if (tr._discFreeMode === 'allied') {
-      (lp.trackDiscFree2||[]).forEach(k => { if(b[k]!==undefined) b[k]+=2; });
-      if (lp.trackDiscFree1 && b[lp.trackDiscFree1]!==undefined) b[lp.trackDiscFree1]++;
-    } else if (tr._discFreeMode === 'diplomatic') {
-      (lp.trackDiscFree||[]).forEach(k => { if(b[k]!==undefined) b[k]++; });
-    }
-  }
-  return b;
-}
-function setLPSpeciesAttrFree(key,idx) {
-  if (!S.char._lp) S.char._lp={};
-  if (!S.char._lp.speciesAttrFree) S.char._lp.speciesAttrFree=[];
-  S.char._lp.speciesAttrFree[idx]=key; saveSlot(); renderCurrentTab();
-}
-function setLPSpeciesDisc(key) {
-  if (!S.char._lp) S.char._lp={};
-  S.char._lp.speciesDiscChoice=key; saveSlot(); renderCurrentTab();
-}
-function setLPSpeciesDiscFree(key,idx) {
-  if (!S.char._lp) S.char._lp={};
-  if (!S.char._lp.speciesDiscFree) S.char._lp.speciesDiscFree=[];
-  S.char._lp.speciesDiscFree[idx]=key; saveSlot(); renderCurrentTab();
-}
-function setLPEnvAttr(key) {
-  if (!S.char._lp) S.char._lp={};
-  S.char._lp.envAttr=key; saveSlot(); renderCurrentTab();
-}
-function setLPUpbrAttr(key) {
-  if (!S.char._lp) S.char._lp={};
-  S.char._lp.upbrAttr=key; saveSlot(); renderCurrentTab();
-}
-function setLPUpbrDisc(key) {
-  if (!S.char._lp) S.char._lp={};
-  S.char._lp.upbrDisc=key; saveSlot(); renderCurrentTab();
-}
-function setLPTrackDiscFree2(key,idx) {
-  if (!S.char._lp) S.char._lp={};
-  if (!S.char._lp.trackDiscFree2) S.char._lp.trackDiscFree2=[];
-  S.char._lp.trackDiscFree2[idx]=key; saveSlot(); renderCurrentTab();
-}
-function setLPTrackDiscFree1(key) {
-  if (!S.char._lp) S.char._lp={};
-  S.char._lp.trackDiscFree1=key; saveSlot(); renderCurrentTab();
-}
-function setLPTrackDiscFree(key,idx) {
-  if (!S.char._lp) S.char._lp={};
-  if (!S.char._lp.trackDiscFree) S.char._lp.trackDiscFree=[];
-  S.char._lp.trackDiscFree[idx]=key; saveSlot(); renderCurrentTab();
-}
+const LP_ATTR_KEYS = ATTRIBUTES.map(a => a.key);
+const LP_DISC_KEYS = DISCIPLINES.map(d => d.key);
+const LP_OUTLOOK_GROUPS = {
+  upbringing: {label:'Upbringing', yes:'Accepted', no:'Rebelled', who:'Any character (the default)'},
+  caste:      {label:'Klingon Caste', yes:'Accepted', no:'Rejected', who:'Klingons, or anyone raised in a Klingon household'},
+  aspiration: {label:'Aspiration', yes:'Pursued', no:'Abandoned', who:'Any character'},
+};
 
-// Creation wizard functions
-function creationNext() {
-  const step=S.char.creationStep||0;
-  if(step===CREATION_STEPS.length-1){
-    S.char.creationComplete=true;
-    S.char.species=S.char._selectedSpecies||S.char.species;
-    S.char.era=S.char._selectedEra||S.char.era;
-    S.char.upbringing=S.char._selectedUpbringing||S.char.upbringing;
-    // Apply all lifepath bonuses
-    const attrB=lpAttrBonuses();
-    ATTRIBUTES.forEach(a => { S.char[a.key]=Math.min(12,S.char[a.key]+(attrB[a.key]||0)); });
-    const discB=lpDiscBonuses();
-    DISCIPLINES.forEach(d => { S.char[d.key]=Math.min(5,S.char[d.key]+(discB[d.key]||0)); });
-    saveSlot(); renderCurrentTab();
+function lpDefault() {
+  return {v:2, mixed:'', speciesPick:[], customName:'',
+    envTable:'', envAttr:'', envDisc:'', envOther:'',
+    outlookGroup:'upbringing', outlookYes:null, outlookDisc:'',
+    eduCat:'', eduAttr:{}, eduMajor:'', eduMinor:['',''], eduSwapFrom:'', eduSwapTo:'',
+    ev1Attr:'', ev1Disc:'', ev2Attr:'', ev2Disc:'',
+    finAttr:[], finDisc:[], adjAttr:{}, adjDisc:{},
+    focus:{outlook:'', edu:['','',''], ev1:'', ev2:''}};
+}
+function lp() {
+  const c = S.char;
+  if (!c._lp || c._lp.v !== 2) c._lp = lpDefault();
+  return c._lp;
+}
+const lpAbbr = k => (ATTRIBUTES.find(a => a.key === k) || DISCIPLINES.find(d => d.key === k) || {abbr:k}).abbr;
+const lpFull = k => (ATTRIBUTES.find(a => a.key === k) || DISCIPLINES.find(d => d.key === k) || {full:k}).full;
+function lpRoll(n) { return Math.floor(Math.random() * (n || 20)) + 1; }
+function lpInRange(roll, range) {
+  const [lo, hi] = String(range).split('-').map(Number);
+  return roll >= lo && roll <= (hi || lo);
+}
+function lpSpecies(name) {
+  if (!name) return null;
+  return name === LP_CUSTOM.name ? LP_CUSTOM : (LP_SPECIES.find(s => s.name === name) || null);
+}
+function lpSpeciesDisplay(c) {
+  const l = lp(); const sp = lpSpecies(c._selectedSpecies);
+  if (!sp) return '';
+  const base = sp === LP_CUSTOM ? (l.customName.trim() || 'New Species') : sp.name;
+  return l.mixed ? `${base} / ${l.mixed}` : base;
+}
+function lpNeedsSpeciesPick(c) {
+  const sp = lpSpecies(c._selectedSpecies);
+  return !!sp && (sp.any > 0 || !!lp().mixed);
+}
+// Attributes a species pick may come from: mixed heritage pools both species.
+function lpSpeciesPickPool(c) {
+  const l = lp(); const sp = lpSpecies(c._selectedSpecies);
+  if (!sp) return [];
+  const sp2 = l.mixed ? lpSpecies(l.mixed) : null;
+  if (sp.any || (sp2 && sp2.any)) return LP_ATTR_KEYS.slice();
+  return [...new Set([...(sp.attrs || []), ...((sp2 && sp2.attrs) || [])])];
+}
+function lpSpeciesAttrs(c) {
+  const sp = lpSpecies(c._selectedSpecies);
+  if (!sp) return [];
+  if (!lpNeedsSpeciesPick(c)) return sp.attrs.slice();
+  const pool = lpSpeciesPickPool(c);
+  return [...new Set(lp().speciesPick)].filter(k => pool.includes(k)).slice(0, 3);
+}
+function lpEnv(c) {
+  const l = lp();
+  return ((LP_ENVIRONMENTS[l.envTable] || []).find(e => e.name === c._selectedEnv)) || null;
+}
+function lpEnvAttrPool(c) {
+  const env = lpEnv(c); if (!env) return [];
+  if (env.attrs === 'SPECIES_ATTRIBUTES') return lpSpeciesAttrs(c);
+  if (env.attrs === 'OTHER_SPECIES_ATTRIBUTES') {
+    const o = lpSpecies(lp().envOther);
+    return !o ? [] : (o.any ? LP_ATTR_KEYS.slice() : o.attrs.slice());
+  }
+  return env.attrs;
+}
+const lpPool = (list, all) => (list && list[0] === 'any') ? all.slice() : (list || []);
+function lpOutlook(c) {
+  return ((LP_OUTLOOKS[lp().outlookGroup] || []).find(o => o.name === c._selectedUpbringing)) || null;
+}
+function lpEdu(c) {
+  for (const cat of LP_EDUCATION) {
+    const t = cat.tracks.find(t => t.name === c._selectedTrack);
+    if (t) return {cat, track:t};
+  }
+  return null;
+}
+// The disciplines an education choice raises, as {key: amount}.
+function lpEduDiscs(c) {
+  const l = lp(); const e = lpEdu(c); const out = {};
+  if (!e) return out;
+  const t = e.track;
+  if (l.eduMajor) out[l.eduMajor] = 2;
+  if (t.mode === 'officer') {
+    const other = l.eduMajor === 'command' ? 'security' : l.eduMajor === 'security' ? 'command' : '';
+    if (other) out[other] = 1;
+    if (l.eduMinor[1]) out[l.eduMinor[1]] = (out[l.eduMinor[1]] || 0) + 1;
   } else {
-    S.char.creationStep=(step+1); saveSlot(); renderCurrentTab();
+    l.eduMinor.filter(Boolean).forEach(k => { out[k] = (out[k] || 0) + 1; });
   }
+  return out;
 }
-function creationBack() {
-  S.char.creationStep=Math.max(0,(S.char.creationStep||0)-1); saveSlot(); renderCurrentTab();
-}
-function setCreationSpecies(name) {
-  if (S.char._selectedSpecies !== name) {
-    // The picker highlights a button only when it matches the stored choice
-    // and warns only when the choice is empty, so a stale pick from the
-    // previous species rendered as neither selected nor missing - and was
-    // still applied on Finish.
-    const lp = S.char._lp || (S.char._lp = {});
-    lp.speciesAttrFree = [];
-    lp.speciesDiscChoice = '';
-    lp.speciesDiscFree = [];
+const lpEvent = name => LP_CAREER_EVENTS.find(e => e.name === name) || null;
+
+// One pass over the whole lifepath: final scores plus what is still missing,
+// grouped by wizard step (0–5) so each step can show its own gaps.
+function lpCompute() {
+  const c = S.char; const l = lp();
+  const attr = {}; LP_ATTR_KEYS.forEach(k => attr[k] = 7);
+  const disc = {}; LP_DISC_KEYS.forEach(k => disc[k] = 1);
+  const issues = [[], [], [], [], [], []];
+  const val = i => ((c.values || [])[i] || '').trim();
+
+  // Step One — Species
+  const sp = lpSpecies(c._selectedSpecies);
+  if (!sp) issues[0].push('Choose a species');
+  else {
+    if (l.mixed && !lpSpecies(l.mixed)) issues[0].push('Choose the second species for mixed heritage');
+    if (sp === LP_CUSTOM && !l.customName.trim()) issues[0].push('Name your species');
+    const sa = lpSpeciesAttrs(c);
+    if (sa.length < 3) issues[0].push(`Choose ${3 - sa.length} more species attribute${3 - sa.length === 1 ? '' : 's'}`);
+    sa.forEach(k => attr[k]++);
   }
-  S.char._selectedSpecies=name; saveSlot(); renderCurrentTab();
+  // Step Two — Environment
+  const env = lpEnv(c);
+  if (!env) issues[1].push('Choose an environment');
+  else {
+    if (env.attrs === 'OTHER_SPECIES_ATTRIBUTES' && !lpSpecies(l.envOther)) issues[1].push('Choose the species whose world you grew up on');
+    if (lpEnvAttrPool(c).includes(l.envAttr)) attr[l.envAttr]++; else issues[1].push('Choose the environment attribute');
+    if (lpPool(env.discs, LP_DISC_KEYS).includes(l.envDisc)) disc[l.envDisc]++; else issues[1].push('Choose the environment discipline');
+  }
+  if (!val(0)) issues[1].push('Write your environment value');
+  // Step Three — Early Outlook
+  const ol = lpOutlook(c);
+  if (!ol) issues[2].push('Choose an early outlook');
+  else {
+    if (l.outlookYes === true || l.outlookYes === false) {
+      Object.entries(l.outlookYes ? ol.yes : ol.no).forEach(([k, v]) => attr[k] += v);
+    } else issues[2].push(`Choose whether you ${LP_OUTLOOK_GROUPS[l.outlookGroup].yes.toLowerCase()} or ${LP_OUTLOOK_GROUPS[l.outlookGroup].no.toLowerCase()} it`);
+    if (lpPool(ol.discs, LP_DISC_KEYS).includes(l.outlookDisc)) disc[l.outlookDisc]++; else issues[2].push('Choose the outlook discipline');
+  }
+  if (!l.focus.outlook.trim()) issues[2].push('Add your early outlook focus');
+  // Step Four — Education
+  const ed = lpEdu(c);
+  if (!ed) issues[3].push('Choose your education');
+  else {
+    const t = ed.track;
+    const pts = Object.entries(l.eduAttr).filter(([k, v]) => LP_ATTR_KEYS.includes(k) && v > 0);
+    const sum = pts.reduce((s, [, v]) => s + v, 0);
+    if (sum !== 3) issues[3].push(`Assign ${3 - sum} more education attribute point${3 - sum === 1 ? '' : 's'}`);
+    else if (t.attrReq.length && !pts.some(([k]) => t.attrReq.includes(k))) issues[3].push(`One education attribute must be ${t.attrReq.map(lpFull).join(' or ')}`);
+    pts.forEach(([k, v]) => attr[k] += v);
+    const majorPool = t.mode === 'officer' ? ['command', 'security'] : lpPool(t.major, LP_DISC_KEYS);
+    if (!majorPool.includes(l.eduMajor)) issues[3].push('Choose the discipline that gets +2');
+    if (t.mode === 'officer') {
+      if (!['conn', 'engineering', 'science', 'medicine'].includes(l.eduMinor[1])) issues[3].push('Choose Conn, Engineering, Science or Medicine for +1');
+    } else {
+      const mins = l.eduMinor.filter(k => k && k !== l.eduMajor);
+      if (new Set(mins).size < 2) issues[3].push(`Choose ${2 - new Set(mins).size} more discipline${2 - new Set(mins).size === 1 ? '' : 's'} for +1`);
+      if (t.mode === 'intel' && l.eduMajor && ![l.eduMajor, ...mins].includes('security')) issues[3].push('Intelligence Training: Security must be one of the three');
+    }
+    const eduD = lpEduDiscs(c);
+    Object.entries(eduD).forEach(([k, v]) => disc[k] += v);
+    if (t.swap && (l.eduSwapFrom || l.eduSwapTo)) {
+      if (!l.eduSwapFrom || !l.eduSwapTo) issues[3].push('Finish or clear the optional discipline swap');
+      else if (eduD[l.eduSwapFrom] || eduD[l.eduSwapTo] || l.eduSwapFrom === l.eduSwapTo) issues[3].push('The swap must move a point between disciplines this education did not raise');
+      else if (disc[l.eduSwapFrom] <= 1) issues[3].push(`${lpFull(l.eduSwapFrom)} is too low to give up a point`);
+      else { disc[l.eduSwapFrom]--; disc[l.eduSwapTo]++; }
+    }
+    if (t.cap4) {
+      const over = LP_DISC_KEYS.filter(k => disc[k] > 4);
+      if (over.length) issues[3].push(`Starfleet Academy: no discipline above 4 at this stage (${over.map(lpFull).join(', ')})`);
+    }
+  }
+  if (!val(1)) issues[3].push('Write your education value');
+  l.focus.edu.forEach((f, i) => { if (!f.trim()) issues[3].push(`Add education focus ${i + 1}`); });
+  // Step Five & Six — Career
+  if (!c.careerLength) issues[4].push('Choose your career length');
+  if (!val(2)) issues[4].push('Write your career length value');
+  [1, 2].forEach(n => {
+    const e = lpEvent(n === 1 ? c.careerEvent : c.careerEvent2);
+    if (!e) { issues[4].push(`Choose career event ${n}`); return; }
+    const a = e.attr === 'any' ? l['ev' + n + 'Attr'] : e.attr;
+    const d = e.disc === 'any' ? l['ev' + n + 'Disc'] : e.disc;
+    if (LP_ATTR_KEYS.includes(a)) attr[a]++; else issues[4].push(`Choose the attribute for career event ${n}`);
+    if (LP_DISC_KEYS.includes(d)) disc[d]++; else issues[4].push(`Choose the discipline for career event ${n}`);
+    if (!l.focus['ev' + n].trim()) issues[4].push(`Add the focus for career event ${n}`);
+  });
+  if (c.careerEvent && c.careerEvent === c.careerEvent2) issues[4].push('Choose two different career events');
+  // Step Seven — Finishing Touches
+  const fa = [...new Set(l.finAttr)].filter(k => LP_ATTR_KEYS.includes(k));
+  const fd = [...new Set(l.finDisc)].filter(k => LP_DISC_KEYS.includes(k));
+  if (fa.length < 2) issues[5].push(`Choose ${2 - fa.length} more attribute${fa.length === 1 ? '' : 's'} to raise`);
+  if (fd.length < 2) issues[5].push(`Choose ${2 - fd.length} more discipline${fd.length === 1 ? '' : 's'} to raise`);
+  fa.forEach(k => attr[k]++); fd.forEach(k => disc[k]++);
+  if (!val(3)) issues[5].push('Write your final value');
+  const before = {attr:{...attr}, disc:{...disc}};
+  // Point moves only make sense against the scores they were made for; if an
+  // earlier step changed those scores since, the moves are dropped.
+  if ((Object.keys(l.adjAttr).length || Object.keys(l.adjDisc).length) && l.adjBase !== JSON.stringify(before)) {
+    l.adjAttr = {}; l.adjDisc = {}; l.adjBase = '';
+  }
+  const capIssues = [];
+  [['attr', attr, l.adjAttr, 12, 'attribute'], ['disc', disc, l.adjDisc, 5, 'discipline']].forEach(([kind, tot, adj, cap, word]) => {
+    Object.entries(adj).forEach(([k, v]) => { if (tot[k] !== undefined) tot[k] += v; });
+    const net = Object.values(adj).reduce((s, v) => s + v, 0);
+    if (net < 0) capIssues.push(`Place ${-net} reduced ${word} point${net === -1 ? '' : 's'} elsewhere`);
+    const keys = Object.keys(tot);
+    keys.filter(k => tot[k] > cap).forEach(k => capIssues.push(`${lpFull(k)} is above ${cap} — reduce it`));
+    if (keys.filter(k => tot[k] === cap).length > 1) capIssues.push(`Only one ${word} may be ${cap} — reduce one`);
+  });
+  issues[5].push(...capIssues);
+  return {attr, disc, before, issues, all: issues.flat(), capIssues};
 }
 
-function setCreationEnv(name) {
-  if (S.char._selectedEnv !== name) { if (S.char._lp) S.char._lp.envAttr = ''; }
-  S.char._selectedEnv=name; saveSlot(); renderCurrentTab();
+// Shared UI pieces
+const lpBox = (title, inner, accent) => `<div style="background:var(--surface2);border:1px solid ${accent ? 'var(--accent)' : 'var(--border)'};border-radius:4px;padding:10px;margin-bottom:10px">
+  ${title ? `<div style="font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">${title}</div>` : ''}${inner}</div>`;
+const lpHint = t => `<div style="font-size:10px;color:var(--muted);margin-bottom:6px">${t}</div>`;
+function lpKeyBtns(keys, chosen, fn, disabledKeys) {
+  const sel = Array.isArray(chosen) ? chosen : [chosen];
+  return keys.map(k => {
+    const dis = disabledKeys && disabledKeys.includes(k);
+    return `<button class="btn btn-xs${sel.includes(k) ? ' btn-accent' : ''}" ${dis ? 'disabled style="opacity:.35"' : ''} onclick="${fn}('${k}')" title="${lpFull(k)}">${lpAbbr(k)}</button>`;
+  }).join('');
+}
+const lpRow = (label, inner) => `<div style="font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span style="color:var(--muted);min-width:118px">${label}</span>${inner}</div>`;
+function lpStepIssues(i) {
+  const list = lpCompute().issues[i];
+  if (!list.length) return `<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Step complete</div>`;
+  return `<div style="font-size:10px;color:var(--danger);margin-top:4px;line-height:1.6">Still to do: ${list.map(escH).join(' · ')}</div>`;
+}
+function lpValueInput(slot, label, hint, list) {
+  const v = (S.char.values || [])[slot] || '';
+  return lpBox(label, `${hint ? lpHint(hint) : ''}<div style="display:flex;gap:6px">
+    <input value="${escH(v)}" placeholder="Write a value — a belief your character holds…" style="flex:1;background:var(--surface3);border:1px solid ${v ? 'var(--border)' : 'var(--danger)'};color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px" onchange="setValueText(${slot},this.value);renderCurrentTab()">
+    <button class="btn btn-xs" onclick="suggestValue(${slot},${list})">🎲 Suggest</button></div>`);
+}
+function lpFocusInput(path, idx, label, examples) {
+  const l = lp();
+  const cur = idx === null ? l.focus[path] : l.focus[path][idx];
+  const chips = (examples || []).map(f => `<button class="btn btn-xs" onclick="lpSetFocus('${path}',${idx},'${escQ(f)}')">${escH(f)}</button>`).join('');
+  return `<div style="margin-bottom:8px"><div style="font-size:10px;color:var(--muted);margin-bottom:3px">${label}</div>
+    <input value="${escH(cur)}" placeholder="Type a focus, or pick an example…" style="width:100%;background:var(--surface3);border:1px solid ${cur ? 'var(--border)' : 'var(--danger)'};color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px" onchange="lpSetFocus('${path}',${idx},this.value)">
+    ${chips ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${chips}</div>` : ''}</div>`;
+}
+function lpBonusText(obj) { return Object.entries(obj).map(([k, v]) => `${lpFull(k)} +${v}`).join(', '); }
+function lpListText(list, all) { return (list && list[0] === 'any') ? 'any' : (list || []).map(lpFull).join(' / '); }
+
+// Step 1 — Species & Era
+function renderLP0() {
+  const c = S.char; const l = lp();
+  const selEra = c._selectedEra || '';
+  const eraOpts = ERAS.map(e => `<option${selEra === e ? ' selected' : ''}>${e}</option>`).join('');
+  const eraBadge = ERA_BADGES.find(e => e.keys.some(k => selEra.includes(k)));
+  const eraBadgeHTML = eraBadge ? `<img src="${eraBadge.src}" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 0 6px var(--accent));flex-shrink:0" onerror="this.style.display='none'">` : `<div style="width:48px;height:48px;border:2px dashed var(--accent-dim);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:var(--accent-dim)">?</div>`;
+  const table = lpEraTable(selEra);
+  const filter = window._lpSpeciesFilter || (table || 'ALL');
+  const list = [...LP_SPECIES.filter(s => filter === 'ALL' || s.eras.includes(filter)), LP_CUSTOM];
+  const rows = list.map(s => {
+    const sel = c._selectedSpecies === s.name;
+    return `<tr onclick="setCreationSpecies('${escQ(s.name)}')" class="${sel ? 'selected' : ''}">
+      <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(s.name)}</strong></td>
+      <td style="color:var(--muted);font-size:10px">${s.any ? `+1 to any ${s.any}` : s.attrs.map(lpFull).join(', ')}</td>
+      <td style="color:var(--muted);font-size:10px">${s.eras.map(e => e).join(' ') || '—'}</td></tr>`;
+  }).join('');
+  const fBtn = (k, label) => `<button class="btn btn-xs${filter === k ? ' btn-accent' : ''}" onclick="window._lpSpeciesFilter='${k}';renderCurrentTab()">${label}</button>`;
+  const sp = lpSpecies(c._selectedSpecies);
+  let detail = '';
+  if (sp) {
+    let inner = `<div style="font-size:11px;color:var(--text);line-height:1.5;margin-bottom:8px">${escH(sp.desc)} <span style="color:var(--muted)">(p. ${escH(sp.page)})</span></div>`;
+    if (sp === LP_CUSTOM) inner += lpRow('Species name:', `<input value="${escH(l.customName)}" placeholder="e.g. Alshain" style="flex:1;background:var(--surface3);border:1px solid ${l.customName ? 'var(--border)' : 'var(--danger)'};color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px" onchange="lpSet('customName',this.value)">`);
+    else {
+      const others = LP_SPECIES.filter(s => s.name !== sp.name).map(s => `<option${l.mixed === s.name ? ' selected' : ''}>${escH(s.name)}</option>`).join('');
+      inner += lpRow('Mixed heritage:', `<select style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:3px;font-size:11px" onchange="lpSetMixed(this.value)"><option value="">— single species —</option>${others}</select>
+        <span style="color:var(--muted);font-size:10px">Pick three different bonuses from across both species (p. 91).</span>`);
+    }
+    if (lpNeedsSpeciesPick(c)) {
+      const pool = lpSpeciesPickPool(c);
+      inner += lpRow(`Attributes +1 (${lpSpeciesAttrs(c).length}/3):`, lpKeyBtns(LP_ATTR_KEYS, l.speciesPick, 'lpToggleSpeciesPick', LP_ATTR_KEYS.filter(k => !pool.includes(k))));
+    } else inner += lpRow('Attributes +1:', sp.attrs.map(k => `<strong style="color:var(--accent)">${lpFull(k)}</strong>`).join(', '));
+    detail = lpBox(`Species — ${escH(lpSpeciesDisplay(c))}`, inner, true);
+  }
+  return `
+  <div style="background:var(--accent-glow);border:2px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:12px">${eraBadgeHTML}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Choose Your Era</div>
+        <select style="width:100%;background:#000;border:2px solid ${selEra ? 'var(--accent)' : 'var(--danger)'};color:var(--text);padding:7px 10px;border-radius:4px;font-size:13px;font-family:var(--font)" onchange="saveCharField('_selectedEra',this.value);window._lpSpeciesFilter=null;renderCurrentTab()"><option value="">— Select Era —</option>${eraOpts}</select>
+        ${!selEra ? `<div style="font-size:10px;color:var(--danger);margin-top:4px">⚠ Era affects available ships and the species roll table.</div>` : `<div style="font-size:10px;color:var(--muted);margin-top:4px">Species roll table: ${LP_ERA_LABEL[table]}</div>`}
+      </div></div></div>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step One: every species gives +1 to three different attributes and a species trait. Choose one, or roll on the era's matrix.</p>
+  <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+    <button class="btn btn-accent btn-sm" onclick="lpRollSpecies()">🎲 Roll Species${table ? ` (${LP_ERA_LABEL[table]})` : ' (random era)'}</button>
+    <span style="flex:1"></span>${fBtn('ENT', 'ENT')}${fBtn('TOS', 'TOS')}${fBtn('TNG', 'TNG')}${fBtn('ALL', 'All 58')}
+  </div>
+  <div style="max-height:260px;overflow-y:auto;margin-bottom:8px">
+    <table class="roll-table"><thead><tr><th>Species</th><th>Attributes +1</th><th>Matrix</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>
+  ${detail}${lpStepIssues(0)}`;
 }
 
-function setCreationUpbringing(name) {
-  if (S.char._selectedUpbringing !== name) {
-    if (S.char._lp) { S.char._lp.upbrAttr=''; S.char._lp.upbrDisc=''; }
+// Step 2 — Environment
+function renderLP1() {
+  const c = S.char; const l = lp();
+  const tBtn = (k, label) => `<button class="btn btn-sm${l.envTable === k ? ' btn-accent' : ''}" onclick="lpSetEnvTable('${k}')">${label}</button>`;
+  let body = '';
+  if (l.envTable) {
+    const rows = LP_ENVIRONMENTS[l.envTable].map(e => {
+      const sel = c._selectedEnv === e.name;
+      const a = e.attrs === 'SPECIES_ATTRIBUTES' ? 'one of your species’ three' : e.attrs === 'OTHER_SPECIES_ATTRIBUTES' ? 'one of another species’ three' : e.attrs.map(lpFull).join(' / ');
+      return `<tr onclick="setCreationEnv('${escQ(e.name)}')" class="${sel ? 'selected' : ''}"><td style="color:var(--muted)">${e.roll}</td>
+        <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(e.name)}</strong><br><span style="color:var(--muted);font-size:10px">${escH(e.text)}</span></td>
+        <td style="color:var(--muted);font-size:10px">${a}</td><td style="color:var(--muted);font-size:10px">${lpListText(e.discs)}</td></tr>`;
+    }).join('');
+    body += `<div style="display:flex;gap:6px;align-items:center;margin:8px 0 6px"><button class="btn btn-accent btn-sm" onclick="lpRollEnv()">🎲 Roll d20</button></div>
+      <table class="roll-table" style="margin-bottom:8px"><thead><tr><th>d20</th><th>${l.envTable === 'settings' ? 'Setting' : 'Condition'}</th><th>Attribute +1</th><th>Discipline +1</th></tr></thead><tbody>${rows}</tbody></table>`;
+    const env = lpEnv(c);
+    if (env) {
+      let inner = '';
+      if (env.attrs === 'OTHER_SPECIES_ATTRIBUTES') {
+        const opts = LP_SPECIES.map(s => `<option${l.envOther === s.name ? ' selected' : ''}>${escH(s.name)}</option>`).join('');
+        inner += lpRow('Other species:', `<select style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:3px;font-size:11px" onchange="lpSet('envOther',this.value);lpSet('envAttr','')"><option value="">— choose —</option>${opts}</select>`);
+      }
+      const ap = lpEnvAttrPool(c);
+      inner += lpRow('Attribute +1:', ap.length ? lpKeyBtns(ap, l.envAttr, 'lpSetEnvAttr') : `<span style="color:var(--muted);font-size:10px">${env.attrs === 'SPECIES_ATTRIBUTES' ? 'Finish your species choice first.' : 'Choose the species first.'}</span>`);
+      inner += lpRow('Discipline +1:', lpKeyBtns(lpPool(env.discs, LP_DISC_KEYS), l.envDisc, 'lpSetEnvDisc'));
+      body += lpBox(`Environment — ${escH(env.name)}`, inner, true);
+    }
   }
-  S.char._selectedUpbringing=name; saveSlot(); renderCurrentTab();
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step Two: where your character grew up gives one value, +1 to one attribute and +1 to one discipline. First choose which matrix fits your concept — the <strong>setting</strong> you grew up in, or the <strong>conditions</strong> of your home — then choose or roll one environment from it.</p>
+  <div style="display:flex;gap:6px">${tBtn('settings', 'Settings')}${tBtn('conditions', 'Conditions')}</div>
+  ${body}
+  ${lpValueInput(0, 'Environment Value', 'A belief shaped by where you grew up.', 1)}
+  ${lpStepIssues(1)}`;
 }
 
-function setCreationTrack(name) {
-  if (S.char._selectedTrack !== name) {
-    const lp = S.char._lp || (S.char._lp = {});
-    lp.trackDiscFree2 = []; lp.trackDiscFree1 = ''; lp.trackDiscFree = [];
+// Step 3 — Early Outlook
+function renderLP2() {
+  const c = S.char; const l = lp(); const g = LP_OUTLOOK_GROUPS[l.outlookGroup];
+  const gBtn = k => `<button class="btn btn-sm${l.outlookGroup === k ? ' btn-accent' : ''}" onclick="lpSetOutlookGroup('${k}')" title="${LP_OUTLOOK_GROUPS[k].who}">${LP_OUTLOOK_GROUPS[k].label}</button>`;
+  const rows = LP_OUTLOOKS[l.outlookGroup].map(o => {
+    const sel = c._selectedUpbringing === o.name;
+    return `<tr onclick="setCreationUpbringing('${escQ(o.name)}')" class="${sel ? 'selected' : ''}"><td style="color:var(--muted)">${o.roll}</td>
+      <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(o.name)}</strong></td>
+      <td style="color:var(--muted);font-size:10px">${g.yes}: ${lpBonusText(o.yes)}<br>${g.no}: ${lpBonusText(o.no)}</td>
+      <td style="color:var(--muted);font-size:10px">${lpListText(o.discs)}</td></tr>`;
+  }).join('');
+  let detail = '';
+  const ol = lpOutlook(c);
+  if (ol) {
+    const yn = (v, label, bonus) => `<button class="btn btn-sm${l.outlookYes === v ? ' btn-accent' : ''}" onclick="lpSet('outlookYes',${v})">${label}: ${lpBonusText(bonus)}</button>`;
+    let inner = lpRow('Did you…', `${yn(true, g.yes, ol.yes)}${yn(false, g.no, ol.no)}<button class="btn btn-xs" onclick="lpSet('outlookYes',Math.random()<0.5)">🎲 50/50</button>`);
+    inner += lpRow('Discipline +1:', lpKeyBtns(lpPool(ol.discs, LP_DISC_KEYS), l.outlookDisc, 'lpSetOutlookDisc'));
+    inner += lpFocusInput('outlook', null, 'Focus — one, related to this outlook', ol.focusEx);
+    detail = lpBox(`${g.label} — ${escH(ol.name)}`, inner, true);
   }
-  S.char._selectedTrack=name; saveSlot(); renderCurrentTab();
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step Three: your early outlook gives three attribute points (+2 and +1), +1 to one discipline and one focus. Choose the approach that suits your character, then whether they ${g.yes.toLowerCase()} or ${g.no.toLowerCase()} it.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">${gBtn('upbringing')}${gBtn('caste')}${gBtn('aspiration')}</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:6px">${g.label}: ${g.who}.</div>
+  <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><button class="btn btn-accent btn-sm" onclick="lpRollOutlook()">🎲 Roll d20</button><span style="font-size:10px;color:var(--muted)">19–20: pick one or reroll</span></div>
+  <div style="max-height:220px;overflow-y:auto;margin-bottom:8px"><table class="roll-table"><thead><tr><th>d20</th><th>${g.label}</th><th>Attributes</th><th>Discipline +1</th></tr></thead><tbody>${rows}</tbody></table></div>
+  ${detail}${lpStepIssues(2)}`;
 }
-function rollUpbringing() {
-  const r=Math.floor(Math.random()*20);
-  let up=UPBRINGINGS[UPBRINGINGS.length-1];
-  for(const u of UPBRINGINGS){
-    const [lo,hi]=(u.d+'-'+u.d).replace(/(\d+)–(\d+)/,'$1-$2').split('-').map(Number);
-    if(r+1>=lo&&r+1<=(hi||lo)){up=u;break;}
+
+// Step 4 — Education
+function renderLP3() {
+  const c = S.char; const l = lp();
+  const catBtns = LP_EDUCATION.map(cat => `<button class="btn btn-sm${l.eduCat === cat.cat ? ' btn-accent' : ''}" onclick="lpSetEduCat('${escQ(cat.cat)}')">${escH(cat.cat)} <span style="opacity:.6">${cat.roll}</span></button>`).join('');
+  let body = '';
+  const cat = LP_EDUCATION.find(x => x.cat === l.eduCat);
+  if (cat) {
+    const rows = cat.tracks.map(t => {
+      const sel = c._selectedTrack === t.name;
+      return `<tr onclick="setCreationTrack('${escQ(t.name)}')" class="${sel ? 'selected' : ''}"><td style="color:var(--muted)">${t.roll}</td>
+        <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(t.name)}</strong></td><td style="color:var(--muted);font-size:10px">${escH(t.discRule)}</td></tr>`;
+    }).join('');
+    body += `<div style="display:flex;gap:6px;align-items:center;margin:8px 0 6px"><button class="btn btn-accent btn-sm" onclick="lpRollEduTrack()">🎲 Roll d20</button>${cat.cat === 'Civilian Training' ? '<span style="font-size:10px;color:var(--muted)">19–20: pick one or reroll</span>' : ''}</div>
+      <table class="roll-table" style="margin-bottom:8px"><thead><tr><th>d20</th><th>Track</th><th>Disciplines</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
-  setCreationUpbringing(up.name);
+  const ed = lpEdu(c);
+  if (ed) {
+    const t = ed.track;
+    const sum = Object.values(l.eduAttr).reduce((s, v) => s + v, 0);
+    let inner = lpHint(`Three attribute points: +1 to three attributes, or +2 and +1.${t.attrReq.length ? ` One must be <strong>${t.attrReq.map(lpFull).join(' or ')}</strong>.` : ''}`);
+    inner += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">${LP_ATTR_KEYS.map(k => {
+      const v = l.eduAttr[k] || 0;
+      return `<div style="display:flex;align-items:center;gap:3px;font-size:11px"><span style="min-width:30px;color:${v ? 'var(--accent)' : 'var(--muted)'}">${lpAbbr(k)}</span>
+        <button class="btn btn-xs" ${v ? '' : 'disabled style="opacity:.35"'} onclick="lpEduAttr('${k}',-1)">−</button><strong style="min-width:14px;text-align:center">${v ? '+' + v : '0'}</strong>
+        <button class="btn btn-xs" ${sum < 3 && v < 2 ? '' : 'disabled style="opacity:.35"'} onclick="lpEduAttr('${k}',1)">+</button></div>`;
+    }).join('')}<span style="font-size:11px;color:${sum === 3 ? 'var(--success)' : 'var(--muted)'}">${sum}/3</span></div>`;
+    if (t.mode === 'officer') {
+      inner += lpRow('+2 (other gets +1):', lpKeyBtns(['command', 'security'], l.eduMajor, 'lpSetEduMajor'));
+      inner += lpRow('Then +1 to one of:', lpKeyBtns(['conn', 'engineering', 'science', 'medicine'], l.eduMinor[1], 'lpSetOfficerMinor'));
+    } else {
+      const majorPool = lpPool(t.major, LP_DISC_KEYS);
+      inner += lpRow('Discipline +2:', lpKeyBtns(majorPool, l.eduMajor, 'lpSetEduMajor'));
+      inner += lpRow('Two others +1:', lpKeyBtns(LP_DISC_KEYS, l.eduMinor.filter(Boolean), 'lpToggleEduMinor', l.eduMajor ? [l.eduMajor] : []));
+      if (t.mode === 'intel') inner += lpHint('Security must be one of the three disciplines you raise.');
+    }
+    if (t.cap4) inner += lpHint('Starfleet Academy: no discipline may go above 4 at this stage.');
+    if (t.swap) {
+      const raised = Object.keys(lpEduDiscs(c));
+      const other = LP_DISC_KEYS.filter(k => !raised.includes(k));
+      inner += lpRow('Optional swap −1:', lpKeyBtns(other, l.eduSwapFrom, 'lpSetSwapFrom') + `<span style="color:var(--muted);font-size:10px">then +1:</span>` + lpKeyBtns(other, l.eduSwapTo, 'lpSetSwapTo', l.eduSwapFrom ? [l.eduSwapFrom] : []) + ((l.eduSwapFrom || l.eduSwapTo) ? `<button class="btn btn-xs" onclick="lpSet('eduSwapFrom','');lpSet('eduSwapTo','')">clear</button>` : ''));
+    }
+    inner += lpFocusInput('edu', 0, 'Focus 1') + lpFocusInput('edu', 1, 'Focus 2') + lpFocusInput('edu', 2, 'Focus 3');
+    if (t.focusEx.length) inner += `<div style="font-size:10px;color:var(--muted);margin-bottom:3px">Examples — click to fill the next empty focus:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${t.focusEx.map(f => `<button class="btn btn-xs" onclick="lpFillEduFocus('${escQ(f)}')">${escH(f)}</button>`).join('')}</div>`;
+    body += lpBox(`${escH(ed.cat.cat)} — ${escH(t.name)}`, inner, true);
+  }
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step Four: education gives a value, three attribute points, +2/+1/+1 to disciplines and three focuses. Choose (or roll) the kind of training, then the track.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${catBtns}<button class="btn btn-xs" onclick="lpRollEduCat()">🎲 Roll</button></div>
+  ${body}
+  ${lpValueInput(1, 'Education Value', 'A belief developed during your training.', 3)}
+  ${lpStepIssues(3)}`;
 }
-function rollCareerLength() {
-  const r = Math.floor(Math.random()*20)+1;
-  const tier = r<=6 ? 'Novice' : r<=13 ? 'Experienced' : 'Veteran';
-  S.char.careerLength = tier;
+
+// Steps 5 & 6 — Career length and two career events
+function renderLP4() {
+  const c = S.char; const l = lp();
+  const lengths = LP_CAREER_LENGTH.map(cl => `<div onclick="saveCharField('careerLength','${escQ(cl.name)}');renderCurrentTab()" style="padding:7px 10px;border-radius:4px;border:1px solid ${c.careerLength === cl.name ? 'var(--accent)' : 'var(--border)'};background:${c.careerLength === cl.name ? 'var(--surface3)' : 'transparent'};cursor:pointer;margin-bottom:4px">
+      <strong style="color:${c.careerLength === cl.name ? 'var(--accent)' : 'var(--text)'};font-size:13px">${cl.name}</strong> <span style="color:var(--muted);font-size:10px">d20 ${cl.roll}</span>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${escH(cl.value)}</div></div>`).join('');
+  const eventBox = n => {
+    const name = n === 1 ? c.careerEvent : c.careerEvent2;
+    const other = n === 1 ? c.careerEvent2 : c.careerEvent;
+    const rows = LP_CAREER_EVENTS.map(e => {
+      const sel = name === e.name; const taken = other === e.name;
+      return `<tr onclick="${taken ? '' : `lpSetEvent(${n},'${escQ(e.name)}')`}" class="${sel ? 'selected' : ''}" style="${taken ? 'opacity:.35' : ''}"><td style="color:var(--muted)">${e.roll}</td>
+        <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(e.name)}</strong><br><span style="color:var(--muted);font-size:10px">${escH(e.text)}</span></td>
+        <td style="color:var(--muted);font-size:10px">${e.attr === 'any' ? 'any' : lpFull(e.attr)}<br>${e.disc === 'any' ? 'any' : lpFull(e.disc)}</td></tr>`;
+    }).join('');
+    const e = lpEvent(name);
+    let pick = '';
+    if (e) {
+      pick += lpRow('Attribute +1:', e.attr === 'any' ? lpKeyBtns(LP_ATTR_KEYS, l['ev' + n + 'Attr'], 'lpSetEvAttr' + n) : `<strong style="color:var(--accent)">${lpFull(e.attr)}</strong>`);
+      pick += lpRow('Discipline +1:', e.disc === 'any' ? lpKeyBtns(LP_DISC_KEYS, l['ev' + n + 'Disc'], 'lpSetEvDisc' + n) : `<strong style="color:var(--accent)">${lpFull(e.disc)}</strong>`);
+      pick += lpFocusInput('ev' + n, null, 'Focus from this event', e.focusEx);
+    }
+    return lpBox(`Career Event ${n}${e ? ' — ' + escH(e.name) : ''}`, `<div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn btn-accent btn-sm" onclick="lpRollEvent(${n})">🎲 Roll d20</button></div>
+      <div style="max-height:170px;overflow-y:auto;margin-bottom:6px"><table class="roll-table"><thead><tr><th>d20</th><th>Event</th><th>Attr / Disc</th></tr></thead><tbody>${rows}</tbody></table></div>${pick}`, !!e);
+  };
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Steps Five and Six: your career length gives a value; each of your two career events gives +1 to an attribute, +1 to a discipline and a focus.</p>
+  ${lpBox('Career Length', `<div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn btn-accent btn-sm" onclick="rollCareerLength()">🎲 Roll d20</button></div>${lengths}`)}
+  ${lpValueInput(2, 'Career Length Value', '', 4)}
+  ${eventBox(1)}${eventBox(2)}
+  ${lpStepIssues(4)}`;
+}
+
+// Step 7 — Finishing Touches: final +2/+2, last value, and the cap check
+function renderLP5() {
+  const c = S.char; const l = lp(); const r = lpCompute();
+  const table = (kind, keys, cap, label) => {
+    const adj = kind === 'attr' ? l.adjAttr : l.adjDisc;
+    const tot = r[kind];
+    const net = Object.values(adj).reduce((s, v) => s + v, 0);
+    const atCap = keys.filter(k => tot[k] === cap).length;
+    const total = keys.reduce((s, k) => s + tot[k], 0);
+    const cells = keys.map(k => {
+      const v = tot[k]; const a = adj[k] || 0;
+      const canDown = v > cap || (v === cap && atCap > 1);
+      const canUp = net < 0 && (v + 1 < cap || (v + 1 === cap && atCap === 0));
+      const bad = v > cap || (v === cap && atCap > 1);
+      const needAdj = r.capIssues.length || a;
+      return `<div class="attr-box"><div class="attr-abbr">${lpAbbr(k)}</div>
+        <div class="attr-val" style="${bad ? 'color:var(--danger)' : ''}">${v}</div>
+        ${a ? `<div style="font-size:9px;color:var(--accent)">${a > 0 ? '+' : ''}${a} moved</div>` : ''}
+        ${needAdj ? `<div style="display:flex;gap:4px;justify-content:center;margin-top:2px">
+          <button class="btn btn-xs" ${canDown ? '' : 'disabled style="opacity:.3"'} onclick="lpAdj('${kind}','${k}',-1)">−</button>
+          <button class="btn btn-xs" ${canUp ? '' : 'disabled style="opacity:.3"'} onclick="lpAdj('${kind}','${k}',1)">+</button></div>` : ''}
+        <div class="attr-full">${lpFull(k)}</div></div>`;
+    }).join('');
+    return `<div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:6px 0 4px">${label} — total ${total} (max ${cap}, only one at ${cap})${Object.keys(adj).length ? ` <button class="btn btn-xs" onclick="lpClearAdj('${kind}')">reset moves</button>` : ''}</div><div class="attr-grid">${cells}</div>`;
+  };
+  const allIssues = r.issues.slice(0, 5).map((list, i) => list.length ? `<div style="font-size:11px;margin-bottom:3px"><a href="#" onclick="S.char.creationStep=${i};saveSlot();renderCurrentTab();return false" style="color:var(--accent)">${CREATION_STEPS[i].title}</a>: <span style="color:var(--danger)">${list.map(escH).join(' · ')}</span></div>` : '').join('');
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step Seven: raise two different attributes and two different disciplines by 1, and add a final value. Then check the limits — no attribute above 12 and only one at 12; no discipline above 5 and only one at 5. Move any extra points to other scores.</p>
+  ${allIssues ? lpBox('Earlier steps still need', allIssues) : ''}
+  ${lpBox('Final Additions', lpRow('Attributes +1 (two):', lpKeyBtns(LP_ATTR_KEYS, l.finAttr, 'lpToggleFinAttr')) + lpRow('Disciplines +1 (two):', lpKeyBtns(LP_DISC_KEYS, l.finDisc, 'lpToggleFinDisc')), true)}
+  ${lpValueInput(3, 'Final Value', 'Perhaps reflecting your career events, or anything else about your character.', 5)}
+  ${lpBox('Your Officer', table('attr', LP_ATTR_KEYS, 12, 'Attributes') + table('disc', LP_DISC_KEYS, 5, 'Disciplines')
+    + `<div style="font-size:11px;color:var(--muted);margin-top:8px">Focuses: ${(c.focuses || []).length ? c.focuses.map(f => `<strong style="color:var(--text)">${escH(f)}</strong>`).join(', ') : '—'}</div>`)}
+  ${lpStepIssues(5)}`;
+}
+
+// Setters — each saves and re-renders
+function lpSet(key, val) { lp()[key] = val; saveSlot(); renderCurrentTab(); }
+function lpSetMixed(name) { const l = lp(); l.mixed = name; l.speciesPick = []; saveSlot(); renderCurrentTab(); }
+function lpToggleSpeciesPick(k) {
+  const l = lp(); const i = l.speciesPick.indexOf(k);
+  if (i >= 0) l.speciesPick.splice(i, 1); else if (l.speciesPick.length < 3) l.speciesPick.push(k);
   saveSlot(); renderCurrentTab();
 }
-function rollCareerEvent() {
-  const e=CAREER_EVENTS[Math.floor(Math.random()*CAREER_EVENTS.length)];
-  S.char.careerEvent=e.name; saveSlot(); renderCurrentTab();
+function lpSetEnvTable(k) {
+  const l = lp(); if (l.envTable !== k) { S.char._selectedEnv = ''; l.envAttr = ''; l.envDisc = ''; l.envOther = ''; }
+  l.envTable = k; saveSlot(); renderCurrentTab();
 }
-function rollCareerEvent2() {
-  const e=CAREER_EVENTS[Math.floor(Math.random()*CAREER_EVENTS.length)];
-  S.char.careerEvent2=e.name; saveSlot(); renderCurrentTab();
+function lpSetEnvAttr(k) { lpSet('envAttr', k); }
+function lpSetEnvDisc(k) { lpSet('envDisc', k); }
+function lpSetOutlookGroup(k) {
+  const l = lp(); if (l.outlookGroup !== k) { S.char._selectedUpbringing = ''; l.outlookYes = null; l.outlookDisc = ''; }
+  l.outlookGroup = k; saveSlot(); renderCurrentTab();
 }
-function selectCareerEvent(name) { S.char.careerEvent=name; saveSlot(); renderCurrentTab(); }
-function selectCareerEvent2(name) { S.char.careerEvent2=name; saveSlot(); renderCurrentTab(); }
-function setLPEventAttr(idx,key) {
-  if(!S.char._lp) S.char._lp={};
-  S.char._lp['event'+idx+'Attr']=key; saveSlot(); renderCurrentTab();
+function lpSetOutlookDisc(k) { lpSet('outlookDisc', k); }
+function lpSetEduCat(name) {
+  const l = lp(); if (l.eduCat !== name) setCreationTrack('');
+  l.eduCat = name; saveSlot(); renderCurrentTab();
 }
-function setLPEventDisc(idx,key) {
-  if(!S.char._lp) S.char._lp={};
-  S.char._lp['event'+idx+'Disc']=key; saveSlot(); renderCurrentTab();
+function lpEduAttr(k, d) {
+  const l = lp(); const v = (l.eduAttr[k] || 0) + d;
+  const sum = Object.values(l.eduAttr).reduce((s, x) => s + x, 0) + d;
+  if (v < 0 || v > 2 || sum > 3) return;
+  if (v) l.eduAttr[k] = v; else delete l.eduAttr[k];
+  saveSlot(); renderCurrentTab();
 }
+function lpSetEduMajor(k) {
+  const l = lp(); l.eduMajor = k;
+  l.eduMinor = l.eduMinor.map(m => m === k ? '' : m);
+  saveSlot(); renderCurrentTab();
+}
+function lpSetOfficerMinor(k) { const l = lp(); l.eduMinor = ['', k]; saveSlot(); renderCurrentTab(); }
+function lpToggleEduMinor(k) {
+  const l = lp(); const cur = l.eduMinor.filter(Boolean);
+  const i = cur.indexOf(k);
+  if (i >= 0) cur.splice(i, 1); else if (cur.length < 2 && k !== l.eduMajor) cur.push(k);
+  l.eduMinor = [cur[0] || '', cur[1] || ''];
+  saveSlot(); renderCurrentTab();
+}
+function lpSetSwapFrom(k) { const l = lp(); l.eduSwapFrom = l.eduSwapFrom === k ? '' : k; if (l.eduSwapTo === k) l.eduSwapTo = ''; saveSlot(); renderCurrentTab(); }
+function lpSetSwapTo(k) { const l = lp(); l.eduSwapTo = l.eduSwapTo === k ? '' : k; saveSlot(); renderCurrentTab(); }
+function lpSetEvent(n, name) {
+  const l = lp();
+  if (n === 1) S.char.careerEvent = name; else S.char.careerEvent2 = name;
+  l['ev' + n + 'Attr'] = ''; l['ev' + n + 'Disc'] = '';
+  saveSlot(); renderCurrentTab();
+}
+function lpSetEvAttr1(k) { lpSet('ev1Attr', k); }
+function lpSetEvAttr2(k) { lpSet('ev2Attr', k); }
+function lpSetEvDisc1(k) { lpSet('ev1Disc', k); }
+function lpSetEvDisc2(k) { lpSet('ev2Disc', k); }
+function lpToggleTwo(key, k) {
+  const l = lp(); const cur = l[key]; const i = cur.indexOf(k);
+  if (i >= 0) cur.splice(i, 1); else if (cur.length < 2) cur.push(k);
+  // Raising a score can change which points need moving, so moves start over.
+  l.adjAttr = {}; l.adjDisc = {};
+  saveSlot(); renderCurrentTab();
+}
+function lpToggleFinAttr(k) { lpToggleTwo('finAttr', k); }
+function lpToggleFinDisc(k) { lpToggleTwo('finDisc', k); }
+function lpAdj(kind, k, d) {
+  const l = lp(); l.adjBase = JSON.stringify(lpCompute().before);
+  const adj = kind === 'attr' ? l.adjAttr : l.adjDisc;
+  adj[k] = (adj[k] || 0) + d;
+  if (!adj[k]) delete adj[k];
+  saveSlot(); renderCurrentTab();
+}
+function lpClearAdj(kind) { const l = lp(); if (kind === 'attr') l.adjAttr = {}; else l.adjDisc = {}; saveSlot(); renderCurrentTab(); }
+function lpSyncFocuses() {
+  const f = lp().focus;
+  const list = [f.outlook, ...f.edu, f.ev1, f.ev2].map(x => (x || '').trim()).filter(Boolean);
+  S.char.focuses = [...new Set(list)];
+}
+function lpFillEduFocus(v) {
+  const edu = lp().focus.edu;
+  if (edu.some(f => f.trim().toLowerCase() === v.toLowerCase())) return;
+  const i = edu.findIndex(f => !f.trim());
+  if (i >= 0) lpSetFocus('edu', i, v);
+}
+function lpSetFocus(path, idx, v) {
+  const f = lp().focus;
+  if (idx === null) f[path] = v; else f[path][idx] = v;
+  lpSyncFocuses(); saveSlot(); renderCurrentTab();
+}
+
+// Choosing a different option clears the picks that belonged to the old one,
+// so a stale choice can never be applied invisibly on Finish.
+function setCreationSpecies(name) {
+  const l = lp();
+  if (S.char._selectedSpecies !== name) { l.speciesPick = []; l.mixed = ''; if (lpEnv(S.char) && lpEnv(S.char).attrs === 'SPECIES_ATTRIBUTES') l.envAttr = ''; }
+  S.char._selectedSpecies = name; saveSlot(); renderCurrentTab();
+}
+function setCreationEnv(name) {
+  const l = lp();
+  if (S.char._selectedEnv !== name) { l.envAttr = ''; l.envDisc = ''; l.envOther = ''; }
+  S.char._selectedEnv = name; saveSlot(); renderCurrentTab();
+}
+function setCreationUpbringing(name) {
+  const l = lp();
+  if (S.char._selectedUpbringing !== name) { l.outlookYes = null; l.outlookDisc = ''; }
+  S.char._selectedUpbringing = name; saveSlot(); renderCurrentTab();
+}
+function setCreationTrack(name) {
+  const l = lp();
+  if (S.char._selectedTrack !== name) { l.eduAttr = {}; l.eduMajor = ''; l.eduMinor = ['', '']; l.eduSwapFrom = ''; l.eduSwapTo = ''; }
+  S.char._selectedTrack = name; saveSlot(); renderCurrentTab();
+}
+
+// Rolls follow the book's matrixes
+function lpRollSpecies() {
+  let t = lpEraTable(S.char._selectedEra);
+  while (!t) { const r = lpRoll(); t = r <= 6 ? 'ENT' : r <= 12 ? 'TOS' : r <= 18 ? 'TNG' : ''; }
+  window._lpSpeciesFilter = t;
+  setCreationSpecies(LP_SPECIES_TABLES[t][lpRoll() - 1]);
+}
+function lpRollEnv() {
+  const l = lp(); if (!l.envTable) return;
+  const r = lpRoll(); const e = LP_ENVIRONMENTS[l.envTable].find(e => lpInRange(r, e.roll));
+  if (e) setCreationEnv(e.name);
+}
+function lpRollOutlook() {
+  const list = LP_OUTLOOKS[lp().outlookGroup]; let o = null;
+  while (!o) { const r = lpRoll(); o = list.find(x => lpInRange(r, x.roll)); }   // 19–20: reroll
+  setCreationUpbringing(o.name);
+}
+function lpRollEduCat() {
+  const r = lpRoll(); const cat = LP_EDUCATION.find(c => lpInRange(r, c.roll));
+  lpSetEduCat(cat.cat);
+}
+function lpRollEduTrack() {
+  const cat = LP_EDUCATION.find(c => c.cat === lp().eduCat); if (!cat) return;
+  let t = null;
+  while (!t) { const r = lpRoll(); t = cat.tracks.find(x => lpInRange(r, x.roll)); }   // Civilian 19–20: reroll
+  setCreationTrack(t.name);
+}
+function rollCareerLength() {
+  const r = lpRoll(); const cl = LP_CAREER_LENGTH.find(x => lpInRange(r, x.roll));
+  S.char.careerLength = cl.name; saveSlot(); renderCurrentTab();
+}
+function lpRollEvent(n) {
+  const other = n === 1 ? S.char.careerEvent2 : S.char.careerEvent;
+  let e;
+  do { e = LP_CAREER_EVENTS[lpRoll() - 1]; } while (e.name === other);   // two different events
+  lpSetEvent(n, e.name);
+}
+
+// Wizard navigation. Steps 0–5 are the lifepath; leaving Finishing Touches
+// needs a complete, in-limits character, and Finish writes it to the sheet.
+function creationNext() {
+  const step = S.char.creationStep || 0;
+  const LAST_LP = 5;
+  if (step >= LAST_LP) {
+    const r = lpCompute();
+    if (r.all.length) {
+      showConfirm('Your lifepath isn\u2019t finished yet:<ul style="margin:8px 0 0 18px">'
+        + r.all.map(t => `<li>${escH(t)}</li>`).join('') + '</ul>', () => {
+        S.char.creationStep = LAST_LP; saveSlot(); renderCurrentTab();
+      }, 'GO TO FINISHING TOUCHES', false);
+      return;
+    }
+  }
+  if (step === CREATION_STEPS.length - 1) {
+    const c = S.char; const l = lp(); const r = lpCompute();
+    LP_ATTR_KEYS.forEach(k => { c[k] = r.attr[k]; });
+    LP_DISC_KEYS.forEach(k => { c[k] = r.disc[k]; });
+    c.species = lpSpeciesDisplay(c);
+    c.era = c._selectedEra || c.era;
+    const ol = lpOutlook(c); const g = LP_OUTLOOK_GROUPS[l.outlookGroup];
+    c.upbringing = ol ? `${ol.name} (${l.outlookYes ? g.yes : g.no})` : c.upbringing;
+    if (!Array.isArray(c.traits)) c.traits = [];
+    if (!c.traits.length) c.traits = c.species.split(' / ');
+    lpSyncFocuses();
+    c.creationComplete = true;
+    saveSlot(); renderCurrentTab();
+    return;
+  }
+  S.char.creationStep = step + 1; saveSlot(); renderCurrentTab();
+}
+function creationBack() {
+  S.char.creationStep = Math.max(0, (S.char.creationStep || 0) - 1); saveSlot(); renderCurrentTab();
+}
+
 function setCreationDirective(desc) { S.char.directive=desc; saveSlot(); renderCurrentTab(); }
 function rollDirective() {
   const d=DIRECTIVE_TABLE[Math.floor(Math.random()*DIRECTIVE_TABLE.length)];
@@ -7304,7 +7185,7 @@ function hudBroadcast(extra) {
     },
     creation: isCreating ? {
       step: c.creationStep || 0,
-      species: c._selectedSpecies || '',
+      species: lpSpeciesDisplay(c) || '',   // mixed heritage / named new species
       era: c._selectedEra || '',
       env: c._selectedEnv || '',
       upbringing: c._selectedUpbringing || '',
@@ -7672,15 +7553,15 @@ function applyState(d){
     setHTML('cr-dots',dots);
     setText('cr-step','Step '+(cr.step+1)+' of '+stepCount+' — '+(CREATION_STEP_NAMES[cr.step]||''));
     var cb='';
-    if(cr.species){cb+='<div class="cr-field"><div class="cr-lbl">Species</div><div class="cr-val">'+cr.species+'</div>'+(cr.era?'<div class="cr-sub">'+cr.era+'</div>':'')+'</div>';}
-    if(cr.env){cb+='<div class="cr-field"><div class="cr-lbl">Environment</div><div class="cr-val">'+cr.env+'</div></div>';}
-    if(cr.upbringing){cb+='<div class="cr-field"><div class="cr-lbl">Upbringing</div><div class="cr-val">'+cr.upbringing+'</div></div>';}
-    if(cr.track){cb+='<div class="cr-field"><div class="cr-lbl">Academy Track</div><div class="cr-val">'+cr.track+'</div></div>';}
-    if(cr.careerLength){cb+='<div class="cr-field"><div class="cr-lbl">Career Length</div><div class="cr-val">'+cr.careerLength+'</div></div>';}
-    if(cr.careerEvent){cb+='<div class="cr-field"><div class="cr-lbl">Career Event 1</div><div class="cr-val" style="font-size:11px">'+cr.careerEvent+'</div></div>';}
-    if(cr.careerEvent2){cb+='<div class="cr-field"><div class="cr-lbl">Career Event 2</div><div class="cr-val" style="font-size:11px">'+cr.careerEvent2+'</div></div>';}
-    if(cr.focuses&&cr.focuses.length){cb+='<div class="cr-field"><div class="cr-lbl">Focuses</div><div class="cr-feats">'+cr.focuses.map(function(f){return '<div class="cr-feat">'+f+'</div>';}).join('')+'</div></div>';}
-    if(cr.name){cb+='<div class="cr-field"><div class="cr-lbl">Name</div><div class="cr-val">'+cr.name+'</div>'+(cr.rank?'<div class="cr-sub">'+cr.rank+'</div>':'')+'</div>';}
+    if(cr.species){cb+='<div class="cr-field"><div class="cr-lbl">Species</div><div class="cr-val">'+escH(cr.species)+'</div>'+(cr.era?'<div class="cr-sub">'+escH(cr.era)+'</div>':'')+'</div>';}
+    if(cr.env){cb+='<div class="cr-field"><div class="cr-lbl">Environment</div><div class="cr-val">'+escH(cr.env)+'</div></div>';}
+    if(cr.upbringing){cb+='<div class="cr-field"><div class="cr-lbl">Early Outlook</div><div class="cr-val">'+escH(cr.upbringing)+'</div></div>';}
+    if(cr.track){cb+='<div class="cr-field"><div class="cr-lbl">Education</div><div class="cr-val">'+escH(cr.track)+'</div></div>';}
+    if(cr.careerLength){cb+='<div class="cr-field"><div class="cr-lbl">Career Length</div><div class="cr-val">'+escH(cr.careerLength)+'</div></div>';}
+    if(cr.careerEvent){cb+='<div class="cr-field"><div class="cr-lbl">Career Event 1</div><div class="cr-val" style="font-size:11px">'+escH(cr.careerEvent)+'</div></div>';}
+    if(cr.careerEvent2){cb+='<div class="cr-field"><div class="cr-lbl">Career Event 2</div><div class="cr-val" style="font-size:11px">'+escH(cr.careerEvent2)+'</div></div>';}
+    if(cr.focuses&&cr.focuses.length){cb+='<div class="cr-field"><div class="cr-lbl">Focuses</div><div class="cr-feats">'+cr.focuses.map(function(f){return '<div class="cr-feat">'+escH(f)+'</div>';}).join('')+'</div></div>';}
+    if(cr.name){cb+='<div class="cr-field"><div class="cr-lbl">Name</div><div class="cr-val">'+escH(cr.name)+'</div>'+(cr.rank?'<div class="cr-sub">'+escH(cr.rank)+'</div>':'')+'</div>';}
     setHTML('cr-body',cb||'<div class="sml">Waiting for input\u2026</div>');
     show('p-creation',true);
     show('p-left',false);
