@@ -2177,7 +2177,7 @@ function renderCS8() {
   const selectedBadge = sh.className ? `<div style="background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:8px 12px;margin-bottom:10px">
     <div style="color:var(--accent);font-size:12px;font-weight:bold">${escH(sh.className)}</div>
     <div style="font-size:10px;color:var(--muted)">${sh.era?escH(sh.era)+' · ':''}Scale ${sh.scale}</div>
-  </div>` : `<div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic">No vessel selected yet — you can skip this and fill it in later.</div>`;
+  </div>` : `<div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic">No vessel selected yet — tap a class below, then <strong>Select This Vessel</strong>. You can also skip this and fill it in later.</div>`;
 
   const classTable = `<div style="overflow-x:auto;max-height:260px;overflow-y:auto">
     <table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -2202,7 +2202,7 @@ function renderCS8() {
       <input value="${escH(sh.registry)}" placeholder="NCC-74656" onchange="saveShipField('registry',this.value);saveCharField('assignment',S.ship.name+(this.value?' '+this.value:''));">
     </div>
   </div>
-  <p style="font-size:10px;color:var(--muted);margin-top:4px">Tap a class to preview it. All stats can be adjusted later on the Ship tab.</p>`;
+  <p style="font-size:10px;color:var(--muted);margin-top:4px">Tap a class to preview it, then press <strong>Select This Vessel</strong>. All stats can be adjusted later on the Ship tab.</p>`;
 
   const customForm = `<div style="font-size:11px;color:var(--muted);margin-bottom:10px">Enter your ship's basics. Full stats and systems can be set on the Ship tab.</div>
   <div class="field"><label>Ship Name</label>
@@ -6426,6 +6426,10 @@ function creationNext() {
     }
   }
   if (step === CREATION_STEPS.length - 1) {
+    // Tapping a class only previews it; players took the open preview for a
+    // choice and finished without pressing Select. If no ship is chosen yet,
+    // the previewed class is the one they meant.
+    if (window._shipClassPreview && !S.ship.className) loadShipClass(window._shipClassPreview);
     const c = S.char; const l = lp(); const r = lpCompute();
     LP_ATTR_KEYS.forEach(k => { c[k] = r.attr[k]; });
     LP_DISC_KEYS.forEach(k => { c[k] = r.disc[k]; });
