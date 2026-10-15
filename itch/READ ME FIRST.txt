@@ -1,0 +1,108 @@
+CAPTAIN'S LOG — Solo Companion App
+==================================
+
+A companion app for solo play of Captain's Log: build your officer and
+ship, roll dice, consult the oracle, map sectors, track NPCs, keep your
+mission log, and print it all as a logbook or a fold-and-staple zine.
+
+Made by Thatwalshguy on itch.io.
+
+Rather not download anything? The same app runs in your browser at:
+https://oldgodsslumber.github.io/stacl/
+(Saves made there, on itch.io, and in a downloaded copy are all kept
+separately - use SAVE FILE / LOAD FILE to move missions between them.)
+
+
+STARTING THE APP
+----------------
+Playing on itch.io? Just press Run on the game page - nothing to set up.
+The fullscreen button gives the app the most room.
+
+Running a downloaded copy:
+1. EXTRACT THE WHOLE ZIP FIRST. Right-click it and choose "Extract All"
+   (Windows) or double-click it (Mac). Don't open the app from inside the
+   zip - the images and the guide won't load and it will look broken.
+2. In the extracted folder, double-click index.html. It opens in your web
+   browser. Nothing is installed.
+3. Click the "?" button at the top right for the user guide.
+
+Chrome or Edge on a desktop or laptop is recommended. Firefox and Safari
+work too, but a few features (like saving files) behave a little
+differently.
+
+Keep all the files and folders together. The app needs them where they are.
+
+
+YOUR SAVES
+----------
+Your three mission slots are saved automatically - in your web browser,
+not in this folder. That means:
+
+  * Use the SAVE FILE button (top right) now and then to make a backup.
+    LOAD FILE brings a backup back.
+  * Make a backup BEFORE you update to a new version, switch browsers,
+    move the folder, or clear your browser's history/site data. Any of
+    those can leave your missions behind.
+
+
+PRINTING
+--------
+All printing starts from the LOG tab -> EXPORT.
+
+  * EXPORT       - your mission log as an After Action Report, plus any
+                   annexes you drag in (stats, NPCs, maps).
+  * LOGBOOK      - blank pages to fill in by hand.
+  * ZINE         - a booklet: pick 12, 16 or 20 pages, print, fold the
+                   stack in half and staple along the fold. Click
+                   "HOW TO PRINT" in the zine view for the exact printer
+                   settings. In short: two-sided, "Flip on short edge",
+                   Scale 100% (never "Fit to page"), Margins: None,
+                   Background graphics on.
+
+No two-sided printer? In the zine view set PRINT to "Fronts only", print,
+put the stack back in the tray, then set "Backs only" and print again.
+Try it with one sheet first - printers differ in which way the paper
+goes back in.
+
+
+STREAMING AND RECORDING (HUD)
+-----------------------------
+The HUD button (top right, desktop only) opens an overlay window for
+streaming or recording your sessions, with your camera, stats, rolls and
+log on screen. The REC button records the HUD window to a video file.
+Your browser will ask for permission to use the camera and to share the
+window.
+
+
+INTERNET
+--------
+The app runs from your computer, but a few things load from the web:
+the display font, the game icons, and camera background removal on the
+HUD. Without a connection those fall back or switch off; everything else
+works offline.
+
+
+TROUBLESHOOTING
+---------------
+Pictures are missing / the guide won't open
+    You're running it from inside the zip. Extract the whole zip and
+    open index.html from there.
+
+Nothing happens when I click EXPORT, LOGBOOK, ZINE, HUD or "?"
+    Your browser blocked the pop-up window. Look for a blocked pop-up icon
+    in the address bar and choose "Always allow".
+
+My missions are gone
+    They're stored in the browser you used before. Open the app in that
+    same browser, or use LOAD FILE with a backup from SAVE FILE.
+
+The zine prints too small or out of order
+    Check the printer settings in "HOW TO PRINT": Scale 100%,
+    Margins: None, two-sided with "Flip on short edge".
+
+
+------------------------------------------------------------------------
+Unofficial fan-made companion. Star Trek and related marks are trademarks
+of CBS Studios Inc. Star Trek Adventures and Captain's Log are published
+by Modiphius Entertainment. This app is not affiliated with or endorsed
+by either.

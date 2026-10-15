@@ -1745,6 +1745,32 @@ function updateSlotLabels() {
   }
 }
 
+// The File System Access pickers are blocked in cross-origin frames — e.g.
+// when itch.io runs the app embedded in its page — so there (or if a picker
+// fails for any reason other than the player cancelling) save and load fall
+// back to a plain download and a plain file input.
+function _pickersAllowed() {
+  try { return window.self === window.top && !!window.showSaveFilePicker; } catch(e) { return false; }
+}
+function _downloadSave(json) {
+  const url = URL.createObjectURL(new Blob([json], {type: 'application/json'}));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'captains-log.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+function _chooseSaveFile() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => _applyImport(ev.target.result);
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
 async function exportToFile() {
   const data = { version: 1, active: ACTIVE_SLOT, slots: {} };
   for (let i = 0; i < 3; i++) {
@@ -1752,44 +1778,26 @@ async function exportToFile() {
     if (raw) try { data.slots[i] = JSON.parse(raw); } catch(e) {}
   }
   const json = JSON.stringify(data, null, 2);
-  if (window.showSaveFilePicker) {
-    try {
-      const fh = await window.showSaveFilePicker({
-        suggestedName: 'captains-log.json',
-        types: [{ description: "Captain's Log Save", accept: { 'application/json': ['.json'] } }]
-      });
-      const writable = await fh.createWritable();
-      await writable.write(json);
-      await writable.close();
-    } catch(e) { if (e.name !== 'AbortError') alert('Save failed: ' + e.message); }
-  } else {
-    const a = document.createElement('a');
-    a.href = 'data:application/json,' + encodeURIComponent(json);
-    a.download = 'captains-log.json';
-    a.click();
-  }
+  if (!_pickersAllowed()) { _downloadSave(json); return; }
+  try {
+    const fh = await window.showSaveFilePicker({
+      suggestedName: 'captains-log.json',
+      types: [{ description: "Captain's Log Save", accept: { 'application/json': ['.json'] } }]
+    });
+    const writable = await fh.createWritable();
+    await writable.write(json);
+    await writable.close();
+  } catch(e) { if (e.name !== 'AbortError') _downloadSave(json); }
 }
 
 function importFromFile() {
-  if (window.showOpenFilePicker) {
-    window.showOpenFilePicker({
-      types: [{ description: "Captain's Log Save", accept: { 'application/json': ['.json'] } }]
-    }).then(async ([fh]) => {
-      const file = await fh.getFile();
-      const text = await file.text();
-      _applyImport(text);
-    }).catch(e => { if (e.name !== 'AbortError') alert('Load failed: ' + e.message); });
-  } else {
-    const inp = document.createElement('input');
-    inp.type = 'file'; inp.accept = '.json';
-    inp.onchange = e => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => _applyImport(ev.target.result);
-      reader.readAsText(file);
-    };
-    inp.click();
-  }
+  if (!_pickersAllowed() || !window.showOpenFilePicker) { _chooseSaveFile(); return; }
+  window.showOpenFilePicker({
+    types: [{ description: "Captain's Log Save", accept: { 'application/json': ['.json'] } }]
+  }).then(async ([fh]) => {
+    const file = await fh.getFile();
+    _applyImport(await file.text());
+  }).catch(e => { if (e.name !== 'AbortError') _chooseSaveFile(); });
 }
 
 function _applyImport(text) {
