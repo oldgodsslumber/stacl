@@ -5788,8 +5788,9 @@ const LP_OUTLOOK_GROUPS = {
   aspiration: {label:'Aspiration', yes:'Pursued', no:'Abandoned', who:'Any character'},
 };
 
+const lpMixedOn = l => !!(l.mixedOn || l.mixed);
 function lpDefault() {
-  return {v:2, mixed:'', speciesPick:[], customName:'',
+  return {v:2, mixed:'', mixedOn:false, speciesPick:[], customName:'',
     envTable:'', envAttr:'', envDisc:'', envOther:'',
     outlookGroup:'upbringing', outlookYes:null, outlookDisc:'',
     eduCat:'', eduAttr:{}, eduMajor:'', eduMinor:['',''], eduSwapFrom:'', eduSwapTo:'',
@@ -5886,91 +5887,94 @@ function lpCompute() {
   const attr = {}; LP_ATTR_KEYS.forEach(k => attr[k] = 7);
   const disc = {}; LP_DISC_KEYS.forEach(k => disc[k] = 1);
   const issues = [[], [], [], [], [], []];
+  // secs: which page section (LP_SECTIONS key) fixes each missing item.
+  const secs = {};
+  const miss = (i, sec, msg) => { issues[i].push(msg); secs[sec] = true; };
   const val = i => ((c.values || [])[i] || '').trim();
 
   // Step One — Species
   const sp = lpSpecies(c._selectedSpecies);
-  if (!sp) issues[0].push('Choose a species');
+  if (!sp) miss(0, 'species', 'Choose a species');
   else {
-    if (l.mixed && !lpSpecies(l.mixed)) issues[0].push('Choose the second species for mixed heritage');
-    if (sp === LP_CUSTOM && !l.customName.trim()) issues[0].push('Name your species');
+    if (lpMixedOn(l) && !lpSpecies(l.mixed)) miss(0, 'speciesDetail', 'Choose the second species for mixed heritage');
+    if (sp === LP_CUSTOM && !l.customName.trim()) miss(0, 'speciesDetail', 'Name your species');
     const sa = lpSpeciesAttrs(c);
-    if (sa.length < 3) issues[0].push(`Choose ${3 - sa.length} more species attribute${3 - sa.length === 1 ? '' : 's'}`);
+    if (sa.length < 3) miss(0, 'speciesDetail', `Choose ${3 - sa.length} more species attribute${3 - sa.length === 1 ? '' : 's'}`);
     sa.forEach(k => attr[k]++);
   }
   // Step Two — Environment
   const env = lpEnv(c);
-  if (!env) issues[1].push('Choose an environment');
+  if (!env) miss(1, 'env', 'Choose an environment');
   else {
-    if (env.attrs === 'OTHER_SPECIES_ATTRIBUTES' && !lpSpecies(l.envOther)) issues[1].push('Choose the species whose world you grew up on');
-    if (lpEnvAttrPool(c).includes(l.envAttr)) attr[l.envAttr]++; else issues[1].push('Choose the environment attribute');
-    if (lpPool(env.discs, LP_DISC_KEYS).includes(l.envDisc)) disc[l.envDisc]++; else issues[1].push('Choose the environment discipline');
+    if (env.attrs === 'OTHER_SPECIES_ATTRIBUTES' && !lpSpecies(l.envOther)) miss(1, 'envPicks', 'Choose the species whose world you grew up on');
+    if (lpEnvAttrPool(c).includes(l.envAttr)) attr[l.envAttr]++; else miss(1, 'envPicks', 'Choose the environment attribute');
+    if (lpPool(env.discs, LP_DISC_KEYS).includes(l.envDisc)) disc[l.envDisc]++; else miss(1, 'envPicks', 'Choose the environment discipline');
   }
-  if (!val(0)) issues[1].push('Write your environment value');
+  if (!val(0)) miss(1, 'envValue', 'Write your environment value');
   // Step Three — Early Outlook
   const ol = lpOutlook(c);
-  if (!ol) issues[2].push('Choose an early outlook');
+  if (!ol) miss(2, 'outlook', 'Choose an early outlook');
   else {
     if (l.outlookYes === true || l.outlookYes === false) {
       Object.entries(l.outlookYes ? ol.yes : ol.no).forEach(([k, v]) => attr[k] += v);
-    } else issues[2].push(`Choose whether you ${LP_OUTLOOK_GROUPS[l.outlookGroup].yes.toLowerCase()} or ${LP_OUTLOOK_GROUPS[l.outlookGroup].no.toLowerCase()} it`);
-    if (lpPool(ol.discs, LP_DISC_KEYS).includes(l.outlookDisc)) disc[l.outlookDisc]++; else issues[2].push('Choose the outlook discipline');
+    } else miss(2, 'outlookDetail', `Choose whether you ${LP_OUTLOOK_GROUPS[l.outlookGroup].yes.toLowerCase()} or ${LP_OUTLOOK_GROUPS[l.outlookGroup].no.toLowerCase()} it`);
+    if (lpPool(ol.discs, LP_DISC_KEYS).includes(l.outlookDisc)) disc[l.outlookDisc]++; else miss(2, 'outlookDetail', 'Choose the outlook discipline');
   }
-  if (!l.focus.outlook.trim()) issues[2].push('Add your early outlook focus');
+  if (!l.focus.outlook.trim()) miss(2, 'outlookDetail', 'Add your early outlook focus');
   // Step Four — Education
   const ed = lpEdu(c);
-  if (!ed) issues[3].push('Choose your education');
+  if (!ed) miss(3, 'edu', 'Choose your education');
   else {
     const t = ed.track;
     const pts = Object.entries(l.eduAttr).filter(([k, v]) => LP_ATTR_KEYS.includes(k) && v > 0);
     const sum = pts.reduce((s, [, v]) => s + v, 0);
-    if (sum !== 3) issues[3].push(`Assign ${3 - sum} more education attribute point${3 - sum === 1 ? '' : 's'}`);
-    else if (t.attrReq.length && !pts.some(([k]) => t.attrReq.includes(k))) issues[3].push(`One education attribute must be ${t.attrReq.map(lpFull).join(' or ')}`);
+    if (sum !== 3) miss(3, 'eduDetail', `Assign ${3 - sum} more education attribute point${3 - sum === 1 ? '' : 's'}`);
+    else if (t.attrReq.length && !pts.some(([k]) => t.attrReq.includes(k))) miss(3, 'eduDetail', `One education attribute must be ${t.attrReq.map(lpFull).join(' or ')}`);
     pts.forEach(([k, v]) => attr[k] += v);
     const majorPool = t.mode === 'officer' ? ['command', 'security'] : lpPool(t.major, LP_DISC_KEYS);
-    if (!majorPool.includes(l.eduMajor)) issues[3].push('Choose the discipline that gets +2');
+    if (!majorPool.includes(l.eduMajor)) miss(3, 'eduDetail', 'Choose the discipline that gets +2');
     if (t.mode === 'officer') {
-      if (!['conn', 'engineering', 'science', 'medicine'].includes(l.eduMinor[1])) issues[3].push('Choose Conn, Engineering, Science or Medicine for +1');
+      if (!['conn', 'engineering', 'science', 'medicine'].includes(l.eduMinor[1])) miss(3, 'eduDetail', 'Choose Conn, Engineering, Science or Medicine for +1');
     } else {
       const mins = l.eduMinor.filter(k => k && k !== l.eduMajor);
-      if (new Set(mins).size < 2) issues[3].push(`Choose ${2 - new Set(mins).size} more discipline${2 - new Set(mins).size === 1 ? '' : 's'} for +1`);
-      if (t.mode === 'intel' && l.eduMajor && ![l.eduMajor, ...mins].includes('security')) issues[3].push('Intelligence Training: Security must be one of the three');
+      if (new Set(mins).size < 2) miss(3, 'eduDetail', `Choose ${2 - new Set(mins).size} more discipline${2 - new Set(mins).size === 1 ? '' : 's'} for +1`);
+      if (t.mode === 'intel' && l.eduMajor && ![l.eduMajor, ...mins].includes('security')) miss(3, 'eduDetail', 'Intelligence Training: Security must be one of the three');
     }
     const eduD = lpEduDiscs(c);
     Object.entries(eduD).forEach(([k, v]) => disc[k] += v);
     if (t.swap && (l.eduSwapFrom || l.eduSwapTo)) {
-      if (!l.eduSwapFrom || !l.eduSwapTo) issues[3].push('Finish or clear the optional discipline swap');
-      else if (eduD[l.eduSwapFrom] || eduD[l.eduSwapTo] || l.eduSwapFrom === l.eduSwapTo) issues[3].push('The swap must move a point between disciplines this education did not raise');
-      else if (disc[l.eduSwapFrom] <= 1) issues[3].push(`${lpFull(l.eduSwapFrom)} is too low to give up a point`);
+      if (!l.eduSwapFrom || !l.eduSwapTo) miss(3, 'eduDetail', 'Finish or clear the optional discipline swap');
+      else if (eduD[l.eduSwapFrom] || eduD[l.eduSwapTo] || l.eduSwapFrom === l.eduSwapTo) miss(3, 'eduDetail', 'The swap must move a point between disciplines this education did not raise');
+      else if (disc[l.eduSwapFrom] <= 1) miss(3, 'eduDetail', `${lpFull(l.eduSwapFrom)} is too low to give up a point`);
       else { disc[l.eduSwapFrom]--; disc[l.eduSwapTo]++; }
     }
     if (t.cap4) {
       const over = LP_DISC_KEYS.filter(k => disc[k] > 4);
-      if (over.length) issues[3].push(`Starfleet Academy: no discipline above 4 at this stage (${over.map(lpFull).join(', ')})`);
+      if (over.length) miss(3, 'eduDetail', `Starfleet Academy: no discipline above 4 at this stage (${over.map(lpFull).join(', ')})`);
     }
   }
-  if (!val(1)) issues[3].push('Write your education value');
-  l.focus.edu.forEach((f, i) => { if (!f.trim()) issues[3].push(`Add education focus ${i + 1}`); });
+  if (!val(1)) miss(3, 'eduValue', 'Write your education value');
+  l.focus.edu.forEach((f, i) => { if (!f.trim()) miss(3, 'eduDetail', `Add education focus ${i + 1}`); });
   // Step Five & Six — Career
-  if (!c.careerLength) issues[4].push('Choose your career length');
-  if (!val(2)) issues[4].push('Write your career length value');
+  if (!c.careerLength) miss(4, 'careerLength', 'Choose your career length');
+  if (!val(2)) miss(4, 'careerValue', 'Write your career length value');
   [1, 2].forEach(n => {
     const e = lpEvent(n === 1 ? c.careerEvent : c.careerEvent2);
-    if (!e) { issues[4].push(`Choose career event ${n}`); return; }
+    if (!e) { miss(4, 'event' + n, `Choose career event ${n}`); return; }
     const a = e.attr === 'any' ? l['ev' + n + 'Attr'] : e.attr;
     const d = e.disc === 'any' ? l['ev' + n + 'Disc'] : e.disc;
-    if (LP_ATTR_KEYS.includes(a)) attr[a]++; else issues[4].push(`Choose the attribute for career event ${n}`);
-    if (LP_DISC_KEYS.includes(d)) disc[d]++; else issues[4].push(`Choose the discipline for career event ${n}`);
-    if (!l.focus['ev' + n].trim()) issues[4].push(`Add the focus for career event ${n}`);
+    if (LP_ATTR_KEYS.includes(a)) attr[a]++; else miss(4, 'event' + n, `Choose the attribute for career event ${n}`);
+    if (LP_DISC_KEYS.includes(d)) disc[d]++; else miss(4, 'event' + n, `Choose the discipline for career event ${n}`);
+    if (!l.focus['ev' + n].trim()) miss(4, 'event' + n, `Add the focus for career event ${n}`);
   });
-  if (c.careerEvent && c.careerEvent === c.careerEvent2) issues[4].push('Choose two different career events');
+  if (c.careerEvent && c.careerEvent === c.careerEvent2) miss(4, 'event2', 'Choose two different career events');
   // Step Seven — Finishing Touches
   const fa = [...new Set(l.finAttr)].filter(k => LP_ATTR_KEYS.includes(k));
   const fd = [...new Set(l.finDisc)].filter(k => LP_DISC_KEYS.includes(k));
-  if (fa.length < 2) issues[5].push(`Choose ${2 - fa.length} more attribute${fa.length === 1 ? '' : 's'} to raise`);
-  if (fd.length < 2) issues[5].push(`Choose ${2 - fd.length} more discipline${fd.length === 1 ? '' : 's'} to raise`);
+  if (fa.length < 2) miss(5, 'fin', `Choose ${2 - fa.length} more attribute${fa.length === 1 ? '' : 's'} to raise`);
+  if (fd.length < 2) miss(5, 'fin', `Choose ${2 - fd.length} more discipline${fd.length === 1 ? '' : 's'} to raise`);
   fa.forEach(k => attr[k]++); fd.forEach(k => disc[k]++);
-  if (!val(3)) issues[5].push('Write your final value');
+  if (!val(3)) miss(5, 'finValue', 'Write your final value');
   const before = {attr:{...attr}, disc:{...disc}};
   // Point moves only make sense against the scores they were made for; if an
   // earlier step changed those scores since, the moves are dropped.
@@ -5987,7 +5991,8 @@ function lpCompute() {
     if (keys.filter(k => tot[k] === cap).length > 1) capIssues.push(`Only one ${word} may be ${cap} — reduce one`);
   });
   issues[5].push(...capIssues);
-  return {attr, disc, before, issues, all: issues.flat(), capIssues};
+  if (capIssues.length) secs.caps = true;
+  return {attr, disc, before, issues, secs, all: issues.flat(), capIssues};
 }
 
 // Shared UI pieces
@@ -6024,14 +6029,30 @@ function lpFocusInput(path, idx, label, examples) {
 function lpBonusText(obj) { return Object.entries(obj).map(([k, v]) => `${lpFull(k)} +${v}`).join(', '); }
 function lpListText(list, all) { return (list && list[0] === 'any') ? 'any' : (list || []).map(lpFull).join(' / '); }
 
+// ── Step sections ──────────────────────────────────────────────────────────
+// Each lifepath step is built from sections, and lpCompute() tags every
+// missing item with the section that fixes it. A step shows all its sections;
+// Finishing Touches shows just the unfinished ones from every step, inline,
+// so nothing sends the player back through the wizard. Nothing is collapsed:
+// every table is open and choices are buttons, not dropdowns.
+const LP_TABLE_HEAD = (t, extra) => `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 4px"><div style="font-size:11px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;font-weight:700">${t}</div>${extra || ''}</div>`;
+const lpVal = i => ((S.char.values || [])[i] || '').trim();
+
 // Step 1 — Species & Era
-function renderLP0() {
-  const c = S.char; const l = lp();
+function lpSecEra(c) {
   const selEra = c._selectedEra || '';
-  const eraOpts = ERAS.map(e => `<option${selEra === e ? ' selected' : ''}>${e}</option>`).join('');
-  const eraBadge = ERA_BADGES.find(e => e.keys.some(k => selEra.includes(k)));
-  const eraBadgeHTML = eraBadge ? `<img src="${eraBadge.src}" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 0 6px var(--accent));flex-shrink:0" onerror="this.style.display='none'">` : `<div style="width:48px;height:48px;border:2px dashed var(--accent-dim);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:var(--accent-dim)">?</div>`;
   const table = lpEraTable(selEra);
+  const eraBadge = ERA_BADGES.find(e => e.keys.some(k => selEra.includes(k)));
+  const badge = eraBadge ? `<img src="${eraBadge.src}" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 0 6px var(--accent));flex-shrink:0" onerror="this.style.display='none'">` : `<div style="width:48px;height:48px;border:2px dashed var(--accent-dim);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:var(--accent-dim)">?</div>`;
+  const btns = ERAS.map(e => `<button class="btn btn-sm${selEra === e ? ' btn-accent' : ''}" onclick="lpSetEra('${escQ(e)}')">${escH(e)}</button>`).join('');
+  return `<div style="background:var(--accent-glow);border:2px solid ${selEra ? 'var(--accent)' : 'var(--danger)'};border-radius:8px;padding:12px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">${badge}
+      <div><div style="font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700">Choose Your Era</div>
+      <div style="font-size:10px;color:${selEra ? 'var(--muted)' : 'var(--danger)'};margin-top:2px">${selEra ? `${escH(selEra)} · species roll table: ${LP_ERA_LABEL[table]}` : '⚠ The era sets your ships and the species roll table.'}</div></div></div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">${btns}</div></div>`;
+}
+function lpSecSpeciesTable(c) {
+  const table = lpEraTable(c._selectedEra || '');
   const filter = window._lpSpeciesFilter || (table || 'ALL');
   const list = [...LP_SPECIES.filter(s => filter === 'ALL' || s.eras.includes(filter)), LP_CUSTOM];
   const rows = list.map(s => {
@@ -6039,195 +6060,222 @@ function renderLP0() {
     return `<tr onclick="setCreationSpecies('${escQ(s.name)}')" class="${sel ? 'selected' : ''}">
       <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(s.name)}</strong></td>
       <td style="color:var(--muted);font-size:10px">${s.any ? `+1 to any ${s.any}` : s.attrs.map(lpFull).join(', ')}</td>
-      <td style="color:var(--muted);font-size:10px">${s.eras.map(e => e).join(' ') || '—'}</td></tr>`;
+      <td style="color:var(--muted);font-size:10px">${s.eras.join(' ') || '—'}</td></tr>`;
   }).join('');
   const fBtn = (k, label) => `<button class="btn btn-xs${filter === k ? ' btn-accent' : ''}" onclick="window._lpSpeciesFilter='${k}';renderCurrentTab()">${label}</button>`;
+  return `<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+      <button class="btn btn-accent btn-sm" onclick="lpRollSpecies()">🎲 Roll Species${table ? ` (${LP_ERA_LABEL[table]})` : ' (random era)'}</button>
+      <span style="flex:1"></span><span style="font-size:10px;color:var(--muted)">Show:</span>${fBtn('ENT', 'Enterprise')}${fBtn('TOS', 'Original Series')}${fBtn('TNG', 'Next Generation')}${fBtn('ALL', 'All 58')}</div>
+    <table class="roll-table" style="margin-bottom:8px"><thead><tr><th>Species</th><th>Attributes +1</th><th>Matrix</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function lpSecSpeciesDetail(c, l) {
   const sp = lpSpecies(c._selectedSpecies);
-  let detail = '';
-  if (sp) {
-    let inner = `<div style="font-size:11px;color:var(--text);line-height:1.5;margin-bottom:8px">${escH(sp.desc)} <span style="color:var(--muted)">(p. ${escH(sp.page)})</span></div>`;
-    if (sp === LP_CUSTOM) inner += lpRow('Species name:', `<input value="${escH(l.customName)}" placeholder="e.g. Alshain" style="flex:1;background:var(--surface3);border:1px solid ${l.customName ? 'var(--border)' : 'var(--danger)'};color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px" onchange="lpSet('customName',this.value)">`);
-    else {
-      const others = LP_SPECIES.filter(s => s.name !== sp.name).map(s => `<option${l.mixed === s.name ? ' selected' : ''}>${escH(s.name)}</option>`).join('');
-      inner += lpRow('Mixed heritage:', `<select style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:3px;font-size:11px" onchange="lpSetMixed(this.value)"><option value="">— single species —</option>${others}</select>
-        <span style="color:var(--muted);font-size:10px">Pick three different bonuses from across both species (p. 91).</span>`);
+  if (!sp) return '';
+  let inner = `<div style="font-size:11px;color:var(--text);line-height:1.5;margin-bottom:8px">${escH(sp.desc)} <span style="color:var(--muted)">(p. ${escH(sp.page)})</span></div>`;
+  if (sp === LP_CUSTOM) {
+    inner += lpRow('Species name:', `<input value="${escH(l.customName)}" placeholder="e.g. Alshain" style="flex:1;background:var(--surface3);border:1px solid ${l.customName ? 'var(--border)' : 'var(--danger)'};color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px" onchange="lpSet('customName',this.value)">`);
+  } else {
+    inner += lpRow('Heritage:', `<button class="btn btn-xs${lpMixedOn(l) ? '' : ' btn-accent'}" onclick="lpSetHeritage(false)">Single species</button><button class="btn btn-xs${lpMixedOn(l) ? ' btn-accent' : ''}" onclick="lpSetHeritage(true)">Mixed heritage</button>`);
+    if (lpMixedOn(l)) {
+      inner += lpHint('Second species — you’ll pick three different bonuses from across both (p. 91):')
+        + `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${LP_SPECIES.filter(s => s.name !== sp.name).map(s => `<button class="btn btn-xs${l.mixed === s.name ? ' btn-accent' : ''}" onclick="lpSetMixed('${escQ(s.name)}')">${escH(s.name)}</button>`).join('')}</div>`;
     }
-    if (lpNeedsSpeciesPick(c)) {
-      const pool = lpSpeciesPickPool(c);
-      inner += lpRow(`Attributes +1 (${lpSpeciesAttrs(c).length}/3):`, lpKeyBtns(LP_ATTR_KEYS, l.speciesPick, 'lpToggleSpeciesPick', LP_ATTR_KEYS.filter(k => !pool.includes(k))));
-    } else inner += lpRow('Attributes +1:', sp.attrs.map(k => `<strong style="color:var(--accent)">${lpFull(k)}</strong>`).join(', '));
-    detail = lpBox(`Species — ${escH(lpSpeciesDisplay(c))}`, inner, true);
   }
-  return `
-  <div style="background:var(--accent-glow);border:2px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:14px">
-    <div style="display:flex;align-items:center;gap:12px">${eraBadgeHTML}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Choose Your Era</div>
-        <select style="width:100%;background:#000;border:2px solid ${selEra ? 'var(--accent)' : 'var(--danger)'};color:var(--text);padding:7px 10px;border-radius:4px;font-size:13px;font-family:var(--font)" onchange="saveCharField('_selectedEra',this.value);window._lpSpeciesFilter=null;renderCurrentTab()"><option value="">— Select Era —</option>${eraOpts}</select>
-        ${!selEra ? `<div style="font-size:10px;color:var(--danger);margin-top:4px">⚠ Era affects available ships and the species roll table.</div>` : `<div style="font-size:10px;color:var(--muted);margin-top:4px">Species roll table: ${LP_ERA_LABEL[table]}</div>`}
-      </div></div></div>
-  <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step One: every species gives +1 to three different attributes and a species trait. Choose one, or roll on the era's matrix.</p>
-  <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
-    <button class="btn btn-accent btn-sm" onclick="lpRollSpecies()">🎲 Roll Species${table ? ` (${LP_ERA_LABEL[table]})` : ' (random era)'}</button>
-    <span style="flex:1"></span>${fBtn('ENT', 'ENT')}${fBtn('TOS', 'TOS')}${fBtn('TNG', 'TNG')}${fBtn('ALL', 'All 58')}
-  </div>
-  <div style="max-height:260px;overflow-y:auto;margin-bottom:8px">
-    <table class="roll-table"><thead><tr><th>Species</th><th>Attributes +1</th><th>Matrix</th></tr></thead><tbody>${rows}</tbody></table>
-  </div>
-  ${detail}${lpStepIssues(0)}`;
+  if (lpNeedsSpeciesPick(c)) {
+    const pool = lpSpeciesPickPool(c);
+    inner += lpRow(`Attributes +1 (${lpSpeciesAttrs(c).length}/3):`, lpKeyBtns(LP_ATTR_KEYS, l.speciesPick, 'lpToggleSpeciesPick', LP_ATTR_KEYS.filter(k => !pool.includes(k))));
+  } else if (!lpMixedOn(l)) {
+    inner += lpRow('Attributes +1:', sp.attrs.map(k => `<strong style="color:var(--accent)">${lpFull(k)}</strong>`).join(', '));
+  }
+  return lpBox(`Species — ${escH(lpSpeciesDisplay(c))}`, inner, true);
 }
 
-// Step 2 — Environment
-function renderLP1() {
-  const c = S.char; const l = lp();
-  const tBtn = (k, label) => `<button class="btn btn-sm${l.envTable === k ? ' btn-accent' : ''}" onclick="lpSetEnvTable('${k}')">${label}</button>`;
-  let body = '';
-  if (l.envTable) {
-    const rows = LP_ENVIRONMENTS[l.envTable].map(e => {
+// Step 2 — Environment: both matrixes open; picking an environment picks its matrix
+function lpSecEnvTables(c, l) {
+  const table = key => {
+    const rows = LP_ENVIRONMENTS[key].map(e => {
       const sel = c._selectedEnv === e.name;
       const a = e.attrs === 'SPECIES_ATTRIBUTES' ? 'one of your species’ three' : e.attrs === 'OTHER_SPECIES_ATTRIBUTES' ? 'one of another species’ three' : e.attrs.map(lpFull).join(' / ');
       return `<tr onclick="setCreationEnv('${escQ(e.name)}')" class="${sel ? 'selected' : ''}"><td style="color:var(--muted)">${e.roll}</td>
         <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(e.name)}</strong><br><span style="color:var(--muted);font-size:10px">${escH(e.text)}</span></td>
         <td style="color:var(--muted);font-size:10px">${a}</td><td style="color:var(--muted);font-size:10px">${lpListText(e.discs)}</td></tr>`;
     }).join('');
-    body += `<div style="display:flex;gap:6px;align-items:center;margin:8px 0 6px"><button class="btn btn-accent btn-sm" onclick="lpRollEnv()">🎲 Roll d20</button></div>
-      <table class="roll-table" style="margin-bottom:8px"><thead><tr><th>d20</th><th>${l.envTable === 'settings' ? 'Setting' : 'Condition'}</th><th>Attribute +1</th><th>Discipline +1</th></tr></thead><tbody>${rows}</tbody></table>`;
-    const env = lpEnv(c);
-    if (env) {
-      let inner = '';
-      if (env.attrs === 'OTHER_SPECIES_ATTRIBUTES') {
-        const opts = LP_SPECIES.map(s => `<option${l.envOther === s.name ? ' selected' : ''}>${escH(s.name)}</option>`).join('');
-        inner += lpRow('Other species:', `<select style="background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:3px;font-size:11px" onchange="lpSet('envOther',this.value);lpSet('envAttr','')"><option value="">— choose —</option>${opts}</select>`);
-      }
-      const ap = lpEnvAttrPool(c);
-      inner += lpRow('Attribute +1:', ap.length ? lpKeyBtns(ap, l.envAttr, 'lpSetEnvAttr') : `<span style="color:var(--muted);font-size:10px">${env.attrs === 'SPECIES_ATTRIBUTES' ? 'Finish your species choice first.' : 'Choose the species first.'}</span>`);
-      inner += lpRow('Discipline +1:', lpKeyBtns(lpPool(env.discs, LP_DISC_KEYS), l.envDisc, 'lpSetEnvDisc'));
-      body += lpBox(`Environment — ${escH(env.name)}`, inner, true);
-    }
-  }
-  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step Two: where your character grew up gives one value, +1 to one attribute and +1 to one discipline. First choose which matrix fits your concept — the <strong>setting</strong> you grew up in, or the <strong>conditions</strong> of your home — then choose or roll one environment from it.</p>
-  <div style="display:flex;gap:6px">${tBtn('settings', 'Settings')}${tBtn('conditions', 'Conditions')}</div>
-  ${body}
-  ${lpValueInput(0, 'Environment Value', 'A belief shaped by where you grew up.', 1)}
-  ${lpStepIssues(1)}`;
+    return LP_TABLE_HEAD(key === 'settings' ? 'Settings — where you grew up' : 'Conditions — what home was like', `<button class="btn btn-xs" onclick="lpRollEnv('${key}')">🎲 Roll d20</button>`)
+      + `<table class="roll-table" style="margin-bottom:8px"><thead><tr><th>d20</th><th>Environment</th><th>Attribute +1</th><th>Discipline +1</th></tr></thead><tbody>${rows}</tbody></table>`;
+  };
+  return lpHint('Choose from whichever matrix fits your character — one environment in total.') + table('settings') + table('conditions');
 }
-
-// Step 3 — Early Outlook
-function renderLP2() {
-  const c = S.char; const l = lp(); const g = LP_OUTLOOK_GROUPS[l.outlookGroup];
-  const gBtn = k => `<button class="btn btn-sm${l.outlookGroup === k ? ' btn-accent' : ''}" onclick="lpSetOutlookGroup('${k}')" title="${LP_OUTLOOK_GROUPS[k].who}">${LP_OUTLOOK_GROUPS[k].label}</button>`;
-  const rows = LP_OUTLOOKS[l.outlookGroup].map(o => {
-    const sel = c._selectedUpbringing === o.name;
-    return `<tr onclick="setCreationUpbringing('${escQ(o.name)}')" class="${sel ? 'selected' : ''}"><td style="color:var(--muted)">${o.roll}</td>
-      <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(o.name)}</strong></td>
-      <td style="color:var(--muted);font-size:10px">${g.yes}: ${lpBonusText(o.yes)}<br>${g.no}: ${lpBonusText(o.no)}</td>
-      <td style="color:var(--muted);font-size:10px">${lpListText(o.discs)}</td></tr>`;
-  }).join('');
-  let detail = '';
-  const ol = lpOutlook(c);
-  if (ol) {
-    const yn = (v, label, bonus) => `<button class="btn btn-sm${l.outlookYes === v ? ' btn-accent' : ''}" onclick="lpSet('outlookYes',${v})">${label}: ${lpBonusText(bonus)}</button>`;
-    let inner = lpRow('Did you…', `${yn(true, g.yes, ol.yes)}${yn(false, g.no, ol.no)}<button class="btn btn-xs" onclick="lpSet('outlookYes',Math.random()<0.5)">🎲 50/50</button>`);
-    inner += lpRow('Discipline +1:', lpKeyBtns(lpPool(ol.discs, LP_DISC_KEYS), l.outlookDisc, 'lpSetOutlookDisc'));
-    inner += lpFocusInput('outlook', null, 'Focus — one, related to this outlook', ol.focusEx);
-    detail = lpBox(`${g.label} — ${escH(ol.name)}`, inner, true);
+function lpSecEnvPicks(c, l) {
+  const env = lpEnv(c); if (!env) return '';
+  let inner = '';
+  if (env.attrs === 'OTHER_SPECIES_ATTRIBUTES') {
+    inner += lpHint('Whose world did you grow up on?')
+      + `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${LP_SPECIES.map(s => `<button class="btn btn-xs${l.envOther === s.name ? ' btn-accent' : ''}" onclick="lpSetEnvOther('${escQ(s.name)}')">${escH(s.name)}</button>`).join('')}</div>`;
   }
-  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step Three: your early outlook gives three attribute points (+2 and +1), +1 to one discipline and one focus. Choose the approach that suits your character, then whether they ${g.yes.toLowerCase()} or ${g.no.toLowerCase()} it.</p>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">${gBtn('upbringing')}${gBtn('caste')}${gBtn('aspiration')}</div>
-  <div style="font-size:10px;color:var(--muted);margin-bottom:6px">${g.label}: ${g.who}.</div>
-  <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><button class="btn btn-accent btn-sm" onclick="lpRollOutlook()">🎲 Roll d20</button><span style="font-size:10px;color:var(--muted)">19–20: pick one or reroll</span></div>
-  <div style="max-height:220px;overflow-y:auto;margin-bottom:8px"><table class="roll-table"><thead><tr><th>d20</th><th>${g.label}</th><th>Attributes</th><th>Discipline +1</th></tr></thead><tbody>${rows}</tbody></table></div>
-  ${detail}${lpStepIssues(2)}`;
+  const ap = lpEnvAttrPool(c);
+  inner += lpRow('Attribute +1:', ap.length ? lpKeyBtns(ap, l.envAttr, 'lpSetEnvAttr') : `<span style="color:var(--muted);font-size:10px">${env.attrs === 'SPECIES_ATTRIBUTES' ? 'Finish your species choice first.' : 'Choose the species first.'}</span>`);
+  inner += lpRow('Discipline +1:', lpKeyBtns(lpPool(env.discs, LP_DISC_KEYS), l.envDisc, 'lpSetEnvDisc'));
+  return lpBox(`Environment — ${escH(env.name)}`, inner, true);
 }
+const lpSecEnvValue = () => lpValueInput(0, 'Environment Value', 'A belief shaped by where you grew up.', 1);
 
-// Step 4 — Education
-function renderLP3() {
-  const c = S.char; const l = lp();
-  const catBtns = LP_EDUCATION.map(cat => `<button class="btn btn-sm${l.eduCat === cat.cat ? ' btn-accent' : ''}" onclick="lpSetEduCat('${escQ(cat.cat)}')">${escH(cat.cat)} <span style="opacity:.6">${cat.roll}</span></button>`).join('');
-  let body = '';
-  const cat = LP_EDUCATION.find(x => x.cat === l.eduCat);
-  if (cat) {
-    const rows = cat.tracks.map(t => {
-      const sel = c._selectedTrack === t.name;
-      return `<tr onclick="setCreationTrack('${escQ(t.name)}')" class="${sel ? 'selected' : ''}"><td style="color:var(--muted)">${t.roll}</td>
-        <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(t.name)}</strong></td><td style="color:var(--muted);font-size:10px">${escH(t.discRule)}</td></tr>`;
+// Step 3 — Early Outlook: all three approaches open
+function lpSecOutlookTables(c, l) {
+  return Object.keys(LP_OUTLOOK_GROUPS).map(gk => {
+    const g = LP_OUTLOOK_GROUPS[gk];
+    const rows = LP_OUTLOOKS[gk].map(o => {
+      const sel = l.outlookGroup === gk && c._selectedUpbringing === o.name;
+      return `<tr onclick="setCreationUpbringing('${escQ(o.name)}','${gk}')" class="${sel ? 'selected' : ''}"><td style="color:var(--muted)">${o.roll}</td>
+        <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(o.name)}</strong></td>
+        <td style="color:var(--muted);font-size:10px">${g.yes}: ${lpBonusText(o.yes)}<br>${g.no}: ${lpBonusText(o.no)}</td>
+        <td style="color:var(--muted);font-size:10px">${lpListText(o.discs)}</td></tr>`;
     }).join('');
-    body += `<div style="display:flex;gap:6px;align-items:center;margin:8px 0 6px"><button class="btn btn-accent btn-sm" onclick="lpRollEduTrack()">🎲 Roll d20</button>${cat.cat === 'Civilian Training' ? '<span style="font-size:10px;color:var(--muted)">19–20: pick one or reroll</span>' : ''}</div>
-      <table class="roll-table" style="margin-bottom:8px"><thead><tr><th>d20</th><th>Track</th><th>Disciplines</th></tr></thead><tbody>${rows}</tbody></table>`;
-  }
-  const ed = lpEdu(c);
-  if (ed) {
-    const t = ed.track;
-    const sum = Object.values(l.eduAttr).reduce((s, v) => s + v, 0);
-    let inner = lpHint(`Three attribute points: +1 to three attributes, or +2 and +1.${t.attrReq.length ? ` One must be <strong>${t.attrReq.map(lpFull).join(' or ')}</strong>.` : ''}`);
-    inner += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">${LP_ATTR_KEYS.map(k => {
-      const v = l.eduAttr[k] || 0;
-      return `<div style="display:flex;align-items:center;gap:3px;font-size:11px"><span style="min-width:30px;color:${v ? 'var(--accent)' : 'var(--muted)'}">${lpAbbr(k)}</span>
-        <button class="btn btn-xs" ${v ? '' : 'disabled style="opacity:.35"'} onclick="lpEduAttr('${k}',-1)">−</button><strong style="min-width:14px;text-align:center">${v ? '+' + v : '0'}</strong>
-        <button class="btn btn-xs" ${sum < 3 && v < 2 ? '' : 'disabled style="opacity:.35"'} onclick="lpEduAttr('${k}',1)">+</button></div>`;
-    }).join('')}<span style="font-size:11px;color:${sum === 3 ? 'var(--success)' : 'var(--muted)'}">${sum}/3</span></div>`;
-    if (t.mode === 'officer') {
-      inner += lpRow('+2 (other gets +1):', lpKeyBtns(['command', 'security'], l.eduMajor, 'lpSetEduMajor'));
-      inner += lpRow('Then +1 to one of:', lpKeyBtns(['conn', 'engineering', 'science', 'medicine'], l.eduMinor[1], 'lpSetOfficerMinor'));
-    } else {
-      const majorPool = lpPool(t.major, LP_DISC_KEYS);
-      inner += lpRow('Discipline +2:', lpKeyBtns(majorPool, l.eduMajor, 'lpSetEduMajor'));
-      inner += lpRow('Two others +1:', lpKeyBtns(LP_DISC_KEYS, l.eduMinor.filter(Boolean), 'lpToggleEduMinor', l.eduMajor ? [l.eduMajor] : []));
-      if (t.mode === 'intel') inner += lpHint('Security must be one of the three disciplines you raise.');
-    }
-    if (t.cap4) inner += lpHint('Starfleet Academy: no discipline may go above 4 at this stage.');
-    if (t.swap) {
-      const raised = Object.keys(lpEduDiscs(c));
-      const other = LP_DISC_KEYS.filter(k => !raised.includes(k));
-      inner += lpRow('Optional swap −1:', lpKeyBtns(other, l.eduSwapFrom, 'lpSetSwapFrom') + `<span style="color:var(--muted);font-size:10px">then +1:</span>` + lpKeyBtns(other, l.eduSwapTo, 'lpSetSwapTo', l.eduSwapFrom ? [l.eduSwapFrom] : []) + ((l.eduSwapFrom || l.eduSwapTo) ? `<button class="btn btn-xs" onclick="lpSet('eduSwapFrom','');lpSet('eduSwapTo','')">clear</button>` : ''));
-    }
-    inner += lpFocusInput('edu', 0, 'Focus 1') + lpFocusInput('edu', 1, 'Focus 2') + lpFocusInput('edu', 2, 'Focus 3');
-    if (t.focusEx.length) inner += `<div style="font-size:10px;color:var(--muted);margin-bottom:3px">Examples — click to fill the next empty focus:</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px">${t.focusEx.map(f => `<button class="btn btn-xs" onclick="lpFillEduFocus('${escQ(f)}')">${escH(f)}</button>`).join('')}</div>`;
-    body += lpBox(`${escH(ed.cat.cat)} — ${escH(t.name)}`, inner, true);
-  }
-  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step Four: education gives a value, three attribute points, +2/+1/+1 to disciplines and three focuses. Choose (or roll) the kind of training, then the track.</p>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${catBtns}<button class="btn btn-xs" onclick="lpRollEduCat()">🎲 Roll</button></div>
-  ${body}
-  ${lpValueInput(1, 'Education Value', 'A belief developed during your training.', 3)}
-  ${lpStepIssues(3)}`;
+    return LP_TABLE_HEAD(`${g.label}s`, `<span style="font-size:10px;color:var(--muted)">${g.who}</span><button class="btn btn-xs" onclick="lpRollOutlook('${gk}')">🎲 Roll d20</button>`)
+      + `<table class="roll-table" style="margin-bottom:8px"><thead><tr><th>d20</th><th>${g.label}</th><th>Attributes</th><th>Discipline +1</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }).join('') + lpHint('On a roll of 19–20, pick one or reroll.');
+}
+function lpSecOutlookDetail(c, l) {
+  const ol = lpOutlook(c); if (!ol) return '';
+  const g = LP_OUTLOOK_GROUPS[l.outlookGroup];
+  const yn = (v, label, bonus) => `<button class="btn btn-sm${l.outlookYes === v ? ' btn-accent' : ''}" onclick="lpSet('outlookYes',${v})">${label}: ${lpBonusText(bonus)}</button>`;
+  let inner = lpRow('Did you…', `${yn(true, g.yes, ol.yes)}${yn(false, g.no, ol.no)}<button class="btn btn-xs" onclick="lpSet('outlookYes',Math.random()<0.5)">🎲 50/50</button>`);
+  inner += lpRow('Discipline +1:', lpKeyBtns(lpPool(ol.discs, LP_DISC_KEYS), l.outlookDisc, 'lpSetOutlookDisc'));
+  inner += lpFocusInput('outlook', null, 'Focus — one, related to this outlook', ol.focusEx);
+  return lpBox(`${g.label} — ${escH(ol.name)}`, inner, true);
 }
 
-// Steps 5 & 6 — Career length and two career events
-function renderLP4() {
-  const c = S.char; const l = lp();
+// Step 4 — Education: every category and track open
+function lpSecEduTables(c, l) {
+  return `<div style="margin:4px 0 2px"><button class="btn btn-accent btn-sm" onclick="lpRollEducation()">🎲 Roll category &amp; track</button></div>`
+    + LP_EDUCATION.map(cat => {
+      const rows = cat.tracks.map(t => {
+        const sel = c._selectedTrack === t.name;
+        return `<tr onclick="setCreationTrack('${escQ(t.name)}')" class="${sel ? 'selected' : ''}"><td style="color:var(--muted)">${t.roll}</td>
+          <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(t.name)}</strong></td><td style="color:var(--muted);font-size:10px">${escH(t.discRule)}</td></tr>`;
+      }).join('');
+      return LP_TABLE_HEAD(`${escH(cat.cat)} <span style="opacity:.6">(category roll ${cat.roll})</span>`, cat.cat === 'Civilian Training' ? '<span style="font-size:10px;color:var(--muted)">track roll 19–20: pick one or reroll</span>' : '')
+        + `<table class="roll-table" style="margin-bottom:8px"><thead><tr><th>d20</th><th>Track</th><th>Disciplines</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }).join('');
+}
+function lpSecEduDetail(c, l) {
+  const ed = lpEdu(c); if (!ed) return '';
+  const t = ed.track;
+  const sum = Object.values(l.eduAttr).reduce((s, v) => s + v, 0);
+  let inner = lpHint(`Three attribute points: +1 to three attributes, or +2 and +1.${t.attrReq.length ? ` One must be <strong>${t.attrReq.map(lpFull).join(' or ')}</strong>.` : ''}`);
+  inner += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">${LP_ATTR_KEYS.map(k => {
+    const v = l.eduAttr[k] || 0;
+    return `<div style="display:flex;align-items:center;gap:3px;font-size:11px"><span style="min-width:30px;color:${v ? 'var(--accent)' : 'var(--muted)'}">${lpAbbr(k)}</span>
+      <button class="btn btn-xs" ${v ? '' : 'disabled style="opacity:.35"'} onclick="lpEduAttr('${k}',-1)">−</button><strong style="min-width:14px;text-align:center">${v ? '+' + v : '0'}</strong>
+      <button class="btn btn-xs" ${sum < 3 && v < 2 ? '' : 'disabled style="opacity:.35"'} onclick="lpEduAttr('${k}',1)">+</button></div>`;
+  }).join('')}<span style="font-size:11px;color:${sum === 3 ? 'var(--success)' : 'var(--muted)'}">${sum}/3</span></div>`;
+  if (t.mode === 'officer') {
+    inner += lpRow('+2 (other gets +1):', lpKeyBtns(['command', 'security'], l.eduMajor, 'lpSetEduMajor'));
+    inner += lpRow('Then +1 to one of:', lpKeyBtns(['conn', 'engineering', 'science', 'medicine'], l.eduMinor[1], 'lpSetOfficerMinor'));
+  } else {
+    inner += lpRow('Discipline +2:', lpKeyBtns(lpPool(t.major, LP_DISC_KEYS), l.eduMajor, 'lpSetEduMajor'));
+    inner += lpRow('Two others +1:', lpKeyBtns(LP_DISC_KEYS, l.eduMinor.filter(Boolean), 'lpToggleEduMinor', l.eduMajor ? [l.eduMajor] : []));
+    if (t.mode === 'intel') inner += lpHint('Security must be one of the three disciplines you raise.');
+  }
+  if (t.cap4) inner += lpHint('Starfleet Academy: no discipline may go above 4 at this stage.');
+  if (t.swap) {
+    const raised = Object.keys(lpEduDiscs(c));
+    const other = LP_DISC_KEYS.filter(k => !raised.includes(k));
+    inner += lpRow('Optional swap −1:', lpKeyBtns(other, l.eduSwapFrom, 'lpSetSwapFrom') + `<span style="color:var(--muted);font-size:10px">then +1:</span>` + lpKeyBtns(other, l.eduSwapTo, 'lpSetSwapTo', l.eduSwapFrom ? [l.eduSwapFrom] : []) + ((l.eduSwapFrom || l.eduSwapTo) ? `<button class="btn btn-xs" onclick="lpSet('eduSwapFrom','');lpSet('eduSwapTo','')">clear</button>` : ''));
+  }
+  inner += lpFocusInput('edu', 0, 'Focus 1') + lpFocusInput('edu', 1, 'Focus 2') + lpFocusInput('edu', 2, 'Focus 3');
+  if (t.focusEx.length) inner += `<div style="font-size:10px;color:var(--muted);margin-bottom:3px">Examples — click to fill the next empty focus:</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">${t.focusEx.map(f => `<button class="btn btn-xs" onclick="lpFillEduFocus('${escQ(f)}')">${escH(f)}</button>`).join('')}</div>`;
+  return lpBox(`${escH(ed.cat.cat)} — ${escH(t.name)}`, inner, true);
+}
+const lpSecEduValue = () => lpValueInput(1, 'Education Value', 'A belief developed during your training.', 3);
+
+// Steps 5 & 6 — Career
+function lpSecCareerLength(c) {
   const lengths = LP_CAREER_LENGTH.map(cl => `<div onclick="saveCharField('careerLength','${escQ(cl.name)}');renderCurrentTab()" style="padding:7px 10px;border-radius:4px;border:1px solid ${c.careerLength === cl.name ? 'var(--accent)' : 'var(--border)'};background:${c.careerLength === cl.name ? 'var(--surface3)' : 'transparent'};cursor:pointer;margin-bottom:4px">
       <strong style="color:${c.careerLength === cl.name ? 'var(--accent)' : 'var(--text)'};font-size:13px">${cl.name}</strong> <span style="color:var(--muted);font-size:10px">d20 ${cl.roll}</span>
       <div style="font-size:11px;color:var(--muted);margin-top:2px">${escH(cl.value)}</div></div>`).join('');
-  const eventBox = n => {
-    const name = n === 1 ? c.careerEvent : c.careerEvent2;
-    const other = n === 1 ? c.careerEvent2 : c.careerEvent;
-    const rows = LP_CAREER_EVENTS.map(e => {
-      const sel = name === e.name; const taken = other === e.name;
-      return `<tr onclick="${taken ? '' : `lpSetEvent(${n},'${escQ(e.name)}')`}" class="${sel ? 'selected' : ''}" style="${taken ? 'opacity:.35' : ''}"><td style="color:var(--muted)">${e.roll}</td>
-        <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(e.name)}</strong><br><span style="color:var(--muted);font-size:10px">${escH(e.text)}</span></td>
-        <td style="color:var(--muted);font-size:10px">${e.attr === 'any' ? 'any' : lpFull(e.attr)}<br>${e.disc === 'any' ? 'any' : lpFull(e.disc)}</td></tr>`;
-    }).join('');
-    const e = lpEvent(name);
-    let pick = '';
-    if (e) {
-      pick += lpRow('Attribute +1:', e.attr === 'any' ? lpKeyBtns(LP_ATTR_KEYS, l['ev' + n + 'Attr'], 'lpSetEvAttr' + n) : `<strong style="color:var(--accent)">${lpFull(e.attr)}</strong>`);
-      pick += lpRow('Discipline +1:', e.disc === 'any' ? lpKeyBtns(LP_DISC_KEYS, l['ev' + n + 'Disc'], 'lpSetEvDisc' + n) : `<strong style="color:var(--accent)">${lpFull(e.disc)}</strong>`);
-      pick += lpFocusInput('ev' + n, null, 'Focus from this event', e.focusEx);
-    }
-    return lpBox(`Career Event ${n}${e ? ' — ' + escH(e.name) : ''}`, `<div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn btn-accent btn-sm" onclick="lpRollEvent(${n})">🎲 Roll d20</button></div>
-      <div style="max-height:170px;overflow-y:auto;margin-bottom:6px"><table class="roll-table"><thead><tr><th>d20</th><th>Event</th><th>Attr / Disc</th></tr></thead><tbody>${rows}</tbody></table></div>${pick}`, !!e);
-  };
-  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Steps Five and Six: your career length gives a value; each of your two career events gives +1 to an attribute, +1 to a discipline and a focus.</p>
-  ${lpBox('Career Length', `<div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn btn-accent btn-sm" onclick="rollCareerLength()">🎲 Roll d20</button></div>${lengths}`)}
-  ${lpValueInput(2, 'Career Length Value', '', 4)}
-  ${eventBox(1)}${eventBox(2)}
-  ${lpStepIssues(4)}`;
+  return lpBox('Career Length', `<div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn btn-accent btn-sm" onclick="rollCareerLength()">🎲 Roll d20</button></div>${lengths}`);
+}
+const lpSecCareerValue = () => lpValueInput(2, 'Career Length Value', '', 4);
+// compact: on Finishing Touches, a chosen event shows only its remaining picks.
+function lpSecEvent(c, l, n, compact) {
+  const name = n === 1 ? c.careerEvent : c.careerEvent2;
+  const other = n === 1 ? c.careerEvent2 : c.careerEvent;
+  const rows = LP_CAREER_EVENTS.map(e => {
+    const sel = name === e.name; const taken = other === e.name;
+    return `<tr onclick="${taken ? '' : `lpSetEvent(${n},'${escQ(e.name)}')`}" class="${sel ? 'selected' : ''}" style="${taken ? 'opacity:.35' : ''}"><td style="color:var(--muted)">${e.roll}</td>
+      <td><strong${sel ? ' style="color:var(--accent)"' : ''}>${escH(e.name)}</strong>${taken ? ' <span style="font-size:9px;color:var(--muted)">(your other event)</span>' : ''}<br><span style="color:var(--muted);font-size:10px">${escH(e.text)}</span></td>
+      <td style="color:var(--muted);font-size:10px">${e.attr === 'any' ? 'any' : lpFull(e.attr)}<br>${e.disc === 'any' ? 'any' : lpFull(e.disc)}</td></tr>`;
+  }).join('');
+  const e = lpEvent(name);
+  let pick = '';
+  if (e) {
+    pick += lpRow('Attribute +1:', e.attr === 'any' ? lpKeyBtns(LP_ATTR_KEYS, l['ev' + n + 'Attr'], 'lpSetEvAttr' + n) : `<strong style="color:var(--accent)">${lpFull(e.attr)}</strong>`);
+    pick += lpRow('Discipline +1:', e.disc === 'any' ? lpKeyBtns(LP_DISC_KEYS, l['ev' + n + 'Disc'], 'lpSetEvDisc' + n) : `<strong style="color:var(--accent)">${lpFull(e.disc)}</strong>`);
+    pick += lpFocusInput('ev' + n, null, 'Focus from this event', e.focusEx);
+  }
+  const tableHTML = (compact && e) ? '' : `<div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn btn-accent btn-sm" onclick="lpRollEvent(${n})">🎲 Roll d20</button></div>
+    <table class="roll-table" style="margin-bottom:6px"><thead><tr><th>d20</th><th>Event</th><th>Attr / Disc</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return lpBox(`Career Event ${n}${e ? ' — ' + escH(e.name) : ''}`, tableHTML + pick, !!e);
 }
 
-// Step 7 — Finishing Touches: final +2/+2, last value, and the cap check
+// Section registry: [step, key, title, render]. Order = order on the page.
+const LP_SECTIONS = [
+  [0, 'species',       'Species',               (c, l) => lpSecSpeciesTable(c)],
+  [0, 'speciesDetail', 'Species bonuses',       lpSecSpeciesDetail],
+  [1, 'env',           'Environment',           lpSecEnvTables],
+  [1, 'envPicks',      'Environment bonuses',   lpSecEnvPicks],
+  [1, 'envValue',      'Environment value',     lpSecEnvValue],
+  [2, 'outlook',       'Early outlook',         lpSecOutlookTables],
+  [2, 'outlookDetail', 'Early outlook choices', lpSecOutlookDetail],
+  [3, 'edu',           'Education',             lpSecEduTables],
+  [3, 'eduDetail',     'Education choices',     lpSecEduDetail],
+  [3, 'eduValue',      'Education value',       lpSecEduValue],
+  [4, 'careerLength',  'Career length',         (c, l) => lpSecCareerLength(c)],
+  [4, 'careerValue',   'Career length value',   lpSecCareerValue],
+  [4, 'event1',        'Career event 1',        (c, l, compact) => lpSecEvent(c, l, 1, compact)],
+  [4, 'event2',        'Career event 2',        (c, l, compact) => lpSecEvent(c, l, 2, compact)],
+];
+const lpRenderStep = (i, c, l) => LP_SECTIONS.filter(s => s[0] === i).map(s => s[3](c, l)).join('');
+
+function renderLP0() {
+  const c = S.char; const l = lp();
+  return lpSecEra(c)
+    + `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step One: every species gives +1 to three different attributes and a species trait. Choose one, or roll on the era's matrix.</p>`
+    + lpRenderStep(0, c, l) + lpStepIssues(0);
+}
+function renderLP1() {
+  const c = S.char; const l = lp();
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:4px">Step Two: where your character grew up gives one value, +1 to one attribute and +1 to one discipline.</p>`
+    + lpRenderStep(1, c, l) + lpStepIssues(1);
+}
+function renderLP2() {
+  const c = S.char; const l = lp();
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:4px">Step Three: your early outlook gives three attribute points (+2 and +1), +1 to one discipline and one focus. Pick from whichever approach suits your character, then whether they embraced it or turned away.</p>`
+    + lpRenderStep(2, c, l) + lpStepIssues(2);
+}
+function renderLP3() {
+  const c = S.char; const l = lp();
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:4px">Step Four: education gives a value, three attribute points, +2/+1/+1 to disciplines and three focuses. Choose or roll a track from any category.</p>`
+    + lpRenderStep(3, c, l) + lpStepIssues(3);
+}
+function renderLP4() {
+  const c = S.char; const l = lp();
+  return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Steps Five and Six: your career length gives a value; each of your two career events gives +1 to an attribute, +1 to a discipline and a focus.</p>`
+    + lpRenderStep(4, c, l) + lpStepIssues(4);
+}
+
+// Step 7 — Finishing Touches. Anything still missing from earlier steps is
+// rendered right here, as the same controls, so it can be finished in place.
 function renderLP5() {
   const c = S.char; const l = lp(); const r = lpCompute();
+  let missing = '';
+  for (let step = 0; step < 5; step++) {
+    const secs = LP_SECTIONS.filter(s => s[0] === step && r.secs[s[1]]);
+    if (!secs.length) continue;
+    missing += `<div style="font-size:10px;color:var(--danger);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px;border-bottom:1px solid var(--danger);padding-bottom:3px">${CREATION_STEPS[step].title} — ${r.issues[step].map(escH).join(' · ')}</div>`
+      + secs.map(s => s[3](c, l, true)).join('');
+  }
   const table = (kind, keys, cap, label) => {
     const adj = kind === 'attr' ? l.adjAttr : l.adjDisc;
     const tot = r[kind];
@@ -6250,19 +6298,28 @@ function renderLP5() {
     }).join('');
     return `<div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:6px 0 4px">${label} — total ${total} (max ${cap}, only one at ${cap})${Object.keys(adj).length ? ` <button class="btn btn-xs" onclick="lpClearAdj('${kind}')">reset moves</button>` : ''}</div><div class="attr-grid">${cells}</div>`;
   };
-  const allIssues = r.issues.slice(0, 5).map((list, i) => list.length ? `<div style="font-size:11px;margin-bottom:3px"><a href="#" onclick="S.char.creationStep=${i};saveSlot();renderCurrentTab();return false" style="color:var(--accent)">${CREATION_STEPS[i].title}</a>: <span style="color:var(--danger)">${list.map(escH).join(' · ')}</span></div>` : '').join('');
   return `<p style="font-size:11px;color:var(--muted);margin-bottom:8px">Step Seven: raise two different attributes and two different disciplines by 1, and add a final value. Then check the limits — no attribute above 12 and only one at 12; no discipline above 5 and only one at 5. Move any extra points to other scores.</p>
-  ${allIssues ? lpBox('Earlier steps still need', allIssues) : ''}
-  ${lpBox('Final Additions', lpRow('Attributes +1 (two):', lpKeyBtns(LP_ATTR_KEYS, l.finAttr, 'lpToggleFinAttr')) + lpRow('Disciplines +1 (two):', lpKeyBtns(LP_DISC_KEYS, l.finDisc, 'lpToggleFinDisc')), true)}
+  ${missing ? `<div id="lp-missing" style="border:2px solid var(--danger);border-radius:6px;padding:10px 12px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--danger);font-weight:700;letter-spacing:1px;text-transform:uppercase">Still needed — finish these right here</div>${missing}</div>` : ''}
+  <div id="lp-fin">${lpBox('Final Additions', lpRow('Attributes +1 (two):', lpKeyBtns(LP_ATTR_KEYS, l.finAttr, 'lpToggleFinAttr')) + lpRow('Disciplines +1 (two):', lpKeyBtns(LP_DISC_KEYS, l.finDisc, 'lpToggleFinDisc')), true)}</div>
   ${lpValueInput(3, 'Final Value', 'Perhaps reflecting your career events, or anything else about your character.', 5)}
   ${lpBox('Your Officer', table('attr', LP_ATTR_KEYS, 12, 'Attributes') + table('disc', LP_DISC_KEYS, 5, 'Disciplines')
     + `<div style="font-size:11px;color:var(--muted);margin-top:8px">Focuses: ${(c.focuses || []).length ? c.focuses.map(f => `<strong style="color:var(--text)">${escH(f)}</strong>`).join(', ') : '—'}</div>`)}
-  ${lpStepIssues(5)}`;
+  ${r.all.length
+    ? `<div style="font-size:11px;color:var(--danger);margin-top:4px">${[missing ? 'Finish the items in the red box above' : '', ...r.issues[5].map(escH)].filter(Boolean).join(' · ')} — then press Next.</div>`
+    : `<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Your lifepath is complete — press Next for officer details.</div>`}`;
 }
 
 // Setters — each saves and re-renders
 function lpSet(key, val) { lp()[key] = val; saveSlot(); renderCurrentTab(); }
-function lpSetMixed(name) { const l = lp(); l.mixed = name; l.speciesPick = []; saveSlot(); renderCurrentTab(); }
+function lpSetMixed(name) { const l = lp(); l.mixed = name; l.mixedOn = !!name || l.mixedOn; l.speciesPick = []; saveSlot(); renderCurrentTab(); }
+function lpSetHeritage(on) {
+  const l = lp(); l.mixedOn = on;
+  if (!on) { l.mixed = ''; l.speciesPick = []; }
+  saveSlot(); renderCurrentTab();
+}
+function lpSetEra(e) { S.char._selectedEra = e; window._lpSpeciesFilter = null; saveSlot(); renderCurrentTab(); }
+function lpSetEnvOther(name) { const l = lp(); l.envOther = name; l.envAttr = ''; saveSlot(); renderCurrentTab(); }
 function lpToggleSpeciesPick(k) {
   const l = lp(); const i = l.speciesPick.indexOf(k);
   if (i >= 0) l.speciesPick.splice(i, 1); else if (l.speciesPick.length < 3) l.speciesPick.push(k);
@@ -6359,16 +6416,22 @@ function setCreationSpecies(name) {
 function setCreationEnv(name) {
   const l = lp();
   if (S.char._selectedEnv !== name) { l.envAttr = ''; l.envDisc = ''; l.envOther = ''; }
+  // Both matrixes are on screen; the environment picked decides which one.
+  const tbl = Object.keys(LP_ENVIRONMENTS).find(k => LP_ENVIRONMENTS[k].some(e => e.name === name));
+  if (tbl) l.envTable = tbl;
   S.char._selectedEnv = name; saveSlot(); renderCurrentTab();
 }
-function setCreationUpbringing(name) {
+function setCreationUpbringing(name, group) {
   const l = lp();
+  if (group && group !== l.outlookGroup) { l.outlookGroup = group; S.char._selectedUpbringing = ''; }
   if (S.char._selectedUpbringing !== name) { l.outlookYes = null; l.outlookDisc = ''; }
   S.char._selectedUpbringing = name; saveSlot(); renderCurrentTab();
 }
 function setCreationTrack(name) {
   const l = lp();
   if (S.char._selectedTrack !== name) { l.eduAttr = {}; l.eduMajor = ''; l.eduMinor = ['', '']; l.eduSwapFrom = ''; l.eduSwapTo = ''; }
+  const cat = LP_EDUCATION.find(x => x.tracks.some(t => t.name === name));
+  if (cat) l.eduCat = cat.cat;
   S.char._selectedTrack = name; saveSlot(); renderCurrentTab();
 }
 
@@ -6379,15 +6442,22 @@ function lpRollSpecies() {
   window._lpSpeciesFilter = t;
   setCreationSpecies(LP_SPECIES_TABLES[t][lpRoll() - 1]);
 }
-function lpRollEnv() {
-  const l = lp(); if (!l.envTable) return;
-  const r = lpRoll(); const e = LP_ENVIRONMENTS[l.envTable].find(e => lpInRange(r, e.roll));
+function lpRollEnv(table) {
+  const tbl = table || lp().envTable; if (!LP_ENVIRONMENTS[tbl]) return;
+  const r = lpRoll(); const e = LP_ENVIRONMENTS[tbl].find(e => lpInRange(r, e.roll));
   if (e) setCreationEnv(e.name);
 }
-function lpRollOutlook() {
-  const list = LP_OUTLOOKS[lp().outlookGroup]; let o = null;
+function lpRollOutlook(group) {
+  const g = group || lp().outlookGroup;
+  const list = LP_OUTLOOKS[g]; let o = null;
   while (!o) { const r = lpRoll(); o = list.find(x => lpInRange(r, x.roll)); }   // 19–20: reroll
-  setCreationUpbringing(o.name);
+  setCreationUpbringing(o.name, g);
+}
+function lpRollEducation() {
+  const cat = LP_EDUCATION.find(c => lpInRange(lpRoll(), c.roll));
+  let t = null;
+  while (!t) { const r = lpRoll(); t = cat.tracks.find(x => lpInRange(r, x.roll)); }   // Civilian 19–20: reroll
+  setCreationTrack(t.name);
 }
 function lpRollEduCat() {
   const r = lpRoll(); const cat = LP_EDUCATION.find(c => lpInRange(r, c.roll));
@@ -6418,10 +6488,14 @@ function creationNext() {
   if (step >= LAST_LP) {
     const r = lpCompute();
     if (r.all.length) {
-      showConfirm('Your lifepath isn\u2019t finished yet:<ul style="margin:8px 0 0 18px">'
-        + r.all.map(t => `<li>${escH(t)}</li>`).join('') + '</ul>', () => {
-        S.char.creationStep = LAST_LP; saveSlot(); renderCurrentTab();
-      }, 'GO TO FINISHING TOUCHES', false);
+      // Everything still missing is shown on Finishing Touches itself; bring
+      // the player there (if they've moved past it) and scroll to it.
+      S.char.creationStep = LAST_LP; saveSlot(); renderCurrentTab();
+      const el = document.getElementById(document.getElementById('lp-missing') ? 'lp-missing' : 'lp-fin');
+      if (el) {
+        el.scrollIntoView({behavior: 'smooth', block: 'start'});
+        if (el.animate) el.animate([{boxShadow: '0 0 0 4px var(--danger)'}, {boxShadow: '0 0 0 0 transparent'}], {duration: 1200});
+      }
       return;
     }
   }
