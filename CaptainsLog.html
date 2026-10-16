@@ -4029,8 +4029,11 @@ function exportLog(startMode) {
   .zc-fb{display:none;position:absolute;top:0.3in;bottom:0.3in;left:0.25in;right:0.25in;flex-direction:column;align-items:center;justify-content:center;text-align:center}
   .zc.noart .zc-frame{display:none}
   .zc.noart .zc-fb{display:flex}
-  .zco{position:absolute;display:flex;align-items:flex-end;color:#6f6f6f;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;line-height:1;white-space:nowrap;overflow:hidden;outline:none}
-  .zco:empty::before{content:attr(data-ph);color:#c9c9c9;font-weight:400}
+  /* Cover blanks. Plain block text (no flex) so the grey hint, the caret and
+     typed text all sit in exactly the same place, in the same weight. */
+  .zco{position:absolute;display:block;color:#6f6f6f;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;line-height:1;white-space:nowrap;overflow:hidden;outline:none}
+  .zco-title{display:flex;flex-direction:column;justify-content:center;text-align:center;white-space:normal;line-height:1.05}
+  .zco:empty::before{content:attr(data-ph);color:#c9c9c9}
   #zine-print .zco:empty::before{content:none}
   .zh{background:var(--accent);color:var(--bg);font-weight:700;letter-spacing:3px;font-size:13px;padding:4px 12px;border-radius:0 50vh 50vh 0;text-transform:uppercase;margin-bottom:6px}
   .zf{display:flex;align-items:flex-end;gap:6px;margin-top:5px}
@@ -4888,16 +4891,35 @@ function zLogEp(it) {
   ep.entries.slice(it.from || 0, it.to == null ? ep.entries.length : it.to).forEach(function(e) { h += logCardHTML(e); });
   return h;
 }
-// Blanks on the front-cover art, in % of the 1275×1650 artwork.
+// Blanks on the front-cover art, measured in the artwork's own pixels
+// (zine/cover-front.png is 1275×1650) and converted to container units, so
+// they track the art at any page size. x/w: left edge and width; base: the
+// baseline of the printed label the value sits beside; fs: font size.
+var ZCOVER_W = 1275, ZCOVER_H = 1650;
 var ZCOVER_FIELDS = [
-  {k:'title',   ph:'Record title',   css:'left:14%;top:9.5%;width:72%;height:9.5%;justify-content:center;align-items:center;text-align:center;white-space:normal;line-height:1.05', fs:'5.4cqw'},
-  {k:'year',    ph:'Year',           css:'left:46%;top:19%;width:20%;height:2.6%;justify-content:center', fs:'3.2cqw'},
-  {k:'vessel',  ph:'Vessel',         css:'left:45.5%;top:75.6%;width:46%;height:3.6%', fs:'4.4cqw'},
-  {k:'captain', ph:'Captain',        css:'left:45.5%;top:80.4%;width:46%;height:3.6%', fs:'4.4cqw'}
+  // inside the Records Division box (x 150–1130, y 85–350), clear of "42.4084"
+  {k:'title',   ph:'Record title', title:true, x:200, w:880, top:112, h:218, fs:64},
+  // right after "YEAR(EARTH TIME):" (label ends x≈440, baseline y≈362)
+  {k:'year',    ph:'Year',    x:455, w:125, base:362,  fs:30},
+  // after "VESSEL REGISTRY:" and "CAPTAIN:" (labels end x≈562)
+  {k:'vessel',  ph:'Vessel',  x:582, w:600, base:1300, fs:46},
+  {k:'captain', ph:'Captain', x:582, w:600, base:1384, fs:46}
 ];
+// Distance from a line box's bottom to its baseline, in em, for this font at
+// line-height 1 — measured, so the text lands on the label baselines.
+var ZCOVER_DESC = 0.2;
+function zcoverCQ(px) { return (px / ZCOVER_W * 100).toFixed(3) + 'cqw'; }
+function zcoverStyle(f) {
+  var css = 'left:' + zcoverCQ(f.x) + ';width:' + zcoverCQ(f.w) + ';';
+  if (f.title) return css + 'top:' + zcoverCQ(f.top) + ';height:' + zcoverCQ(f.h);
+  // bottom edge = baseline + descent; the descent is in em so the baseline
+  // stays put when long text is shrunk to fit.
+  return css + 'bottom:calc(' + zcoverCQ(ZCOVER_H - f.base) + ' - ' + ZCOVER_DESC + 'em)';
+}
 function zineCoverDefaults() {
   var co = SRC_CHAR || {}, cv = SRC_SHIP || {};
-  return {title:'', year:'', vessel:[cv.name, cv.registry].filter(Boolean).join(' · '), captain:((co.rank || '') + ' ' + (co.name || '')).trim()};
+  // A rank on its own ("Ensign") isn't a captain's name; leave the blank empty.
+  return {title:'', year:'', vessel:[cv.name, cv.registry].filter(Boolean).join(' · '), captain: co.name ? ((co.rank || '') + ' ' + co.name).trim() : ''};
 }
 function zineCoverEdit(el, k) {
   if (!ZINE.cover) ZINE.cover = {};
@@ -4937,8 +4959,9 @@ function zineCoverHTML(kind, item, preview) {
     var vals = zineCoverDefaults(), saved = ZINE.cover || {};
     overlay = ZCOVER_FIELDS.map(function(f) {
       var v = saved[f.k] != null ? saved[f.k] : vals[f.k];
-      return '<div class="zco"' + (preview ? ' contenteditable="true" oninput="zineCoverEdit(this,&#39;' + f.k + '&#39;)"' : '')
-        + ' data-ph="' + f.ph + '" data-fs="' + f.fs + '" style="' + f.css + ';font-size:' + f.fs + '">' + esc(v) + '</div>';
+      var fs = zcoverCQ(f.fs);
+      return '<div class="zco' + (f.title ? ' zco-title' : '') + '"' + (preview ? ' contenteditable="true" oninput="zineCoverEdit(this,&#39;' + f.k + '&#39;)"' : '')
+        + ' data-ph="' + f.ph + '" data-fs="' + fs + '" style="' + zcoverStyle(f) + ';font-size:' + fs + '">' + esc(v) + '</div>';
     }).join('');
   }
   return zineArtHTML(front ? ZINE_ART.front : ZINE_ART.back, overlay) + '<div class="zc-fb">' + fb + '</div></div>';
