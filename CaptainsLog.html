@@ -794,6 +794,15 @@ function talIconHTML(slug, size, style) {
 // anything else (legacy emoji / free text) renders as escaped text, so old
 // maps keep working untouched.
 function giIsSlug(v) { return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(String(v||'').trim()); }
+// For the export window (and zine): an <img data-gi> placeholder that the
+// window fills from its one batched icon fetch (see giLoad there). CSS-mask
+// icons came out invisible there and as solid squares in print.
+function giInlineHTML(v, px) {
+  v = String(v == null ? '' : v).trim();
+  if (!v) return '';
+  if (!giIsSlug(v)) return escH(v);
+  return `<img data-gi="${escH(v)}" width="${px}" height="${px}" alt="" style="vertical-align:middle">`;
+}
 function giIconHTML(v, size) {
   if (!v) return '';
   return giIsSlug(v) ? talIconHTML(String(v).trim(), size===undefined?null:size) : escH(v);
@@ -3806,7 +3815,7 @@ function exportLog(startMode) {
     <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-weight:700">${esc(s.name)}</div>
     <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px">
       ${s.cells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">
-        <span style="font-size:18px;line-height:1">${esc(c.icon||'')}</span>
+        <span style="font-size:18px;line-height:1">${giInlineHTML(c.icon, 18)}</span>
         ${c.name?`<span style="font-size:8px;text-align:center;line-height:1.2;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('')}
     </div>
@@ -3824,7 +3833,7 @@ function exportLog(startMode) {
     const bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
     const bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
     return `<div style="background:${bg};border:1px solid ${bd};overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center">`
-      + `<span style="font-size:14px;line-height:1">${esc(c.icon||'')}</span>`
+      + `<span style="font-size:14px;line-height:1">${giInlineHTML(c.icon, 14)}</span>`
       + (c.name ? `<span style="font-size:7px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">${esc(c.name)}</span>` : '')
       + '</div>';
   }).join('');
@@ -3838,7 +3847,7 @@ function exportLog(startMode) {
     const szcells = (sz.subZone.cells || []).slice(0, 25);
     while (szcells.length < 25) szcells.push({});
     const cellsHTML = szcells.map(c => `<div style="aspect-ratio:1;background:${c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)'};border:1px solid ${c.isVoid?'transparent':'var(--cell-border)'};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px">
-        <span style="font-size:18px;line-height:1">${esc(c.icon||'')}</span>
+        <span style="font-size:18px;line-height:1">${giInlineHTML(c.icon, 18)}</span>
         ${c.name?`<span style="font-size:8px;text-align:center;line-height:1.2;overflow:hidden;color:var(--cell-text)">${esc(c.name)}</span>`:''}
       </div>`).join('');
     return `<div class="map-block" draggable="true" ondragstart="srcDragStart(event,'map-subzone',${i})" style="margin-top:10px;border-color:var(--lcars-ltblue)">
@@ -4236,6 +4245,61 @@ var _srcDragItem = null;
 var _reorderIdx = null;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// Map icons are game-icons names (e.g. "planet-core"): draw them as icons;
+// legacy emoji / free text still shows as text.
+// Icons are drawn as <img data-gi="slug"> from SVGs fetched ONCE for the whole
+// window (one batched request — per-icon requests got rate-limited, and CSS
+// masks were invisible here and printed as solid squares). Their colour
+// follows the theme. An icon the service doesn't know shows its name.
+var GI = {}, GI_STATE = 'idle';
+function giColor() { return document.body && document.body.classList.contains('print-mode') ? '#444444' : '#FFCC99'; }
+function giSrc(slug) {
+  var g = GI[slug]; if (!g) return '';
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + g.vb + '" style="color:' + giColor() + '">' + g.body + '</svg>';
+  return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+function gIcon(v, px) {
+  v = String(v == null ? '' : v).trim();
+  if (!v) return '';
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v)) return esc(v);
+  if (GI_STATE === 'done' && !GI[v]) return giUnknown(v);
+  var src = giSrc(v);
+  return '<img data-gi="' + esc(v) + '"' + (src ? ' src="' + src + '"' : '') + ' width="' + px + '" height="' + px + '" alt="" style="vertical-align:middle">';
+}
+// A name the icon service doesn't know: show it, small enough to fit a cell.
+function giUnknown(v) { return '<span style="font-size:8px;line-height:1.1;word-break:break-all">' + esc(v) + '</span>'; }
+// Fill every placeholder (and recolour after a theme change).
+function giHydrate() {
+  document.querySelectorAll('img[data-gi]').forEach(function(img) {
+    var slug = img.getAttribute('data-gi'), src = giSrc(slug);
+    if (src) img.src = src;
+    else if (GI_STATE === 'done') img.outerHTML = giUnknown(slug);
+  });
+}
+function giLoad() {
+  var slugs = {};
+  var add = function(v) { v = String(v || '').trim(); if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v)) slugs[v] = 1; };
+  ALL_SECTORS.forEach(function(s) { (s.cells || []).forEach(function(c) { add(c.icon); }); });
+  ALL_SUBZONES.forEach(function(z) { ((z.subZone && z.subZone.cells) || []).forEach(function(c) { add(c.icon); }); });
+  INT_CELLS.forEach(function(c) { add(c.icon); });
+  (SRC_SHIP.talents || []).forEach(function(t) { add(t.icon); });
+  var list = Object.keys(slugs);
+  if (!list.length) { GI_STATE = 'done'; return; }
+  GI_STATE = 'loading';
+  fetch('https://api.iconify.design/game-icons.json?icons=' + list.map(encodeURIComponent).join(','))
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) {
+      if (d && d.icons) Object.keys(d.icons).forEach(function(k) {
+        var ic = d.icons[k];
+        GI[k] = {body: ic.body, vb: '0 0 ' + (ic.width || d.width || 512) + ' ' + (ic.height || d.height || 512)};
+      });
+    })
+    .catch(function() {})
+    .then(function() {
+      GI_STATE = 'done'; giHydrate();
+      if (typeof ZINE !== 'undefined' && ZINE && document.body.classList.contains('zine-mode')) zineScheduleFit();
+    });
+}
 var ATT_COLOR={Hostile:'#FF2200',Cautious:'#FFCC00',Neutral:'#7a7a7a',Allied:'#FF9933',Crew:'#66CC66'};
 
 function showSTab(t) {
@@ -4251,6 +4315,10 @@ function toggleTheme() {
   var pm = b.classList.contains('print-mode');
   document.documentElement.style.background = pm ? '#fff' : '#000';
   document.getElementById('theme-btn').textContent = pm ? '◐ DARK MODE' : '◑ PRINT MODE';
+  // Icons are coloured images: redraw the cards and recolour the rest.
+  renderDroppedItems();
+  if (ZINE && document.body.classList.contains('zine-mode')) renderZine();
+  giHydrate();
 }
 
 // ── Blank logbook mode ──────────────────────────────────────────────────────
@@ -4341,7 +4409,7 @@ function renderDroppedCard(item, idx, rmOverride) {
     var scells = sd.cells || [];
     var grid = '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:8px;overflow:hidden">'
       + scells.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px;min-width:0;min-height:0">'
-        +'<span style="font-size:22px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +'<span style="font-size:22px;line-height:1">'+gIcon(c.icon,22)+'</span>'
         +(c.name?'<span style="font-size:10px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
         +'</div>';}).join('')+'</div>';
     return '<div class="dropped-card">'+rm+'<div class="dropped-map-title">'+esc(sd.name)+'</div>'+grid+'</div>';
@@ -4352,7 +4420,7 @@ function renderDroppedCard(item, idx, rmOverride) {
     while (szcells.length < 25) szcells.push({});
     var szgrid = '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:8px;overflow:hidden">'
       + szcells.map(function(c){ return '<div style="aspect-ratio:1;background:'+(c.isVoid?'transparent':c.name?'var(--card-bg)':'var(--empty-cell)')+';border:1px solid '+(c.isVoid?'transparent':'var(--cell-border)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border-radius:2px;min-width:0">'
-        +'<span style="font-size:22px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +'<span style="font-size:22px;line-height:1">'+gIcon(c.icon,22)+'</span>'
         +(c.name?'<span style="font-size:10px;text-align:center;line-height:1.2;color:var(--cell-text)">'+esc(c.name)+'</span>':'')
         +'</div>';}).join('')+'</div>';
     var sztitle = esc((szd.subZone && szd.subZone.name) || szd.cellName || 'Sub-Zone');
@@ -4364,7 +4432,7 @@ function renderDroppedCard(item, idx, rmOverride) {
       var bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
       var bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
       return '<div style="background:'+bg+';border:1px solid '+bd+';overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center">'
-        +'<span style="font-size:16px;line-height:1">'+esc(c.icon||'')+'</span>'
+        +'<span style="font-size:16px;line-height:1">'+gIcon(c.icon,16)+'</span>'
         +(c.name?'<span style="font-size:8px;color:var(--cell-text);text-align:center;word-break:break-all;overflow:hidden">'+esc(c.name)+'</span>':'')
         +'</div>';
     }).join('');
@@ -4410,7 +4478,7 @@ function renderDroppedCard(item, idx, rmOverride) {
     ['Comms','Engines','Structure','Computers','Sensors','Weapons'].forEach(function(s){ h2 += statRow(s, sys[s.toLowerCase()]); });
     h2 += '<div class="stat-sec">Departments</div>';
     ['Command','Conn','Security','Engineering','Science','Medicine'].forEach(function(d){ h2 += statRow(d, dep[d.toLowerCase()]); });
-    if (sh.talents && sh.talents.length) { h2 += '<div class="stat-sec">Talents</div>'+sh.talents.map(function(t){ var ic=t.icon?'<span style="display:inline-block;width:22px;height:22px;vertical-align:-6px;margin-right:5px;background:currentColor;-webkit-mask:url(https://api.iconify.design/game-icons/'+encodeURIComponent(t.icon)+'.svg) center/contain no-repeat;mask:url(https://api.iconify.design/game-icons/'+encodeURIComponent(t.icon)+'.svg) center/contain no-repeat"></span>':''; return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--lcars-ltblue);font-weight:700">'+ic+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
+    if (sh.talents && sh.talents.length) { h2 += '<div class="stat-sec">Talents</div>'+sh.talents.map(function(t){ var ic=t.icon?'<span style="margin-right:5px">'+gIcon(t.icon,22)+'</span>':''; return '<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--lcars-ltblue);font-weight:700">'+ic+esc(t.name)+'</span>'+(t.desc?' — <span style="color:var(--sub)">'+esc(t.desc)+'</span>':'')+'</div>'; }).join(''); }
     if (sh.traits) { h2 += '<div class="stat-sec">Traits</div><div style="font-size:10px;color:var(--text)">'+esc(sh.traits)+'</div>'; }
     return h2+'</div>';
   }
@@ -5082,7 +5150,7 @@ window.addEventListener('resize', function() {
   }, 150);
 });
 
-window.addEventListener('DOMContentLoaded', function(){ syncModeUI(); renderLogOutput(); });
+window.addEventListener('DOMContentLoaded', function(){ syncModeUI(); renderLogOutput(); giLoad(); });
 ${'<'+'/script>'}
 </body></html>`;
 
