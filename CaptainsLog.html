@@ -4051,6 +4051,12 @@ function exportLog(startMode) {
   .zi-grow .be-scene{flex:1 1 48px;min-height:48px;overflow:hidden}
   .zlbl{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:8px}
   .zed{outline:none;min-height:18px;font-size:11px;line-height:1.6;white-space:pre-wrap}
+  /* Ship interior on a zine page: the 5×10 grid is twice as tall as it is wide,
+     so it is sized from the space left on the page (container units), not
+     from the page width — that overflowed and couldn't be shrunk to fit. */
+  .zimap-card{flex:1;display:flex;flex-direction:column;min-height:0}
+  .zimap{flex:1 1 0;min-height:2.2in;container-type:size;position:relative;margin-top:6px}
+  .zimap-grid{position:absolute;left:50%;top:0;transform:translateX(-50%);width:min(100cqw,50cqh);height:min(200cqw,100cqh);display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(10,1fr);gap:1px}
   .zed:empty::before{content:attr(data-ph);color:var(--muted)}
   @media print {
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -4666,7 +4672,7 @@ var ZINE_PAPER = {
 var ZFULL = {'galaxy-map':1,'z-front':1,'z-back':1,'z-char':1,'z-char-blank':1,'z-ship':1,'z-ship-blank':1,'z-ep-a':1,'z-ep-b':1};
 // Items whose last child (a ruled block) stretches to fill the page.
 var ZART = {'z-front':1,'z-back':1,'galaxy-map':1};   // full-bleed art pages
-var ZGROW = {'z-lines':1,'z-ep-a':1,'z-ep-b':1,'z-char':1,'z-char-blank':1,'z-ship':1,'z-ship-blank':1};
+var ZGROW = {'map-interior':1,'z-lines':1,'z-ep-a':1,'z-ep-b':1,'z-char':1,'z-char-blank':1,'z-ship':1,'z-ship-blank':1};
 var _zPrevPrintMode = null;
 var ZRULE_LINES = new Array(41).join('<i></i>');   // 40 ruled lines, clipped to fit
 var ZSCENE_LINES = new Array(7).join('<i></i>');
@@ -4863,6 +4869,18 @@ function zShip(blank) {
     + '<div class="zsec">Talents</div>' + zLines(talents, 3)
     + '<div class="zlbl">Damage, repairs &amp; refits</div><div class="zrule">' + ZRULE_LINES + '</div>';
 }
+function zInteriorMap() {
+  var cells = INT_CELLS.map(function(c) {
+    var bg = c.isVoid ? 'transparent' : (c.name ? 'var(--card-bg)' : 'var(--empty-cell)');
+    var bd = c.isVoid ? 'transparent' : 'var(--cell-border)';
+    return '<div style="background:' + bg + ';border:1px solid ' + bd + ';overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:0">'
+      + '<span style="line-height:1">' + gIcon(c.icon, 14) + '</span>'
+      + (c.name ? '<span style="font-size:7px;color:var(--cell-text);text-align:center;line-height:1.1;overflow:hidden">' + esc(c.name) + '</span>' : '')
+      + '</div>';
+  }).join('');
+  return '<div class="dropped-card zimap-card"><div class="dropped-map-title">' + esc(SHIP_NAME) + ' — Interior</div>'
+    + '<div class="zimap"><div class="zimap-grid">' + cells + '</div></div></div>';
+}
 function zLogEp(it) {
   var ep = EPISODES[it.ep]; if (!ep) return '';
   var h = '<div class="ep-banner"><div><div class="ep-banner-label">' + (it.from > 0 ? 'Episode — continued' : 'Episode') + '</div>'
@@ -4934,6 +4952,7 @@ function zineItemHTML(it, p, j, epNum, preview) {
     case 'z-ship': return zShip(false);
     case 'z-ship-blank': return zShip(true);
     case 'log-ep': return zLogEp(it);
+    case 'map-interior': return zInteriorMap();
     case 'z-lines':
       var ed = preview ? ' contenteditable="true"' : '';
       return '<div class="zsec zed"' + ed + ' data-ph="NOTES" oninput="zineEdit(this,' + p + ',' + j + ',0)">' + esc(it.label == null ? 'Notes' : it.label) + '</div>'
